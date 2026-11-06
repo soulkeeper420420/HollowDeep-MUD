@@ -1,0 +1,18 @@
+HPROFILE - your Hollowdeep chronicle
+
+Syntax: hprofile
+        hprofile status
+
+Shows your recorded room count, current character level, and earned
+chronicle badges. This journal is saved on the game host and is shared
+between your browser and native MUD-client sessions for the same character.
+
+Start a chronicle with hquest accept first-steps. Explore and use hquest
+survey to record different rooms. Use hquest claim first-steps after three
+rooms to earn your first cosmetic badge.
+
+Hprofile status is a compact display for phone screens: character name,
+class, level, current/max health and mana, XP, gold, recorded places, and
+badge count. It uses your current character and journal values without
+changing them. Use hclass progress for training requirements and hquest
+next for the next exploration goal.

@@ -1,0 +1,23 @@
+HCOMMANDS - Hollowdeep command overview
+
+Syntax: hcommands
+        hcommands mobile
+        hcommands social
+
+Lists practical original Mordor commands for exploration, combat, character
+progression, equipment, and group communication. Also lists the Hollowdeep
+chronicle commands. For original rules and restrictions use help <command>.
+
+These additions preserve the original Mordor 3.00 classes and saved data.
+
+The mobile guide lists existing short commands: l (look), i (inventory),
+sc (score), n/s/e/w/ne/nw/se/sw/u/d (movement), k (kill), c (cast), and ?
+(help). Short commands have the same costs and restrictions as their full
+names. If quit asks you to wait, wait and issue quit again.
+
+The social guide covers who, say, tell, follow, group, gtalk, lose, and emote.
+Follow requires the other adventurer to be in your room. Group lists your
+followers; gtalk reaches your leader and the group. Use lose with no name
+to stop following, or lose <name> to remove one of your followers.
+
+Quick views: hprofile status, hclass progress, hquest next.

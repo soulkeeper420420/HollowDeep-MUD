@@ -1,0 +1,25 @@
+HMODERATE - Moderation commands
+
+Syntax: hmoderate announce <message>
+        hmoderate mute <name> [minutes]
+        hmoderate unmute <name>
+        hmoderate kick <name>
+
+Requires mod, admin or owner. You may moderate only characters below your
+own staff role. Native caretakers require an owner. The founder is protected.
+Mute/kick targets must be online and have saved their character already.
+
+Mute lasts 1-1440 minutes (default 10), survives reconnect/restart, and blocks
+say, tell, emote, yell, sendmail, gtalk and broadcast, including their aliases.
+It leaves movement, fighting, help, saving and logout available. Announcements
+also respect the speaker's mute. Role changes clear old mutes.
+
+Announcements allow 1-180 printable ASCII characters. Kicks use the original
+engine's normal disconnect/save routine; they do not delete a character or
+ban future connections. These commands never grant native DM powers.
+
+Example:
+  hmoderate announce Welcome to Hollowdeep!
+  hmoderate mute Trouble 10
+  hmoderate unmute Trouble
+  hmoderate kick Trouble

@@ -1,0 +1,33 @@
+HQUEST - the Hollowdeep chronicles
+
+Syntax: hquest
+        hquest next
+        hquest accept <id>
+        hquest survey
+        hquest claim <id>
+
+Accept one or more chronicles, explore the original world, and survey each
+new room. Survey records the room your character is actually in. A room
+counts once; repeated surveys do not increase your count. Earlier surveys
+also count toward chronicles accepted later. Up to 128 unique rooms can
+be recorded in this initial journal format.
+
+The first release includes four chronicles:
+  first-steps  - survey 3 rooms; earn the Wayfarer badge.
+  mapmaker    - survey 10 rooms; earn the Pathfinder badge.
+  apprentice  - survey 3 rooms and reach level 3; earn the Adept badge.
+  veteran     - survey 10 rooms and reach level 5; earn the Veteran badge.
+
+Claim checks your recorded places and your actual current character level.
+Each badge is awarded once. These are cosmetic journal honors: no gold,
+experience, character title, or class is changed. Use hprofile to read them.
+
+Hquest next first shows an accepted chronicle whose badge you can claim.
+Otherwise it shows the first unfinished active chronicle and its remaining
+places and levels. With no active chronicles, it suggests the next one to
+accept. This view does not accept, survey, or claim anything automatically.
+
+Progress is saved in a separate per-character journal on the game host.
+It is not browser storage. The game host must back up hollowdeep-data
+alongside the original player files. This system does not replace the
+original engine's quest-item rewards.

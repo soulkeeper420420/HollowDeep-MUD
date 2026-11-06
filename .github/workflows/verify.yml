@@ -1,0 +1,95 @@
+name: Verify and package
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  website:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
+      - name: Install locked dependencies
+        run: |
+          npm ci
+          npm ci --prefix server
+      - name: Test client and bridge
+        run: node --test tests/*.test.mjs server/test/*.test.mjs
+      - name: Type check
+        run: node node_modules/typescript/bin/tsc --noEmit
+      - name: Build website
+        run: npm run build
+
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install 32-bit build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gcc-multilib libc6-dev-i386
+          cat > "$RUNNER_TEMP/gcc32" <<'CC'
+          #!/bin/sh
+          exec gcc -m32 "$@"
+          CC
+          chmod +x "$RUNNER_TEMP/gcc32"
+      - name: Extract pinned original distribution
+        run: |
+          tar -xzf public/workshop-files/hollowdeep-server-kit.tar.gz -C "$RUNNER_TEMP" hollowdeep-server-kit/Mordor_3.00.tar.gz
+          echo "MORDOR_ARCHIVE=$RUNNER_TEMP/hollowdeep-server-kit/Mordor_3.00.tar.gz" >> "$GITHUB_ENV"
+      - name: Prepare and build original ELF32 engine
+        run: |
+          python3 engine/tests/test_prepare.py --archive "$MORDOR_ARCHIVE"
+          python3 engine/manage.py prepare --archive "$MORDOR_ARCHIVE" --destination "$RUNNER_TEMP/hollowdeep-world" --admin Realmkeeper
+          python3 engine/manage.py build --work "$RUNNER_TEMP/hollowdeep-world"
+      - name: Exercise native behavior with 32-bit types
+        run: |
+          for suite in extensions staff stance network input; do
+            python3 "engine/tests/test_${suite}.py" --source "$RUNNER_TEMP/hollowdeep-world/src_3.00" --cc "$RUNNER_TEMP/gcc32"
+          done
+          python3 engine/tests/test_runtime_client.py
+      - name: Exercise disposable multiplayer world and persistence
+        run: python3 engine/tests/test_runtime.py --archive "$MORDOR_ARCHIVE"
+      - name: Generate and check deployment artifacts
+        run: |
+          python3 deploy/make-console-setup.py
+          python3 deploy/make-native-update.py
+          python3 deploy/make-bridge-installer.py
+          python3 deploy/make-runtime-recovery.py
+          python3 deploy/test_console_bootstrap.py
+          python3 deploy/test_enable_public.py
+          python3 deploy/test_native_update.py
+          python3 deploy/test_bridge_installer.py
+          python3 deploy/test_runtime_recovery.py
+      - name: Keep reviewed installation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hollowdeep-installers-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            outputs/hollowdeep-native-update.py
+            outputs/hollowdeep-browser-setup.py
+            outputs/hollowdeep-console-setup.html
+            outputs/hollowdeep-console-setup.txt

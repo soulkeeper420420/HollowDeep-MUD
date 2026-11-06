@@ -1,0 +1,21 @@
+HCLASS - original Mordor class guide
+
+Syntax: hclass [class-name]
+        hclass progress
+
+With no argument, shows guidance for your current class. Supply assassin,
+barbarian, cleric, fighter, mage, paladin, ranger, thief, bard, or monk to
+read that class's guide. This command does not change your class or stats.
+
+Train in the proper class training room after earning enough experience
+and gold. The original engine controls abilities and progression.
+
+Hclass progress shows your actual XP requirement, training gold cost, and
+remaining XP and gold. It also checks whether this room trains your class,
+whether blindness blocks training, and whether the engine has approved your
+character for training. Requirements come from the original engine's level
+table. Higher levels use its original extended-level calculation.
+
+When every requirement is met, use train to advance one level. Training
+spends gold and retains your accumulated XP. This guide only reads your
+character; it does not train you, grant XP, spend gold, or change any flags.

@@ -1,0 +1,26 @@
+HSTANCE - Combat stances
+
+Syntax: hstance [status|balanced|guarded|aggressive]
+
+Balanced uses normal physical accuracy and defense.
+Aggressive improves your physical accuracy and makes you easier to hit.
+Guarded improves your defense and makes your physical attacks less accurate.
+
+The tradeoff is 1 point on the original d20 hit threshold at levels 1-4,
+2 points at levels 5-9, and 3 points at level 10 and above. It affects
+ordinary weapon/unarmed hit rolls, including physical monster attacks.
+It does not change spell success, damage rolls, armor items, XP or gold.
+Effects from both attacker and defender combine on the same hit roll.
+
+Use the original train command to gain levels. Stance strength follows
+your real character level; no separate practice currency is required.
+
+Changes require 20 seconds since the previous change and 20 seconds
+beyond your last attack/spell cooldown. This prevents changing stance
+between each attack and retaliation. Asking for your current stance
+does not change the timer.
+
+Stances are for the ten playable classes. Monsters and administrative
+classes receive no stance modifiers. Your choice persists across logins
+in hollowdeep-data/<character>.stance. A damaged stance file uses balanced
+combat rules and is preserved for the host to inspect.

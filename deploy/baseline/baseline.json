@@ -1,0 +1,10 @@
+{
+  "files": {
+    "enable-public.py": "694d123322511c5408929dbaf9ce49b71f744532f39e3648b20c01450d040e12",
+    "install-ubuntu.sh": "184f4bc5b9b4438bc0d05d6c741660a2780e49d2d291b76310013af389cc43a0",
+    "recovered-runtime.py": "c0d771cd252ce8533c52f0744efb3f03d39dfb6aa7908ee6a658732cfc393924"
+  },
+  "kit_sha256": "c50a99730f83a16e994f941006f2b64b7943b12f6fd60f0d3c087481208d3537",
+  "runtime_fix_sha": "c0d771cd252ce8533c52f0744efb3f03d39dfb6aa7908ee6a658732cfc393924",
+  "unit_text": "[Unit]\nDescription=Hollowdeep original Mordor 3.00 game server\nAfter=network.target\nStartLimitIntervalSec=60\nStartLimitBurst=3\n\n[Service]\nType=simple\nUser=hollowdeep\nGroup=hollowdeep\nWorkingDirectory=/srv/hollowdeep/world\nEnvironment=PYTHONDONTWRITEBYTECODE=1\nExecStart=/usr/bin/python3 /srv/hollowdeep/kit/manage.py run --work /srv/hollowdeep/world --port 4040\nRestart=on-failure\nRestartSec=5\nUMask=0077\nNoNewPrivileges=true\nPrivateTmp=true\nProtectHome=true\nProtectSystem=strict\nReadWritePaths=/srv/hollowdeep/world\nTimeoutStopSec=20\n\n[Install]\nWantedBy=multi-user.target\n"
+}
