@@ -48,8 +48,14 @@ jobs:
       - name: Install 32-bit build tools
         timeout-minutes: 5
         run: |
-          sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
-          sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y build-essential gcc-multilib libc6-dev-i386
+          cat > "$RUNNER_TEMP/hollowdeep-ubuntu.list" <<'APT'
+          deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe restricted multiverse
+          deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble-updates main universe restricted multiverse
+          deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://security.ubuntu.com/ubuntu noble-security main universe restricted multiverse
+          APT
+          apt_options=(-o "Dir::Etc::sourcelist=$RUNNER_TEMP/hollowdeep-ubuntu.list" -o Dir::Etc::sourceparts=- -o Acquire::Retries=2 -o Acquire::https::Timeout=30)
+          sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get "${apt_options[@]}" update
+          sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get "${apt_options[@]}" install -y build-essential gcc-multilib libc6-dev-i386
           cat > "$RUNNER_TEMP/gcc32" <<'CC'
           #!/bin/sh
           exec gcc -m32 "$@"
@@ -66,7 +72,8 @@ jobs:
           python3 engine/manage.py build --work "$RUNNER_TEMP/hollowdeep-world"
       - name: Exercise native behavior with 32-bit types
         run: |
-          for suite in extensions staff stance network input; do
+          CC="$RUNNER_TEMP/gcc32" python3 engine/tests/test_extensions.py --source "$RUNNER_TEMP/hollowdeep-world/src_3.00"
+          for suite in staff stance network input; do
             python3 "engine/tests/test_${suite}.py" --source "$RUNNER_TEMP/hollowdeep-world/src_3.00" --cc "$RUNNER_TEMP/gcc32"
           done
           python3 engine/tests/test_runtime_client.py
