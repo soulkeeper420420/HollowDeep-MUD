@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-06 — One-file updater
+
+Added `hollowdeep-update.py`: upload one file and run `python3 /root/hollowdeep-update.py`. It embeds the existing reviewed installers, verifies their hashes and chooses the matching completed installation or its own known rollback. Unknown/unfinished records are refused. Existing updater safeguards and source payloads are unchanged. Twelve launcher tests cover version selection, bundle integrity, malformed records, no-install verification and child error handling. This does not establish live installation.
+
 ## 2026-11-06 — Command discovery, staff tools and release planning
 
 Status: tested source and installation packages. **Installation of this release on the live Linode is not verified.** The last host-confirmed completed installation is the earlier spells update. The failed builder attempt stopped in a disposable test before activation.

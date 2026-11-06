@@ -51,3 +51,7 @@ Follow the [server guide](SERVER_GUIDE.md), using a planned empty-server window 
 After installation, verify a real native login, progression/help commands, staff restrictions, save/logout and reconnect. After the bridge is installed, verify trusted HTTPS and a full browser sign-in and character session. Retain the updater's backup and final result privately.
 
 A release note should identify the source commit, checks that actually passed, website version/deployment result, and whether the Linode update and browser session were verified. Pending deployment steps should remain explicit.
+
+## One-file native update
+
+After reviewing the variant artifacts and `deploy/artifacts/RELEASE.json`, run `python3 deploy/make-simple-update.py` and `python3 deploy/test_simple_update.py`. The generator verifies the existing artifacts before embedding them in `outputs/hollowdeep-update.py`. Publish that file in `deploy/artifacts/` with its checksum and release-metadata entry. It changes packaging and selection, not the native game payloads.

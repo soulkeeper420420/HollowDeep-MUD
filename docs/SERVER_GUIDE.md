@@ -2,6 +2,20 @@
 
 Source: [soulkeeper420420/HollowDeep-MUD](https://github.com/soulkeeper420420/HollowDeep-MUD).
 
+## One-file update (recommended)
+
+Download [hollowdeep-update.py](../deploy/artifacts/hollowdeep-update.py) and upload it with WinSCP/SFTP to `/root` on **172.233.176.81**. It includes the three reviewed installers and selects the matching one from the completed installation record. You do not need to choose a variant or download supporting files.
+
+Have players enter `save`, then `quit`. In the root Lish console, run:
+
+```sh
+python3 /root/hollowdeep-update.py
+```
+
+The selected installer verifies the host, installed source/binary and service, tests a separate candidate, and preserves the world/saves and existing access settings. If this exact release is already installed, it verifies that state instead. Unknown or unfinished update records stop the operation for review; no guard is bypassed. Keep the final output and any private backup path.
+
+To check only the downloaded file without starting an installation, use `python3 /root/hollowdeep-update.py --verify`. This verifies the bundle, not the server installation. The advanced variant selection and generation instructions below remain available.
+
 ## Current status and the correct updater
 
 The host confirmed native access at **172.233.176.81:4040** and completion of the earlier spells update. The later builder update failed in its disposable test on a long room-name command; it did not activate. The new release repairs that parser overflow and adds builder/DM powers, Implementor roles, bonus tiers, full help indexing, skills, staff labels and the staff-only clan. **Publication is not confirmation of live installation.**
@@ -32,6 +46,7 @@ The release carries all artifacts and their hashes in [deploy/artifacts](../depl
 ```sh
 mkdir -p /root/hollowdeep-downloads
 cd /root/hollowdeep-downloads
+curl -fSLO https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/main/deploy/artifacts/hollowdeep-update.py
 curl -fSLO https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/main/deploy/artifacts/hollowdeep-native-update.py
 curl -fSLO https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/main/deploy/artifacts/hollowdeep-native-update-from-repair.py
 curl -fSLO https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/main/deploy/artifacts/hollowdeep-native-update-from-legacy.py
@@ -40,7 +55,7 @@ curl -fSLO https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/mai
 sha256sum --check SHA256SUMS
 ```
 
-Continue only when the downloads succeed and every checksum reports `OK`. For a durable release pin, replace `main` in all five URLs with the same reviewed commit SHA. SFTP/WinSCP upload of those exact files is an alternative; SSH/SFTP uses port 22, not the game's port 4040.
+Continue only when the downloads succeed and every checksum reports `OK`. For a durable release pin, replace `main` in all six URLs with the same reviewed commit SHA. SFTP/WinSCP upload of those exact files is an alternative; SSH/SFTP uses port 22, not the game's port 4040.
 
 Have everyone use `save`, then `quit` and wait/retry if the game requests a cooldown. For the **last confirmed spells installation**, run:
 

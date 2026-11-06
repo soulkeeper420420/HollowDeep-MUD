@@ -26,6 +26,11 @@
       "file": "hollowdeep-browser-setup.py",
       "sha256": "251252338c392c6e538defa32234664a8486ab59a1392756c940ff1333c85aa3",
       "payload_sha256": "df8dc3aa53d5fd3b4d4a98fbe7f983fee3cda83cc47cc42649fed0f829203fb2"
+    },
+    {
+      "file": "hollowdeep-update.py",
+      "sha256": "61804c8559c6726a7046fa02d963055c09e620aab953e97b2466f6de7146ebd1",
+      "kind": "automatic selector with all three reviewed native installers"
     }
   ]
 }

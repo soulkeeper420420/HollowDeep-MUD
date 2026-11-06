@@ -92,6 +92,8 @@ jobs:
           python3 deploy/test_console_bootstrap.py
           python3 deploy/test_enable_public.py
           python3 deploy/test_native_update.py
+          python3 deploy/make-simple-update.py
+          python3 deploy/test_simple_update.py
           python3 deploy/test_bridge_installer.py
           python3 deploy/test_runtime_recovery.py
       - name: Keep reviewed installation artifacts
@@ -102,6 +104,8 @@ jobs:
           retention-days: 30
           path: |
             outputs/hollowdeep-native-update*.py
+            outputs/hollowdeep-update.py
+            outputs/hollowdeep-update.sha256
             outputs/hollowdeep-browser-setup.py
             outputs/hollowdeep-console-setup.html
             outputs/hollowdeep-console-setup.txt
