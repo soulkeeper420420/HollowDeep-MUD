@@ -1,0 +1,9 @@
+PUSH / PRESS - Use special world objects
+
+Syntax: push <object> [number]
+        press <object> [number]
+
+These aliases activate an object's configured special behavior, such as a
+combination mechanism. The result depends on the actual object and room.
+They do not create an object or guarantee a particular outcome. Inspect the
+object and surrounding room for clues before using it.

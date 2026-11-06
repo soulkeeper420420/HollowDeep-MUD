@@ -1,0 +1,8 @@
+*LOCK - Reload native site lockouts
+
+Syntax: *lock
+
+Requires the native caretaker/DM class. Reloads the host's existing lockout
+configuration and displays the loaded user/site rules. It does not create
+new rules or change HollowDeep staff roles. Native host configuration remains
+separate from in-game room and clan management.

@@ -1,0 +1,7 @@
+MEDITATE - Recover health through discipline
+
+Syntax: meditate
+
+Monks may attempt to recover health by meditation, up to their existing
+maximum. Success and failure have different cooldowns. This does not raise
+maximum health, restore mana or change class. Read the response before retrying.

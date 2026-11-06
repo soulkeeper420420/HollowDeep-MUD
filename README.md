@@ -6,7 +6,7 @@ An online multiplayer dungeon using the **original Mordor 3.00 C server**, a bro
 - **Website:** https://hollowdeep-dungeon.soulkeeper420.chatgpt.site/
 - **Source:** https://github.com/soulkeeper420420/HollowDeep-MUD
 
-Native access has been confirmed by the host. The new progression, stance and staff commands in this source version still require the native update to be installed. Browser play needs the separate authenticated TLS bridge and a matching website deployment. Publishing source does not install either service.
+Native access has been confirmed by the host. The host has confirmed the earlier spells/progression/staff update. New help, skills, builder/event and staff-clan changes in this source version still require their guarded native update to be installed. Browser play needs the separate authenticated TLS bridge and a matching website deployment. Publishing source does not install either service.
 
 ## Guides
 
@@ -17,13 +17,18 @@ Native access has been confirmed by the host. The new progression, stance and st
 | [Server guide](docs/SERVER_GUIDE.md) | Updating the working Linode, connecting the website, service checks and backups. |
 | [Engine development](engine/README.md) | Edit C commands, prepare a world, build ELF32, test and apply workshop patches. |
 | [Atlas comparison](docs/ATLAS_COMPARISON.md) | Implemented features and planned work compared with classic The Secret of Atlas. |
+| [Command reference](docs/COMMAND_REFERENCE.md) | Every registered command name/alias, with permission notes. |
+| [Building](docs/BUILDING_GUIDE.md) | Room allocations, scoped building and DM powers. |
+| [Future releases](docs/FUTURE_RELEASES.md) | XP curves, higher levels, remorts, classes, clans and quest-area designs. |
+| [Atlas research and quest design](docs/ATLAS_RESEARCH_AND_QUEST_DESIGN.md) | Verified public help observations and original gear/objective-based area proposals. |
+| [Release notes](CHANGELOG.md) | Completed source changes and deployment status. |
 | [Publishing](docs/PUBLISHING.md) | Checks, generated packages and separate GitHub, website and game deployments. |
 
 ## Included
 
 The browser has an ANSI terminal, password masking, command history, a searchable command palette, aliases and manually stepped macros. Its adventure journal and source workshop store local drafts and support export. The [Realm Codex](https://hollowdeep-dungeon.soulkeeper420.chatgpt.site/codex) documents the original classes, spells and commands.
 
-The server retains Mordor's ten playable classes, world, combat and original player-file format. Hollowdeep adds persistent exploration Chronicles with cosmetic badges; compact character and training guidance; balanced, aggressive and guarded combat stances; and an owner/admin/mod hierarchy with moderation and auditing. In-game help accompanies the added commands. Staff roles do not grant native DM classes or Linux access.
+The server retains Mordor's ten playable classes, world, combat and original player-file format. Hollowdeep adds persistent exploration Chronicles with cosmetic badges; compact character and training guidance; balanced, aggressive and guarded combat stances; an owner/admin/mod/implementor hierarchy with moderation and auditing; assigned builder ranges; timed monster-reward events; searchable help; existing skill guidance; and a staff-only clan. In-game help accompanies the added commands. Staff roles do not grant native DM classes or Linux access.
 
 The bridge translates authenticated WebSocket sessions into separate Telnet connections, with origin restrictions, bounded input, ticket replay protection and engine readiness checks. Browser ChatGPT sign-in is separate from the character's Mordor login.
 

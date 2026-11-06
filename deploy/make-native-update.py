@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Generate one uploadable updater from reviewed engine files and a pinned baseline."""
+import argparse
+import ast
 import base64
 import hashlib
 import importlib.util
@@ -51,7 +53,30 @@ def prepared_files(world):
     return result
 
 
+def read_previous_update(path, checksum):
+    raw = path.read_bytes()
+    if not checksum or hashlib.sha256(raw).hexdigest() != checksum:
+        raise ValueError('Previous updater file checksum differs; provide its verified SHA-256.')
+    values = {}
+    # Parse constants only: never execute a supplied updater while packaging.
+    for node in ast.parse(raw).body:
+        if (isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name)
+                and node.targets[0].id in ('PAYLOAD_BASE64', 'PAYLOAD_SHA256')):
+            if node.targets[0].id in values:
+                raise ValueError('Duplicate updater payload constant.')
+            values[node.targets[0].id] = ast.literal_eval(node.value)
+    updater = import_manage(ROOT / 'deploy/update-native.py', 'hollowdeep_update_reader')
+    data = updater.decode_payload(values['PAYLOAD_BASE64'], values['PAYLOAD_SHA256'])
+    return values['PAYLOAD_SHA256'], data, updater.expected_after(data)
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--from-update', type=Path, help='Exact updater already installed on the target')
+    parser.add_argument('--from-sha256', help='Verified SHA-256 of that updater file')
+    args = parser.parse_args()
+    if bool(args.from_update) != bool(args.from_sha256):
+        parser.error('--from-update and --from-sha256 must be supplied together')
     baseline, kit_archive = load_baseline()
     old_kit = {}
     with tarfile.open(fileobj=io.BytesIO(kit_archive), mode='r:gz') as bundle:
@@ -60,6 +85,14 @@ def main():
                 if not member.name.startswith('hollowdeep-server-kit/'):
                     raise ValueError('Unexpected baseline path.')
                 old_kit[member.name.removeprefix('hollowdeep-server-kit/')] = bundle.extractfile(member).read()
+    predecessor = None
+    previous_manifests = None
+    if args.from_update:
+        predecessor, previous, previous_manifests = read_previous_update(args.from_update, args.from_sha256)
+        # The original tools not replaced by an updater remain in the live kit.
+        old_kit.update(previous['engine'])
+        if {name: hashlib.sha256(raw).hexdigest() for name, raw in old_kit.items()} != previous_manifests[0]:
+            raise ValueError('The previous updater has an unsupported kit history.')
     engine = source_files(ROOT / 'engine')
     with tempfile.TemporaryDirectory(prefix='hollowdeep-update-package-') as temporary:
         temp = Path(temporary)
@@ -73,6 +106,8 @@ def main():
         old_world = old_manage.prepare_archive(archive, temp / 'old-world', 'Realmkeeper')
         new_world = new_manage.prepare_archive(archive, temp / 'new-world', 'Realmkeeper')
         before, after = prepared_files(old_world), prepared_files(new_world)
+        if previous_manifests and {name: hashlib.sha256(raw).hexdigest() for name, raw in before.items()} != previous_manifests[1]:
+            raise ValueError('The previous updater source does not reproduce its installed world manifest.')
         if before['src_3.00/mstruct.h'] != after['src_3.00/mstruct.h']:
             raise ValueError('Serialized structure definitions changed; this requires a different migration.')
         if set(before) - set(after):
@@ -89,7 +124,7 @@ def main():
         ['/usr/bin/python3', '{kit}/tests/test_runtime.py', '--archive', '{archive}', '--cc', '{cc}'],
     ]
     # Optional new native modules use the same explicit source/compiler interface.
-    for name in ('test_staff.py', 'test_stance.py'):
+    for name in ('test_staff.py', 'test_stance.py', 'test_build.py', 'test_rewards.py', 'test_parser.py', 'test_help.py'):
         if 'tests/' + name in engine:
             tests.insert(-1, ['/usr/bin/python3', '{kit}/tests/' + name, '--source', '{source}', '--cc', '{cc}'])
     data = {
@@ -101,6 +136,8 @@ def main():
         'unit_text': baseline['unit_text'],
         'tests': tests,
     }
+    if predecessor:
+        data['predecessor_sha256'] = predecessor
     packed = zlib.compress(json.dumps(data, sort_keys=True).encode(), 9)
     checksum = hashlib.sha256(packed).hexdigest()
     encoded = '\n'.join(textwrap.wrap(base64.b64encode(packed).decode(), 96))

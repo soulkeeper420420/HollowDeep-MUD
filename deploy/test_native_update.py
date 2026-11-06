@@ -54,6 +54,24 @@ class PayloadTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'size or format'):
             update.decode_payload(base64.b64encode(packed).decode(), update.digest(packed))
 
+    def test_successor_checksum_is_strict(self):
+        encoded, checksum = self.payload(predecessor_sha256='a' * 64)
+        self.assertEqual(update.decode_payload(encoded, checksum)['predecessor_sha256'], 'a' * 64)
+        for value in ('', '../file', 'a' * 63, None):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'predecessor'):
+                update.decode_payload(*self.payload(predecessor_sha256=value))
+
+    def test_previous_updater_is_verified_without_execution(self):
+        encoded, checksum = self.payload()
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'previous.py'
+            raw = (f'PAYLOAD_SHA256 = {checksum!r}\nPAYLOAD_BASE64 = {encoded!r}\n'
+                   'raise AssertionError("must never execute this file")\n').encode()
+            path.write_bytes(raw)
+            self.assertEqual(generator.read_previous_update(path, update.digest(raw))[0], checksum)
+            with self.assertRaisesRegex(ValueError, 'checksum'):
+                generator.read_previous_update(path, '0' * 64)
+
     def test_baseline_works_without_git_history(self):
         with patch('subprocess.run', side_effect=AssertionError('Git must not be needed')):
             metadata, kit = generator.load_baseline()
@@ -149,6 +167,35 @@ class LocalWorldTests(unittest.TestCase):
                                       self.base / 'world/src_3.00/command.c',
                                       self.base / 'world/help/help.90',
                                       self.base / 'world/src_3.00/frp.new'})
+        self.assert_saves_intact()
+
+    def test_successor_requires_exact_completed_predecessor_and_binary(self):
+        data = dict(self.data, predecessor_sha256='a' * 64)
+        with self.assertRaisesRegex(RuntimeError, 'record is missing'):
+            update.inspect_update_record(data)
+        record = {'payload_sha256': 'a' * 64, 'status': 'complete',
+                  'binary_sha256': update.digest(self.old[self.base / 'world/src_3.00/frp.new'])}
+        update.RECORD.write_text(json.dumps(record))
+        self.assertFalse(update.inspect_update_record(data))
+        for changes in ({'status': 'installing'}, {'status': 'needs-review'},
+                        {'payload_sha256': 'b' * 64}, {'binary_sha256': '0' * 64}):
+            update.RECORD.write_text(json.dumps(dict(record, **changes)))
+            with self.subTest(changes=changes), self.assertRaises(RuntimeError):
+                update.inspect_update_record(data)
+        self.service.assert_not_called()
+
+    def test_successor_failure_keeps_previous_record_and_allows_verified_retry(self):
+        previous = {'payload_sha256': 'a' * 64, 'status': 'complete',
+                    'binary_sha256': update.digest(self.old[self.base / 'world/src_3.00/frp.new'])}
+        update.RECORD.write_text(json.dumps(previous))
+        self.check_greeting.side_effect = [RuntimeError('candidate failed'), None]
+        with self.assertRaisesRegex(RuntimeError, 'original game files restored'):
+            update.activate(self.data, self.stage, self.candidate, self.account, True)
+        self.assertEqual(json.loads((self.stage / 'backup/previous-native-update.json').read_text()), previous)
+        self.assertFalse(update.inspect_update_record(dict(self.data, predecessor_sha256='a' * 64)))
+        (self.base / 'world/src_3.00/frp.new').write_bytes(b'changed')
+        with self.assertRaisesRegex(RuntimeError, 'binary differs'):
+            update.inspect_update_record(dict(self.data, predecessor_sha256='a' * 64))
         self.assert_saves_intact()
 
     def test_success_backs_up_and_preserves_saved_world(self):

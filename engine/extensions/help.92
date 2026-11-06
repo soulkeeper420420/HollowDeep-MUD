@@ -1,0 +1,35 @@
+HBUILD - Assigned world-building ranges
+
+Everyone: hbuild mine
+Staff (including implementors) and assigned builders: hbuild info
+Owners manage assignments for existing saved characters:
+  hbuild assign <name> <start> [count]  Default 50 rooms; count 1-500.
+  hbuild unassign <name>               Remove ALL of that builder's ranges.
+  hbuild ranges                        Show everyone's assignments.
+
+Example: hbuild assign Aria 8000 assigns rooms 8000-8049 inclusive.
+Ranges may not overlap. IDs must stay within 2-8999. Assignment does not
+create, erase or overwrite any rooms. Owners can edit any existing room.
+All other builders, including admins, edit only their assigned ranges.
+
+Builder commands:
+  hbuild create <room>                 Create an unused assigned room.
+  hbuild name <text>                   Rename the current room (1-79 chars).
+  hbuild describe <text>               Replace its long description (1-180 chars).
+  hbuild link <direction> <room>       Add a one-way exit within your ranges.
+  hbuild unlink <direction>            Remove a current-room exit.
+
+Changes save immediately in the original world format. Existing rooms cannot
+be overwritten by create. Existing exits must be unlinked before replacement.
+Directions: north, south, east, west, northeast, northwest, southeast,
+southwest, up, down. Use full lowercase directions. A return exit must be
+created separately from the other room. Keep text printable ASCII.
+
+Use hdm goto <room> to enter an existing assigned room. Ask an owner to
+connect your area to the public world; both ends of a builder's link must be
+assigned. New rooms are empty; existing flags and permanent contents remain.
+Assignments persist and confer no moderation or class powers. Use hbuild
+unassign to remove range access; hstaff revoke removes the role separately.
+Unassigning retains completed rooms. Corrupt data denies building access.
+The audit records authorized buildtry/rangetry attempts before effects;
+read the command response to confirm success. Class and level stay intact.

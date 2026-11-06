@@ -1,0 +1,19 @@
+HELP - Searchable command reference
+
+help                         First page of registered commands and aliases.
+help commands [page]         Browse the complete command index.
+help all [page]              Same index.
+help social [page]           Browse all registered social actions.
+help search <text> [page]    Find command names containing text.
+help <command>               Read command help, including short aliases.
+help <spell-name>            Read an original spell page.
+help spells                  Original full spell catalog.
+help spell                   Your learned-spell listing command.
+help policy                  Server policy.
+help dm                      Your staff and DM command guide.
+
+Use dmcommands for role-based powers and dmcommands native [page] for
+native class powers. Use skills for class/level-eligible skills and skills
+all for the full skill catalog. Listing help never grants a permission,
+learns a spell or bypasses a cooldown. Duplicate registrations are omitted;
+registered aliases remain visible. Ordinary command requirements still apply.

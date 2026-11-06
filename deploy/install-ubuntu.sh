@@ -16,7 +16,7 @@ trap 'printf "Installation stopped during %s (line %s). Any newly created instal
 kit_input=$1
 admin_name=${2:-Realmkeeper}
 game_port=${3:-4040}
-kit_sha256=946d69e0afb2be03964a4b76eb51dc5b0945aa26e57e3c7304b46e2347e89cb3
+kit_sha256=9982875dea95ffdb9f360f86eae8cbd9f6bcff4cf20bad0b0ca7d147786d8bd1
 base=/srv/hollowdeep
 [[ $admin_name =~ ^[A-Z][a-z]{2,13}$ ]] || die 'AdminName must be 3–14 letters: an initial capital, then lowercase.'
 [[ $game_port =~ ^[0-9]{4,5}$ ]] || die 'Choose a TCP port from 1024 to 65535.'

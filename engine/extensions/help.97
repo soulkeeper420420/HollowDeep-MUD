@@ -1,0 +1,18 @@
+SKILLS - Class abilities
+
+Syntax: skills
+        skills all
+
+skills lists native skills for which your character meets the class and level
+requirements. skills all lists all 18 native skills with eligible markers or
+requirements. This is an eligibility guide, not a promise that a skill can be
+used immediately: cooldowns, targets, equipment and conditions still apply.
+
+Use help <skill> for rules and syntax. All classes can hide, search and prepare
+for traps. Specialized skills include backstab, bash, charm, circle, haste,
+meditate, peek, pick, pray, sneak, steal, teach, touch, track and turn. Monks can
+pick locks and sneak; both mages and clerics can teach spells. Touch needs level 10.
+
+The command reads your character without granting skills or changing stats.
+Use spells for learned magic, hclass progress for training, and help commands
+for the complete command reference. Skill aliases share their original behavior.

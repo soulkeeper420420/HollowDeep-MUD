@@ -16,7 +16,7 @@ UNIT_FILE = Path('/etc/systemd/system') / UNIT
 DROPIN_DIR = Path('/etc/systemd/system/hollowdeep.service.d')
 DROPIN = DROPIN_DIR / '20-public.conf'
 INSTALL_CONFIG = Path('/etc/hollowdeep/install.json')
-KIT_SHA256 = '946d69e0afb2be03964a4b76eb51dc5b0945aa26e57e3c7304b46e2347e89cb3'
+KIT_SHA256 = '9982875dea95ffdb9f360f86eae8cbd9f6bcff4cf20bad0b0ca7d147786d8bd1'
 
 
 def command(*arguments):

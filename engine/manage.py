@@ -28,12 +28,13 @@ CORE = ('global files1 files2 files3 command1 command2 command3 command4 '
         'magic1 magic2 magic3 magic4 magic5 magic6 magic7 magic8 '
         'dm1 dm2 dm3 dm4 dm5 dm6 io player creature room object update post action '
         'misc special1 compress memory combat logic main hollowdeep hollowdeep_net '
-        'hollowdeep_staff hollowdeep_stance').split()
-EXTENSION_COMMANDS = ('hcommands', 'hclass', 'hquest', 'hprofile', 'hstaff', 'hmoderate', 'hstance')
+        'hollowdeep_staff hollowdeep_stance hollowdeep_build hollowdeep_ranges hollowdeep_bonus hollowdeep_help').split()
+EXTENSION_COMMANDS = ('hcommands', 'hclass', 'hquest', 'hprofile', 'hstaff', 'hmoderate', 'hstance', 'spells', 'hbuild', 'hdm', 'hbonus', 'dmcommands', 'staffclan', 'skills')
 EXTENSION_SOURCES = tuple(f'{name}.{suffix}' for name in
-                          ('hollowdeep', 'hollowdeep_net', 'hollowdeep_staff', 'hollowdeep_stance')
+                          ('hollowdeep', 'hollowdeep_net', 'hollowdeep_staff', 'hollowdeep_stance', 'hollowdeep_build', 'hollowdeep_ranges', 'hollowdeep_bonus', 'hollowdeep_help')
                           for suffix in ('c', 'h'))
-EXTENSION_HELP = tuple(f'help.{number}' for number in range(84, 84 + len(EXTENSION_COMMANDS)))
+EXTRA_HELP = tuple(f'help.{number}' for number in (14, 78, 81, 82, 83, 100, 109, 123, 147, 148, 149, -2))
+EXTENSION_HELP = tuple(f'help.{number}' for number in range(84, 84 + len(EXTENSION_COMMANDS))) + EXTRA_HELP
 
 def replace_once(text, before, after, name):
     if text.count(before) != 1:
@@ -153,7 +154,7 @@ def apply_compatibility(work, admin):
     edit('dm4.c', dm)
     def login(text):
         text = replace_once(text, '#include "mstruct.h"',
-                            '#include "mstruct.h"\n#include "hollowdeep_staff.h"', 'staff dispatch include')
+                            '#include "mstruct.h"\n#include "hollowdeep_staff.h"\n#include "hollowdeep_help.h"', 'staff dispatch include')
         text = replace_once(text,
             'print(fd, "\\nChoose a password (up to 14 chars): ");',
             'print(fd, "%c%c%c\\nChoose a password (up to 14 chars): ", 255, 251, 1);',
@@ -163,11 +164,41 @@ def apply_compatibility(work, admin):
             'new character echo restoration')
         text = replace_once(text, r'"\255\252\1\n\rIncorrect.\n\r"',
                             r'"\377\374\1\n\rIncorrect.\n\r"', 'failed login echo restoration')
+        # The legacy parser checks its value index after writing a token.
+        # A sixth word can overrun str[COMMANDMAX], even for short commands.
+        token_copy = '\t\t\t\tstrncpy(cmnd->str[n++], tempstr, 20);'
+        if text.count(token_copy) != 2:
+            raise ValueError('Expected both native command token copies')
+        text = text.replace(token_copy,
+            '\t\t\t\tif(n >= COMMANDMAX) break;\n'
+            '\t\t\t\tstrncpy(cmnd->str[n], tempstr, 20);\n'
+            '\t\t\t\tcmnd->str[n++][20] = 0;')
+        text = replace_once(text, "while((str[i+1] == ' ' || str[i] == '#') && i < j+1)",
+            "while(i < j && (str[i+1] == ' ' || str[i+1] == '#'))", 'parser separator bounds')
+        text = replace_once(text, '\t\t\tn = 5;\n\t\t\tbreak;',
+            '\t\t\tn = COMMANDMAX;\n\t\t\tbreak;', 'parser token limit')
+        text = replace_once(text, '\t\tstrncpy(cmnd.fullstr, str, 255);',
+            '\t\tstrncpy(cmnd.fullstr, str, sizeof(cmnd.fullstr) - 1);\n'
+            '\t\tcmnd.fullstr[sizeof(cmnd.fullstr) - 1] = 0;', 'literal command termination')
         return replace_once(text, '\tif(cmdlist[cmdno].cmdno < 0)',
+            '\tif(cmdlist[cmdno].cmdstr[0] == \'*\' && !hd_native_command_allowed(Ply[fd].ply, cmdlist[cmdno].cmdno)) {\n'
+            '\t\tprint(fd, "Native caretaker/DM permission required.\\n"); return 0; }\n'
             '\t/* Apply moderation after alias resolution, before every native dispatch. */\n'
             '\tif(hd_staff_blocks_command(Ply[fd].ply, cmdlist[cmdno].cmdno)) return 0;\n\n'
             '\tif(cmdlist[cmdno].cmdno < 0)', 'staff chat gate')
     edit('command1.c', login)
+    def help_dispatch(text):
+        original = re.search(r'(?ms)^int help\(ply_ptr, cmnd\).*?^}', text)
+        if not original: raise ValueError('Original help handler missing')
+        return replace_once(text, original.group(0), '/* Command help is implemented in hollowdeep_help.c. */', 'help dispatch')
+    edit('command4.c', help_dispatch)
+    def staff_badges(text):
+        text = replace_once(text, '#include "mstruct.h"', '#include "mstruct.h"\n#include "hollowdeep_staff.h"', 'visible staff roles include')
+        text = replace_once(text, 'print(fd, "%-20s%s  ", Ply[i].ply->name,',
+            'print(fd, "%s ", hd_staff_badge(Ply[i].ply));\n        print(fd, "%-20s%s  ", Ply[i].ply->name,', 'who staff badge')
+        return replace_once(text, 'print(fd, "%-10s\\n", race_str[crt_ptr->race]);',
+            'print(fd, "%-10s\\n", race_str[crt_ptr->race]);\n        if(*hd_staff_badge(crt_ptr)) print(fd, "Staff role: %s\\n", hd_staff_badge(crt_ptr));', 'whois staff badge')
+    edit('command5.c', staff_badges)
     def physical_attacks(text, player_attack):
         text = replace_once(text, '#include "mstruct.h"',
                             '#include "mstruct.h"\n#include "hollowdeep_stance.h"', 'stance include')
@@ -221,23 +252,41 @@ def apply_compatibility(work, admin):
     edit('io.c', io)
     def globals_(text):
         text = replace_once(text, '#include "mstruct.h"',
-                            '#include "mstruct.h"\n#include "hollowdeep.h"\n#include "hollowdeep_staff.h"\n#include "hollowdeep_stance.h"',
+                            '#include "mstruct.h"\n#include "hollowdeep.h"\n#include "hollowdeep_staff.h"\n#include "hollowdeep_stance.h"\n#include "hollowdeep_build.h"\n#include "hollowdeep_bonus.h"\n#include "hollowdeep_help.h"',
                             'extension include')
         anchor = '\t{ "touch", 83, touch_of_death},'
         return replace_once(text, anchor, anchor + '\n' + ''.join(
             f'\t{{ "{command}", {number}, {command} }},\n'
-            for number, command in enumerate(EXTENSION_COMMANDS, 84)), 'command table')
+            for number, command in enumerate(EXTENSION_COMMANDS, 84)) + '\n\t{ "spell", 91, spells },\n\t{ "dmhelp", 95, dmcommands },\n\t{ "hstaffclan", 96, staffclan },', 'command table')
     edit('global.c', globals_)
+    def rewards(text):
+        text = replace_once(text, '#include "mstruct.h"', '#include "mstruct.h"\n#include "hollowdeep_bonus.h"', 'bonus reward include')
+        text = replace_once(text, '                expdiv = MIN(expdiv, crt_ptr->experience);',
+            '                expdiv = MIN(expdiv, crt_ptr->experience);\n'
+            '                expdiv = hd_bonus_xp(ply_ptr, expdiv);', 'monster XP bonus')
+        text = replace_once(text, '            sprintf(obj_ptr->name, "%d gold coins", crt_ptr->gold);',
+            '            obj_ptr->value = hd_bonus_gold(crt_ptr->gold);\n'
+            '            sprintf(obj_ptr->name, "%ld gold coins", obj_ptr->value);', 'monster gold bonus')
+        return replace_once(text, '            obj_ptr->value = crt_ptr->gold;\n', '', 'single gold bonus application')
+    edit('creature.c', rewards)
+    def gold_pickup(text):
+        text = replace_once(text, '#include "mstruct.h"', '#include "mstruct.h"\n#include "hollowdeep_bonus.h"', 'gold pickup include')
+        anchor = 'if(weight_ply(ply_ptr) + weight_obj(obj_ptr) >'
+        if text.count(anchor) != 4:
+            raise ValueError('Expected all four native coin pickup checks')
+        return text.replace(anchor, 'if(!hd_bonus_can_take_gold(ply_ptr, obj_ptr) || weight_ply(ply_ptr) + weight_obj(obj_ptr) >')
+    edit('command2.c', gold_pickup)
     original_make = (source / 'Makefile').read_text()
     makefile = ('# Hollowdeep development build of original Mordor 3.00. Original notices retained.\n'
                 'CC ?= cc\n'
                 'CFLAGS = -m32 -std=gnu89 -O1 -g -fcommon -DDEBUG -DCOMPRESS '
+                '-D_FORTIFY_SOURCE=3 -fstack-protector-strong '
                 '-Wno-implicit-function-declaration -Wno-int-conversion '
                 '-Wno-incompatible-pointer-types -Wno-return-type\n'
                 'LDFLAGS = -m32\nLDLIBS = -lm\n'
                 'OBJECTS = ' + ' '.join(f'{name}.o' for name in CORE) + '\n\n'
                 'frp.new: $(OBJECTS)\n\t$(CC) $(LDFLAGS) $(OBJECTS) -o $@ $(LDLIBS)\n'
-                '%.o: %.c mstruct.h mtype.h mextern.h hollowdeep.h hollowdeep_net.h hollowdeep_staff.h hollowdeep_stance.h\n\t$(CC) $(CFLAGS) -c $< -o $@\n'
+                '%.o: %.c mstruct.h mtype.h mextern.h hollowdeep.h hollowdeep_net.h hollowdeep_staff.h hollowdeep_stance.h hollowdeep_build.h hollowdeep_ranges.h hollowdeep_bonus.h hollowdeep_help.h\n\t$(CC) $(CFLAGS) -c $< -o $@\n'
                 'clean:\n\trm -f $(OBJECTS) frp.new\n.PHONY: clean\n')
     (source / 'Makefile').write_text(makefile)
     patch.extend(difflib.unified_diff(original_make.splitlines(True), makefile.splitlines(True),
@@ -285,11 +334,17 @@ def sync_extensions(work):
     table = (source_dir / 'global.c').read_text(encoding='latin-1')
     hooks = ((source_dir / 'command5.c').read_text(encoding='latin-1').count('hd_stance_threshold('),
              (source_dir / 'combat.c').read_text(encoding='latin-1').count('hd_stance_threshold('))
-    if (any(f'{name}.o' not in makefile for name in ('hollowdeep_net', 'hollowdeep_staff', 'hollowdeep_stance'))
+    if (any(f'{name}.o' not in makefile for name in ('hollowdeep_net', 'hollowdeep_staff', 'hollowdeep_stance', 'hollowdeep_build', 'hollowdeep_ranges', 'hollowdeep_bonus', 'hollowdeep_help'))
             or 'hd_staff_blocks_command(' not in dispatch or hooks != (1, 2)
+            or 'hd_native_command_allowed(' not in dispatch
+            or dispatch.count('if(n >= COMMANDMAX) break;') != 2
+            or 'cmnd.fullstr[sizeof(cmnd.fullstr) - 1] = 0;' not in dispatch
+            or 'hd_bonus_xp(ply_ptr, expdiv)' not in (source_dir / 'creature.c').read_text(encoding='latin-1')
+            or 'hd_bonus_gold(crt_ptr->gold)' not in (source_dir / 'creature.c').read_text(encoding='latin-1')
+            or (source_dir / 'command2.c').read_text(encoding='latin-1').count('hd_bonus_can_take_gold(') != 4
             or any(f'{{ "{command}", {number}, {command} }}' not in table
                    for number, command in enumerate(EXTENSION_COMMANDS, 84))):
-        raise ValueError('This checkout predates the staff and combat-stance hooks. Use the guarded '
+        raise ValueError('This checkout predates the current commands or staff/combat-stance hooks. Use the guarded '
                          'native updater or prepare a separate fresh checkout; keep the existing world and saves intact.')
     changes = []
     for name in EXTENSION_SOURCES + EXTENSION_HELP:

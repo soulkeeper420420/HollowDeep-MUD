@@ -13,6 +13,8 @@ test('untrusted project paths cannot target parent, absolute, hidden, or platfor
   assert.equal(validatePath('src/command_extensions.c'), 'src/command_extensions.c');
   assert.equal(validatePath('Makefile'), 'Makefile');
   assert.equal(validatePath('extensions/help.84'), 'extensions/help.84');
+  assert.equal(validatePath('extensions/help.-2'), 'extensions/help.-2');
+  assert.throws(() => validatePath('extensions/help.-3'));
   assert.equal(validatePath('COPYRIGHT'), 'COPYRIGHT');
 });
 test('corrupt, duplicate, binary and oversized imports fail without partial project changes', () => {

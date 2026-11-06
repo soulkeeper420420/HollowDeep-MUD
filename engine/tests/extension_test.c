@@ -18,6 +18,21 @@ long needed_exp[MAXALVL] = {
     1739616, 2203457, 2799000, 3505139, 4465120, 5792661, 7319072,
     8874375, 15000000
 };
+/* Deliberately reordered: the handler must use spell IDs, not table indexes. */
+struct {
+    char *splstr;
+    int splno;
+    int (*splfn)();
+} spllist[] = {
+    {"fireball", SFIREB, NULL},
+    {"vigor", SVIGOR, NULL},
+    {"fortune", SFORTU, NULL},
+    {"last-spell", 127, NULL},
+    {"invalid-high", 128, NULL},
+    {"invalid-negative", -2, NULL},
+    {"@", -1, NULL},
+    {"after-sentinel", SLIGHT, NULL}
+};
 void print(int fd, const char *format, ...)
 {
     va_list args;
@@ -68,6 +83,45 @@ static void training_room(room *location, unsigned int class_number)
         F_CLR(location, RTRAIN + 3 - i);
         if (class_number & (1U << i)) F_SET(location, RTRAIN + 3 - i);
     }
+}
+static void spell_views(creature *player)
+{
+    creature original = *player;
+    unsigned int class_number;
+    memset(player->spells, 0, sizeof(player->spells));
+    player->mpcur = 2; player->mpmax = 12;
+    invoke(player, "spells", spells);
+    contains("Spells known: 0 | Mana: 2/12");
+    contains("have not learned any spells"); contains("help study");
+    excludes("  fireball\n");
+
+    S_SET(player, SVIGOR); S_SET(player, SFORTU);
+    invoke(player, "spells", spells);
+    contains("Spells known: 2"); contains("  fortune\n  vigor\n");
+    contains("cast <spell> [target]"); contains("help <spell>");
+    excludes("  fireball\n"); excludes("last-spell");
+    invoke(player, "spell", spells); contains("Spells known: 2");
+
+    /* No class-based guesses or mana spending: report actual learned bits. */
+    player->mpcur = 0;
+    for (class_number = ASSASSIN; class_number <= MONK; class_number++) {
+        player->class = class_number;
+        invoke(player, "spells", spells);
+        contains("Spells known: 2 | Mana: 0/12");
+        contains("Known spells still require");
+    }
+    player->class = DM;
+    invoke(player, "spells", spells); contains("Spells known: 2");
+
+    /* Ignore unregistered bits, invalid IDs and entries after the sentinel. */
+    memset(player->spells, 0xff, sizeof(player->spells));
+    invoke(player, "spells", spells);
+    contains("Spells known: 4");
+    contains("  fireball\n  fortune\n  last-spell\n  vigor\n");
+    excludes("invalid-"); excludes("after-sentinel");
+    invoke(player, "spells fireball", spells);
+    contains("Usage: spells"); excludes("YOUR KNOWN SPELLS");
+    *player = original;
 }
 static void player_views(creature *player, room *location)
 {
@@ -193,6 +247,7 @@ int main(int argc, char **argv)
     output[0] = '\0'; hclass(&player, &command); contains("Mage:"); contains("enough experience and gold");
     output[0] = '\0'; hcommands(&player, &command); contains("hquest"); contains("flee can drop");
     player_views(&player, &location);
+    spell_views(&player);
 
     /* Bad journals are rejected, and symlinks are never followed. */
     file = fopen("hollowdeep-data/tester.journal", "w"); assert(file); fputs("HOLLOWDEEP 1 1 1 2\n1\n1\n", file); fclose(file);

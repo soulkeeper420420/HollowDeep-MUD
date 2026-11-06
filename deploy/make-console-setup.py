@@ -11,7 +11,7 @@ import textwrap
 
 ROOT = Path(__file__).resolve().parents[1]
 kit = ROOT / 'public/workshop-files/hollowdeep-server-kit.tar.gz'
-if hashlib.sha256(kit.read_bytes()).hexdigest() != '946d69e0afb2be03964a4b76eb51dc5b0945aa26e57e3c7304b46e2347e89cb3':
+if hashlib.sha256(kit.read_bytes()).hexdigest() != '9982875dea95ffdb9f360f86eae8cbd9f6bcff4cf20bad0b0ca7d147786d8bd1':
     raise SystemExit('The corrected source kit has changed; review it before generating an installer.')
 files = {}
 with tarfile.open(kit, 'r:gz') as archive:

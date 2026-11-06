@@ -1,0 +1,24 @@
+HBONUS - Timed XP and gold events
+
+Everyone: hbonus (or hbonus status)
+Moderators, implementors, admins and owners:
+  hbonus start <xp|gold|both> <multiplier> <minutes>
+  hbonus stop
+
+Moderators/Implementors: whole-number x1-x5, 1-60 minutes.
+Admins: whole-number x1-x10, 1-1440 minutes.
+Owners: whole-number x1-x20, 1-1440 minutes.
+x1 means ordinary rewards for that event. Staff may stop events started
+by their own rank or lower. Moderators and implementors are equal peers.
+One event can run at a time; stop it explicitly before starting another.
+Example: hbonus start both 2 60
+
+The event affects newly earned monster-kill XP and newly dropped monster
+gold for everyone. It does not multiply PvP rewards, quests, shops, trades,
+bank transfers, existing coins or manually assigned rewards. Coin piles
+already dropped keep their value after the event ends. Bonuses never stack.
+
+Events survive restarts and expire automatically using the saved end time.
+Starting and stopping are announced and audited. Corrupt event storage uses
+normal rewards and refuses management until repaired; it never boosts them.
+Use ordinary save/quit to retain earned rewards. Training rules still apply.

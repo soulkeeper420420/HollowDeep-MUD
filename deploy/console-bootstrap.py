@@ -15,10 +15,10 @@ import urllib.request
 
 TARGET_IP = '172.233.176.81'
 UPSTREAM_SHA256 = '05fa24e9d475636bb77020e00a3c2b77a21516af63eef7baf6779ffc1f75e0c0'
-ORIGINAL_KIT_SHA256 = '946d69e0afb2be03964a4b76eb51dc5b0945aa26e57e3c7304b46e2347e89cb3'
-PUBLISHED_KIT_SHA256 = '5a7bdd831048dc3d5aa7b0c30315711fecfb91ba871248958b0b871e604631ae'
+ORIGINAL_KIT_SHA256 = '9982875dea95ffdb9f360f86eae8cbd9f6bcff4cf20bad0b0ca7d147786d8bd1'
+PUBLISHED_KIT_SHA256 = '9982875dea95ffdb9f360f86eae8cbd9f6bcff4cf20bad0b0ca7d147786d8bd1'
 ARCHIVE_URL = 'https://godwars.net/~mudbytes/files/codebases/Mordor_3.00.tar.gz'
-PUBLISHED_KIT_URL = 'https://hollowdeep-dungeon.soulkeeper420.chatgpt.site/workshop-files/hollowdeep-server-kit.tar.gz'
+PUBLISHED_KIT_URL = 'https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/main/public/workshop-files/hollowdeep-server-kit.tar.gz'
 STAGE = Path('/root/hollowdeep-console')
 
 # EMBEDDED_SOURCE

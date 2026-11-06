@@ -73,7 +73,7 @@ jobs:
       - name: Exercise native behavior with 32-bit types
         run: |
           CC="$RUNNER_TEMP/gcc32" python3 engine/tests/test_extensions.py --source "$RUNNER_TEMP/hollowdeep-world/src_3.00"
-          for suite in staff stance network input; do
+          for suite in staff stance build rewards parser help network input; do
             python3 "engine/tests/test_${suite}.py" --source "$RUNNER_TEMP/hollowdeep-world/src_3.00" --cc "$RUNNER_TEMP/gcc32"
           done
           python3 engine/tests/test_runtime_client.py
@@ -83,6 +83,10 @@ jobs:
         run: |
           python3 deploy/make-console-setup.py
           python3 deploy/make-native-update.py
+          mv outputs/hollowdeep-native-update.py outputs/hollowdeep-native-update-from-legacy.py
+          python3 deploy/make-native-update.py --from-update deploy/baseline/staff-builder-repair.py --from-sha256 3f1bdb212d5fc7c95c6967c0be93dc280b816f11654e30151f8d085571ac4316
+          mv outputs/hollowdeep-native-update.py outputs/hollowdeep-native-update-from-repair.py
+          python3 deploy/make-native-update.py --from-update deploy/baseline/spells-update.py --from-sha256 2e366aac5195273541d4d1ad033e3352eb14eab484b0bcf0564bca7932bcfe81
           python3 deploy/make-bridge-installer.py
           python3 deploy/make-runtime-recovery.py
           python3 deploy/test_console_bootstrap.py
@@ -97,7 +101,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
           path: |
-            outputs/hollowdeep-native-update.py
+            outputs/hollowdeep-native-update*.py
             outputs/hollowdeep-browser-setup.py
             outputs/hollowdeep-console-setup.html
             outputs/hollowdeep-console-setup.txt

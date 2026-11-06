@@ -60,6 +60,22 @@ The update adds two compact views:
 
 `hclass progress` uses the original progression table. Its readiness check also considers blindness and the engine's character-approval flag. It reads your state; use `train` to perform the actual level advancement.
 
+## Your available spells
+
+After installing the source update that adds this command, enter `spells` (or
+`spell`) to see your learned spells alphabetically, one per line, together with
+your current and maximum mana. The list uses your character's actual learned
+spells, including spells learned from scrolls; it does not guess from your class.
+
+Use `cast <spell> [target]` to cast and `help <spell-name>` for that spell's rules.
+Knowing a spell does not guarantee you can cast it immediately: mana, class,
+level, cooldowns and other conditions still apply. If the list is empty, use
+`help study` to read about learning from scrolls. Listing spells does not cast
+them, spend mana or change your character.
+
+`help spell` explains the new command. `help spells` retains the original catalog
+of all game spells, including spells your character has not learned.
+
 ## Exploration Chronicles
 
 Start with:
@@ -125,3 +141,27 @@ The update adds `hcommands mobile` and `hcommands social` for these instructions
 - **Muted:** movement, combat, help, saving and logout remain available. Ask staff to review the restriction; reconnecting does not reset a timed mute.
 
 Use the [Realm Codex](https://hollowdeep-dungeon.soulkeeper420.chatgpt.site/codex) for searchable command and class guidance.
+
+## Timed rewards and assigned builders
+
+After the builder/event update, `hbonus` shows the current monster XP/gold multiplier and time remaining. Events are temporary, survive restarts and end automatically. They affect newly earned monster-kill XP and newly dropped monster gold; shops, trades, existing coins and quest/PvP rewards are unchanged. Normal training and saving still apply. The event-tier update supports whole-number multipliers up to 20× and durations up to 24 hours, depending on the initiating staff role. 1× means normal rewards.
+
+If an owner assigns you a building range, `hbuild mine` shows its inclusive room IDs. You can build within that range without becoming a moderator. See [the building guide](BUILDING_GUIDE.md). Remort and specialization ideas are documented in [progression options](PROGRESSION_OPTIONS.md); they are not active character features.
+
+Clan and guild designs, housing, cooperative quests and other possible additions are covered in [clans and feature options](CLANS_AND_FEATURES.md). These are proposals; this update does not enable clan commands.
+
+## Find commands and existing skills (new update)
+
+- `help` shows the first command-index page and usage.
+- `help commands 2` or `help all 2` moves through the alphabetical index. There are 315 unique registered names/aliases in this source; native staff-class entries are filtered for your character.
+- `help search spell` finds matching command names. Search is a substring match, not typo correction.
+- `help social` lists social actions; `help wave` explains their usage.
+- `help search` alone explains the original room-search command.
+- `skills` lists native skills allowed by your class and level. `skills all` shows the full 18-skill catalog and requirements.
+- `dmcommands` (or `dmhelp`) shows your assigned staff/building tools. Ordinary players see that they have no staff powers.
+
+The command index is a reference; seeing a command name does not grant its class, equipment, cooldown or staff requirements. The skill list does not promise immediate readiness and never spends resources. Use `spells` for learned magic.
+
+Staff labels are `[OWNER]`, `[ADMIN]`, `[MOD]` and `[IMPLEMENTOR]` in `who`, `whois` and staff announcements. Existing invisibility rules still apply. Implementor and Moderator have equal starting authority, even though their labels differ. Builder allocation is separate. The HollowDeep Staff clan accepts staff roles automatically and excludes ordinary players and builder-only characters.
+
+Plans for higher levels, new spells/classes and gear-based quests are in the [future release guide](FUTURE_RELEASES.md). They are not unlocked by installing the command/help update.

@@ -1,0 +1,17 @@
+DMCOMMANDS - Your staff and DM powers
+
+Syntax: dmcommands
+        dmcommands native [page]
+Alias: dmhelp
+Also: help dm, help staff
+
+The default guide lists HollowDeep tools based on your saved staff role and
+builder assignments. The native index lists original * commands allowed by
+your native caretaker/DM class. Command-specific target and room rules remain.
+The guide does not grant powers, change class or perform any listed action.
+
+Mod and Implementor are separate roles with equal authority. Admins and
+Owners have additional tools. Builder assignments are independent of roles.
+An Owner with an ordinary playable class does not acquire native * commands.
+The named-operator-only *flushrooms command stays unavailable while its
+configured operator name is empty. See help hstaff, help hbuild and help hdm.

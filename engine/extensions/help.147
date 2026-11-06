@@ -1,0 +1,9 @@
+*POSSESS - Possess a monster
+
+Syntax: *possess <creature> [number]
+
+Requires the native caretaker/DM class and an eligible monster in the room.
+Permanent monsters and other invalid targets are refused by the original
+engine. This is the legacy possession system, not hdm teleport. Scoped hdm
+teleports refuse possessed characters. Read the game responses for the
+possession state; this command does not assign staff or builder permissions.

@@ -1,0 +1,18 @@
+STAFFCLAN - HollowDeep Staff
+
+Syntax: staffclan [status]
+        staffclan who
+        staffclan say <message>
+Aliases: hstaffclan; staffclan list lists the roster.
+
+This clan is reserved for saved Mod, Implementor, Admin and Owner roles.
+Membership follows role assignments automatically. Revoking a staff role
+immediately removes both roster and chat access. Room assignments alone and
+native staff classes without a HollowDeep staff role do not grant membership.
+There are no invitations, fees, promotions, clan vaults or separate clan ranks.
+
+Private chat reaches currently online staff only, includes the sender's role,
+and respects timed mutes. Messages accept 1-160 printable ASCII characters;
+there is no offline delivery or saved chat history. The roster includes offline
+staff. Staff roles display as [MOD], [IMPLEMENTOR], [ADMIN] or [OWNER] in who,
+whois, staff announcements and clan chat. Class, level and permissions stay intact.

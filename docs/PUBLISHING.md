@@ -13,7 +13,7 @@ The public repository is [soulkeeper420420/HollowDeep-MUD](https://github.com/so
    ```
 
 4. Review the resulting kit SHA-256 and update the expected kit digest in `deploy/install-ubuntu.sh`, `deploy/enable-public.py`, `deploy/console-bootstrap.py` and `deploy/make-console-setup.py` together. Their pins intentionally reject an unreviewed replacement. Do not change the separate legacy baseline pins to match a new kit.
-5. Generate and test the console setup, native updater and browser installer. Copy the reviewed native updater and browser installer from `outputs/` into `deploy/artifacts/`, then refresh `deploy/artifacts/SHA256SUMS` from those exact two files. These tracked artifacts let mobile host operators download the release without building it. Exclude credentials, player files, private backups and host logs from publication.
+5. Generate and test the console setup, native updater and browser installer. Copy the reviewed matching native updater variants and browser installer from `outputs/` into `deploy/artifacts/`, then refresh `deploy/artifacts/SHA256SUMS` from all reviewed files. These tracked artifacts let mobile host operators download the release without building it. Exclude credentials, player files, private backups and host logs from publication.
 6. Commit the complete source state and push it to `main`, or use a pull request for review. The GitHub verification workflow runs on pushes and pull requests and retains installer artifacts after successful checks. A queued workflow is not a passed check.
 
 The workflow tests on Ubuntu 24.04 with multilib GCC, Python 3.12 and Node 22. It builds the original engine as ELF32 and starts disposable local test worlds. It has read-only repository permissions and does not restart the live Linode or publish the website.
@@ -24,11 +24,11 @@ From the repository root:
 
 ```sh
 python3 deploy/make-console-setup.py
-python3 deploy/make-native-update.py
+python3 deploy/make-native-update.py --from-update deploy/baseline/spells-update.py --from-sha256 2e366aac5195273541d4d1ad033e3352eb14eab484b0bcf0564bca7932bcfe81
 python3 deploy/make-bridge-installer.py
 ```
 
-- `outputs/hollowdeep-native-update.py` updates the known working installation after checking its baseline and preserving its world and saves. Its pinned baseline is bundled under `deploy/baseline/`; generating it does not require the original private Git history.
+- `outputs/hollowdeep-native-update.py` updates the known working installation after checking its baseline and preserving its world and saves. The command above targets the confirmed spells installation. See the server guide for repair and legacy alternatives. Pinned predecessor sources are bundled under `deploy/baseline/`; generation does not require private Git history.
 - `outputs/hollowdeep-browser-setup.py` installs the separate bridge and TLS services, carrying only the public verification key.
 - `outputs/hollowdeep-console-setup.html` and `.txt` are for a **fresh host**, not an update over the working world.
 

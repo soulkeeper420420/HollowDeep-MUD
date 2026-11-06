@@ -1,63 +1,85 @@
-# Hollowdeep server guide
+# HollowDeep server guide
 
-Source repository: [soulkeeper420420/HollowDeep-MUD](https://github.com/soulkeeper420420/HollowDeep-MUD).
+Source: [soulkeeper420420/HollowDeep-MUD](https://github.com/soulkeeper420420/HollowDeep-MUD).
 
-## Deployment status
+## Current status and the correct updater
 
-The host confirmed native mobile-client access to **172.233.176.81:4040**. That confirms the earlier native installation, not installation of every later source change.
+The host confirmed native access at **172.233.176.81:4040** and completion of the earlier spells update. The later builder update failed in its disposable test on a long room-name command; it did not activate. The new release repairs that parser overflow and adds builder/DM powers, Implementor roles, bonus tiers, full help indexing, skills, staff labels and the staff-only clan. **Publication is not confirmation of live installation.**
 
-This source update adds combat stances, staff roles/moderation and compact progression guides. Apply the native updater to install them on the existing world. Browser play requires the separate browser bridge installer and matching Sites runtime configuration. Neither publishing source nor publishing the website restarts or changes the Linode automatically.
+Use Ubuntu 24.04 x86_64 with Python 3, Make and 32-bit GCC support. Do not rerun a fresh installer over the world, delete installation records, remove checks, or remove `-m32`.
 
-The target is Ubuntu 24.04 LTS on x86_64. The native engine requires Python 3, Make and a working **32-bit-capable GCC toolchain** (`build-essential`, `gcc-multilib`, `libc6-dev-i386`). Original Mordor world files serialize native structures; a 64-bit engine is incompatible with them.
+In the Linode root Lish console, read the completed update record:
 
-## Access from a phone
+```sh
+cat /etc/hollowdeep/native-update.json
+```
 
-Use a mobile SFTP app to upload supplied deployment files, or use a terminal with SSH/SFTP support. The host is `172.233.176.81`, SSH/SFTP port is normally `22`, and the configured administration login is `root`. Enter the Linux password or SSH key in that app, not in the game or repository.
+Match its payload hash to this table. A failed candidate does not replace the completed record.
 
-Linode's browser-based Lish/Weblish console provides the Linux command prompt without a Telnet connection to the game. Inside that console, `telnet 127.0.0.1 4040` reaches the local game. A mobile MUD app connects to the public IP and port 4040 instead.
+| Completed predecessor payload | Artifact for this release |
+| --- | --- |
+| `6b7331917578a7963453245ee2b64d5e3ab929cddbe64635aa5008fb46f734ee` (spells; last confirmed) | `hollowdeep-native-update.py` |
+| `5017286c11aeaba8b539a8c9be841c815db56f63561bf4ff976838657da7dccb` (staff/builder parser repair, if you subsequently installed it) | `hollowdeep-native-update-from-repair.py` |
+| No native update record, and the exact pinned original pre-feature installation | `hollowdeep-native-update-from-legacy.py` — requires that baseline; not for the confirmed spells server. |
+| Any other hash, missing/unexpected metadata, or local source edits | Keep the world intact and review the record/output before choosing a migration. |
 
-## Download the reviewed installers from Lish
+These alternatives are **not a sequence**. Run only the artifact for the completed predecessor. Each verifies its own baseline and refuses mismatches.
 
-On a phone, the simplest path is to paste these commands into the signed-in **root Lish console**. They download the published scripts and verify their SHA-256 values before you run either installer:
+## Download and install from Lish
+
+The release carries all artifacts and their hashes in [deploy/artifacts](../deploy/artifacts/). Downloading does not run them:
 
 ```sh
 mkdir -p /root/hollowdeep-downloads
 cd /root/hollowdeep-downloads
 curl -fSLO https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/main/deploy/artifacts/hollowdeep-native-update.py
+curl -fSLO https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/main/deploy/artifacts/hollowdeep-native-update-from-repair.py
+curl -fSLO https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/main/deploy/artifacts/hollowdeep-native-update-from-legacy.py
 curl -fSLO https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/main/deploy/artifacts/hollowdeep-browser-setup.py
 curl -fSLO https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/main/deploy/artifacts/SHA256SUMS
 sha256sum --check SHA256SUMS
 ```
 
-Continue only when both files report `OK`. If a download or checksum fails, keep the error output and resolve it before running the scripts. You can also upload the same files with SFTP to the directory above.
+Continue only when the downloads succeed and every checksum reports `OK`. For a durable release pin, replace `main` in all five URLs with the same reviewed commit SHA. SFTP/WinSCP upload of those exact files is an alternative; SSH/SFTP uses port 22, not the game's port 4040.
 
-## Update the working native game
+Have everyone use `save`, then `quit` and wait/retry if the game requests a cooldown. For the **last confirmed spells installation**, run:
 
-Use the generated `hollowdeep-native-update.py` artifact supplied for this installation. **Do not rerun the fresh installer over the working world.**
-
-1. Tell players to use `save`, then `quit`; wait for any quit cooldown and retry `quit` if needed.
-2. Download and verify the scripts as above, or upload the reviewed updater to `/root/hollowdeep-downloads/hollowdeep-native-update.py`.
-3. In Lish, run:
-
-   ```sh
-   python3 /root/hollowdeep-downloads/hollowdeep-native-update.py
-   ```
-
-The updater checks the expected installation, original file hashes, service settings and player connections. It builds and tests a separate candidate, retains a private backup, and checks the replacement locally before restoring the existing public binding. It retains player, room, object and Chronicle data. Changed local source or unexpected service overrides require review; do not remove guards to force an update.
-
-After success, reconnect and verify:
-
-```text
-hprofile status
-hclass progress
-hquest next
-hstance
-hstaff whoami
+```sh
+python3 /root/hollowdeep-downloads/hollowdeep-native-update.py
 ```
 
-Use a normal playable character to test stance effects. Realmkeeper has administrative-class behavior. Record the updater's final output and the printed backup location.
+If the record instead matches the repair row, run its `-from-repair.py` file. The updater validates the expected host, service settings, source/binary hashes and disconnected players; builds and tests a separate world; rechecks the installation; and only then backs up and activates. It retains player, room, object, Chronicle, stance and staff data and existing service access settings. Keep the private backup path and final output. A candidate failure before activation leaves the running installation unchanged.
 
-The updater generator is `python3 deploy/make-native-update.py`. It uses the checksum-pinned legacy kit and manifest under `deploy/baseline/`, so a fresh repository clone can generate it without the original Git history. The older runtime-recovery generator remains a separate historical tool.
+After `Native update installed and login verified`, reconnect and check:
+
+```text
+help commands
+help search staff
+skills
+skills all
+spells
+dmcommands
+hstaff whoami
+staffclan
+hbuild mine
+hbonus
+```
+
+Test staff-only commands with a staff character and denied access with a normal player. Check role badges using `who`. Save/logout and reconnect. The [staff](STAFF_GUIDE.md), [building](BUILDING_GUIDE.md) and [player](PLAYER_GUIDE.md) guides describe the exact permissions.
+
+The earlier `hollowdeep-builder-events-update.py` is superseded because of its parser failure. `hollowdeep-staff-builder-repair.py` is a completed predecessor source, not the newest feature package. Historical runtime recovery remains separate. Proposed XP curves, remorts, new classes/spells and quest areas are not installed by this release.
+
+## Generate matching packages from source
+
+The release includes checksum-pinned historical updaters under `deploy/baseline/` for reproducible successor generation. Their embedded data is public source, not player saves. Do not run these historical copies as new installers.
+
+```sh
+python3 deploy/make-native-update.py --from-update deploy/baseline/spells-update.py --from-sha256 2e366aac5195273541d4d1ad033e3352eb14eab484b0bcf0564bca7932bcfe81
+```
+
+The output is `outputs/hollowdeep-native-update.py`. To target the repair baseline, substitute `deploy/baseline/staff-builder-repair.py` and SHA `3f1bdb212d5fc7c95c6967c0be93dc280b816f11654e30151f8d085571ac4316`. With neither option the generator targets the historical legacy baseline; its default output filename alone does not identify compatibility. Inspect the manifest or exact generation command.
+
+The generator parses literal constants and verifies hashes instead of executing the supplied predecessor. It reproduces kit/world manifests, rejects serialized-structure changes and removed files, and includes the new help/permission tests in pre-activation checks.
 
 ## Connect the website
 

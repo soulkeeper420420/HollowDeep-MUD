@@ -1,0 +1,16 @@
+SPELLS - Your learned spells
+
+Syntax: spells
+        spell
+
+Lists the spells your character currently knows, alphabetically, one per line.
+Also shows your current and maximum mana. Spell is the short form of spells.
+
+Use cast <spell> [target] to cast and help <spell-name> for a spell's rules.
+Learning and casting retain the original class, level, mana and condition
+requirements. A learned spell is not necessarily ready to cast right now.
+If you know no spells, use help study to learn about studying scrolls.
+
+This command only reads your character. It does not cast, spend mana, teach
+spells, change cooldowns or save anything. Help spell shows this page;
+help spells retains the original catalog of all spells in the game.

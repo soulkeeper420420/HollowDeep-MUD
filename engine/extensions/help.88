@@ -3,25 +3,30 @@ HSTAFF - Staff roles
 Syntax: hstaff whoami
         hstaff list
         hstaff audit
-        hstaff grant <name> <player|mod|admin|owner>
+        hstaff grant <name> <player|mod|implementor|admin|owner>
         hstaff revoke <name>
 
 Targets are saved character names of 3-19 letters, as in the original login.
 
 The configured founder is the first owner and cannot be demoted. Owners may
-assign owners, admins and mods. Admins may assign/remove mods; they cannot
-change other admins or owners. Mods cannot assign roles. Characters must
+assign owners, admins, mods and implementors. Admins may assign/remove mods
+and implementors; they cannot change admins or owners. Mods and implementors
+are separate roles with equal authority; neither may assign roles or
+moderate the other. Characters must
 already exist and have saved. Another owner must change your own role.
 
-These roles grant Hollowdeep staff commands only. They do not change a
-character's native Mordor class, level, abilities, or DM/caretaker powers.
-Roster access requires mod; recent audit access requires admin. The last
+Roles also grant hbuild and hdm powers: mods/implementors inspect rooms; admins teleport
+and restore themselves; owners assign room ranges and summon/restore lower
+roles. Assigned builders edit only their ranges; owners edit any room.
+Timed rewards: help hbonus. Class, level and legacy * permissions stay intact.
+Roster access requires mod or implementor; recent audit access requires admin. The last
 64 staff action records persist with the role data. The audit records actor,
 action, target and duration/role, never announcements or passwords.
 
 Example, as the founder:
   hstaff grant Aria admin
   hstaff grant Rowan mod
+  hstaff grant Elara implementor
   hstaff list
 
 Roles and timed mutes persist in hollowdeep-data/staff.db. Include this

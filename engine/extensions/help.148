@@ -1,0 +1,7 @@
+*TELL - Native DM flash message
+
+Syntax: *tell <player> <message>
+
+Requires the original DM class. Sends a flash message to an online character
+through the original engine. It is distinct from ordinary tell and from the
+private staffclan channel. Do not confuse it with role assignment or moderation.

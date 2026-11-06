@@ -1,0 +1,8 @@
+*MEMORY - Native world memory report
+
+Syntax: *memory
+
+Requires the native caretaker/DM class. Reports loaded room, object, creature
+and script-related memory totals. It does not grant privileges or edit the
+world. This diagnostic follows the same native-class dispatch gate as other
+legacy * commands.

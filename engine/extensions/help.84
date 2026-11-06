@@ -21,3 +21,10 @@ followers; gtalk reaches your leader and the group. Use lose with no name
 to stop following, or lose <name> to remove one of your followers.
 
 Quick views: hprofile status, hclass progress, hquest next.
+Known magic: spells (or spell) lists your learned spells and current mana.
+Staff world tools: hbuild; role-based DM powers: hdm. See their help pages.
+Timed monster XP/gold events: hbonus. Assigned builder ranges: hbuild mine.
+
+Find commands: help commands [page], help search <text> [page].
+Native skills: skills [all]. Your staff/DM tools: dmcommands (or dmhelp).
+Staff-only roster/chat: staffclan who; staffclan say <message>.

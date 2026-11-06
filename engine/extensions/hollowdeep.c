@@ -22,6 +22,12 @@
 
 extern void print(int fd, const char *format, ...);
 extern long needed_exp[MAXALVL];
+/* Match Mordor's spell registry in global.c; spell IDs need not be indexes. */
+extern struct {
+    char *splstr;
+    int splno;
+    int (*splfn)();
+} spllist[];
 
 #ifndef HOLLOWDEEP_DATA_DIR
 #define HOLLOWDEEP_DATA_DIR "hollowdeep-data"
@@ -158,6 +164,40 @@ static int quest_index(const char *id)
     return -1;
 }
 
+static int spell_name_order(const void *left, const void *right)
+{
+    return strcmp(*(const char *const *)left, *(const char *const *)right);
+}
+
+int spells(creature *player, cmd *command)
+{
+    const char *known[sizeof(player->spells) * 8];
+    size_t count = 0, i;
+    int id;
+    if (command->num > 1) {
+        print(player->fd, "Usage: spells (or spell). To cast, use cast <spell> [target].\n");
+        return 0;
+    }
+    for (i = 0; spllist[i].splno != -1; i++) {
+        id = spllist[i].splno;
+        if (id < 0 || (size_t)id >= sizeof(player->spells) * 8) continue;
+        if (S_ISSET(player, id) && count < sizeof(known) / sizeof(known[0]))
+            known[count++] = spllist[i].splstr;
+    }
+    qsort(known, count, sizeof(known[0]), spell_name_order);
+    print(player->fd, "YOUR KNOWN SPELLS\n");
+    print(player->fd, "Spells known: %u | Mana: %d/%d\n", (unsigned int)count,
+          player->mpcur, player->mpmax);
+    if (!count) {
+        print(player->fd, "You have not learned any spells. See help study for learning from scrolls.\n");
+        return 0;
+    }
+    for (i = 0; i < count; i++) print(player->fd, "  %s\n", known[i]);
+    print(player->fd, "Cast: cast <spell> [target] | Details: help <spell>\n");
+    print(player->fd, "Known spells still require the mana, class, level and conditions needed to cast.\n");
+    return 0;
+}
+
 int hcommands(creature *player, cmd *command)
 {
     const char *topic = command->num > 1 ? command->str[1] : "all";
@@ -169,6 +209,7 @@ int hcommands(creature *player, cmd *command)
         print(player->fd, "Help: ? <command> | Save: save | Leave: quit\n");
         print(player->fd, "If quit asks you to wait, wait and enter quit again.\n");
         print(player->fd, "Compact status: hprofile status\n");
+        print(player->fd, "Known spells: spells (or spell)\n");
         print(player->fd, "Training: hclass progress | Next goal: hquest next\n");
         return 0;
     }
@@ -194,10 +235,15 @@ int hcommands(creature *player, cmd *command)
     print(player->fd, "Fight: kill <creature>, cast <spell> [target], flee\n");
     print(player->fd, "Warning: original Mordor's flee can drop your wielded weapon.\n");
     print(player->fd, "Character: score, equipment, inventory, train, study <scroll>\n");
+    print(player->fd, "Known magic: spells (or spell); help <spell> for its rules\n");
+    print(player->fd, "Staff world tools: hbuild | Role-based DM powers: hdm\n");
+    print(player->fd, "Timed monster XP/gold events: hbonus\n");
     print(player->fd, "Together: who, say <message>, tell <name> <message>, follow <name>, group, gtalk <message>\n");
     print(player->fd, "Chronicles: hquest, hquest accept <id>, hquest survey, hquest claim <id>, hprofile\n");
     print(player->fd, "Class guide: hclass [class-name]. Original rules: help <command>.\n");
     print(player->fd, "Quick views: hprofile status, hclass progress, hquest next\n");
+    print(player->fd, "Find commands: help commands | help search <text> | skills [all] | dmcommands\n");
+    print(player->fd, "Staff channel: staffclan who | staffclan say <message>\n");
     print(player->fd, "Focused guides: hcommands mobile | hcommands social\n");
     return 0;
 }

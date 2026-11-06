@@ -1,0 +1,8 @@
+CHARM - Bard's song
+
+Syntax: charm <creature> [number]
+
+Bards may attempt to charm a creature through song. Silence prevents singing;
+daily uses, target restrictions and success checks apply. Permanent and
+undead monsters resist this skill. A failed charm can make a monster hostile.
+Use the game's response to determine whether the charm succeeded.

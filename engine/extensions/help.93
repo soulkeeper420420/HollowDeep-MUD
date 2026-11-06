@@ -1,0 +1,21 @@
+HDM - Role-based DM powers
+
+Assigned builders:
+  hdm goto <room>                      Enter an existing assigned room.
+Admin and owner:
+  hdm goto <room>                      Teleport yourself (room 1-8999).
+  hdm restore                          Restore your own current HP and mana.
+Owner only:
+  hdm bring <character>                Summon an online lower-role character.
+  hdm restore <character>              Restore an online lower-role character.
+
+The founder and other owners cannot be targeted by another owner. Explicitly
+naming yourself is allowed for an owner. Teleporting a character in combat
+or possessing a monster is refused. Maximum HP/mana, class, level, spells,
+gold and XP do not change. Restored characters should save afterward.
+
+Roles and ranges are checked for every action. Use hbuild unassign to remove
+range access and hstaff revoke to remove role powers; neither changes class.
+Authorized attempts are recorded as powertry in hstaff audit before effects.
+These tools provide the listed powers, not blanket access to legacy * DM
+commands, account deletion, forced commands or Linux/server controls.

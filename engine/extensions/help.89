@@ -5,8 +5,8 @@ Syntax: hmoderate announce <message>
         hmoderate unmute <name>
         hmoderate kick <name>
 
-Requires mod, admin or owner. You may moderate only characters below your
-own staff role. Native caretakers require an owner. The founder is protected.
+Requires mod, implementor, admin or owner. Mod and Implementor are peers.
+You may moderate only characters below your own staff authority. Native caretakers require an owner. The founder is protected.
 Mute/kick targets must be online and have saved their character already.
 
 Mute lasts 1-1440 minutes (default 10), survives reconnect/restart, and blocks

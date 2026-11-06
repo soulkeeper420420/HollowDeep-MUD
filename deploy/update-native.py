@@ -8,6 +8,7 @@ import os
 from pathlib import Path, PurePosixPath
 import platform
 import pwd
+import re
 import shutil
 import socket
 import stat
@@ -58,9 +59,11 @@ def decode_payload(encoded, checksum):
     if not decoder.eof or decoder.unused_data or decoder.unconsumed_tail:
         raise ValueError('Unexpected update payload size or format.')
     data = json.loads(raw)
-    if set(data) != {'engine', 'kit_baseline', 'world_baseline', 'world_updates',
+    if set(data) - {'predecessor_sha256'} != {'engine', 'kit_baseline', 'world_baseline', 'world_updates',
                      'runtime_fix_sha', 'unit_text', 'tests'}:
         raise ValueError('Unexpected update payload contents.')
+    if 'predecessor_sha256' in data and not re.fullmatch(r'[0-9a-f]{64}', str(data['predecessor_sha256'])):
+        raise ValueError('Unexpected predecessor update checksum.')
     for section in ('engine', 'kit_baseline', 'world_baseline', 'world_updates'):
         for name in data[section]:
             path = relative_name(name)
@@ -188,6 +191,24 @@ def verify_world(expected):
             raise RuntimeError(f'Local help edits found: {name}. Nothing will be overwritten.')
 
 
+def inspect_update_record(data):
+    """Accept only the exact completed predecessor, this update or its rollback."""
+    predecessor = data.get('predecessor_sha256')
+    if not RECORD.exists() and not RECORD.is_symlink():
+        if predecessor:
+            raise RuntimeError('This package requires the previously completed native update; its record is missing.')
+        return False
+    record = json.loads(regular(RECORD))
+    own = record.get('payload_sha256') == PAYLOAD_SHA256
+    prior = predecessor and record.get('payload_sha256') == predecessor and record.get('status') == 'complete'
+    if not prior and not (own and record.get('status') in ('complete', 'rolled-back')):
+        raise RuntimeError('A different or unfinished update exists. Preserve its backup and inspect it first.')
+    if prior or record.get('status') == 'complete' or predecessor:
+        if digest(regular(BASE / 'world/src_3.00/frp.new')) != record.get('binary_sha256'):
+            raise RuntimeError('The installed binary differs from its update record; no update will be applied.')
+    return bool(own and record['status'] == 'complete')
+
+
 def preflight(data):
     if os.geteuid() != 0:
         raise RuntimeError('Run this updater in the Linode root console.')
@@ -235,19 +256,13 @@ def preflight(data):
     pid = int(read_command('systemctl', 'show', UNIT, '--property=MainPID', '--value'))
     if pid < 1 or not os.path.samefile(f'/proc/{pid}/exe', BASE / 'world/src_3.00/frp.new'):
         raise RuntimeError('The service is not running the expected game binary.')
-    if RECORD.exists() or RECORD.is_symlink():
-        record = json.loads(regular(RECORD))
-        if record.get('payload_sha256') != PAYLOAD_SHA256 or record.get('status') not in ('complete', 'rolled-back'):
-            raise RuntimeError('A different or unfinished update exists. Preserve its backup and inspect it first.')
-        if record['status'] == 'complete':
-            kit, world = expected_after(data)
-            verify_manifest(BASE / 'kit', kit)
-            verify_world(world)
-            if digest(regular(BASE / 'world/src_3.00/frp.new')) != record['binary_sha256']:
-                raise RuntimeError('The installed binary differs from the completed update.')
-            check_greeting(public=public)
-            return account, public, True
-    verify_manifest(BASE / 'kit', data['kit_baseline'], allowed={
+    if inspect_update_record(data):
+        kit, world = expected_after(data)
+        verify_manifest(BASE / 'kit', kit)
+        verify_world(world)
+        check_greeting(public=public)
+        return account, public, True
+    verify_manifest(BASE / 'kit', data['kit_baseline'], allowed={} if data.get('predecessor_sha256') else {
         'tests/test_runtime.py': [data['runtime_fix_sha']]})
     verify_world(data['world_baseline'])
     for name in set(data['world_updates']) - set(data['world_baseline']):
@@ -356,6 +371,10 @@ def changed_targets(data, candidate):
 def back_up(stage, targets):
     backup = stage / 'backup'
     backup.mkdir(mode=0o700)
+    if RECORD.exists() or RECORD.is_symlink():
+        previous = backup / 'previous-native-update.json'
+        previous.write_bytes(regular(RECORD))
+        previous.chmod(0o600)
     # The stopped world is consistent; this archive remains private on the host.
     with tarfile.open(backup / 'world.tar.gz', 'w:gz', dereference=False) as archive:
         archive.add(BASE / 'world', arcname='world')
@@ -401,6 +420,7 @@ def remove_maintenance():
 
 def activate(data, stage, candidate, account, public):
     require_empty()
+    original_binary = regular(BASE / 'world/src_3.00/frp.new')
     if not DROPINS.exists():
         DROPINS.mkdir(mode=0o755)
     directory(DROPINS)
@@ -459,7 +479,7 @@ def activate(data, stage, candidate, account, public):
             service('reset-failed')
             service('start')
             check_greeting(public=public)
-            write_record(stage, 'rolled-back')
+            write_record(stage, 'rolled-back', original_binary)
         except BaseException as rollback_error:
             write_record(stage, 'needs-review', candidate)
             raise RuntimeError(f'Update failed ({failure}); rollback requires review ({rollback_error}). Backup: {stage / "backup"}') from failure

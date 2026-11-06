@@ -1,0 +1,7 @@
+TOUCH - Touch of death
+
+Syntax: touch <target> [number]
+
+Monks need level 10 and empty hands to attempt this skill. It cannot be used
+against undead monsters. Target, lawful/PvP, room, blindness and cooldown
+restrictions still apply. The skill can fail; it is not guaranteed to kill.

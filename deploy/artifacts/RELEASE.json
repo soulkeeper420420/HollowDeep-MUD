@@ -1,0 +1,31 @@
+{
+  "release": "2026-11-06-help-staff",
+  "live_installation": "not verified",
+  "native_predecessors": {
+    "hollowdeep-native-update.py": "6b7331917578a7963453245ee2b64d5e3ab929cddbe64635aa5008fb46f734ee",
+    "hollowdeep-native-update-from-repair.py": "5017286c11aeaba8b539a8c9be841c815db56f63561bf4ff976838657da7dccb",
+    "hollowdeep-native-update-from-legacy.py": "pinned pre-feature legacy installation"
+  },
+  "artifacts": [
+    {
+      "file": "hollowdeep-native-update.py",
+      "sha256": "1fd537243002c2a62fc764a48257d8cf0768b3469687f23dda4406c797e9f6cc",
+      "payload_sha256": "ee83715cd08e7af0926355dc52d0e9a462c82d675f7051f22b82565913764860"
+    },
+    {
+      "file": "hollowdeep-native-update-from-repair.py",
+      "sha256": "0a4e83ea3f6fd52cff9a436fad2a1b31d4647770b788755458fd66a7f9c4b576",
+      "payload_sha256": "1b9a14fcca8c3747f69c2919a31cd327695ccad4180ee19600e386611904bfab"
+    },
+    {
+      "file": "hollowdeep-native-update-from-legacy.py",
+      "sha256": "806cfcfe6c93509afb9827658b7d6cb693858df5e571efee68b4ad0bbd58f58c",
+      "payload_sha256": "200f4ba569f7ea12ed275731e7f374c21a573b7d6ba6d55e046e71b30679d310"
+    },
+    {
+      "file": "hollowdeep-browser-setup.py",
+      "sha256": "251252338c392c6e538defa32234664a8486ab59a1392756c940ff1333c85aa3",
+      "payload_sha256": "df8dc3aa53d5fd3b4d4a98fbe7f983fee3cda83cc47cc42649fed0f829203fb2"
+    }
+  ]
+}

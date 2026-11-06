@@ -1,0 +1,9 @@
+PASSWORD - Change your game password
+
+Syntax: password
+Alias: passwd
+
+Follow the private game prompts for your current password, new password,
+and confirmation. The original password length is 3-14 characters. Do not
+put the password after the command or in chat. This changes your game
+character password, not your website or Linode login.

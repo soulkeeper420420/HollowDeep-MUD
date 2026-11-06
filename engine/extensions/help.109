@@ -1,0 +1,8 @@
+*PURGE - Remove current room contents
+
+Syntax: *purge
+
+Requires the native caretaker/DM class. Purges the current room's monster
+and object lists through the original engine routines. This changes the
+active world; it is not a preview or the scoped hbuild editor. Use only in
+the intended room. Players themselves are not removed by this command.

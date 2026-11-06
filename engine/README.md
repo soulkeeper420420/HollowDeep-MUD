@@ -7,9 +7,12 @@ An editable extension kit for the **original Mordor 3.00** by Brett Vickers and 
 - `manage.py`: checksum-verified source preparation, a 32-bit build, explicit extension synchronization, and a foreground development launcher.
 - `extensions/hollowdeep.c`: character/training guidance and four persistent exploration Chronicles.
 - `extensions/hollowdeep_stance.c`: persistent balanced, guarded and aggressive physical-combat stances.
-- `extensions/hollowdeep_staff.c`: owner/admin/mod roles, announcements, timed mutes, kicks and a bounded audit.
+- `extensions/hollowdeep_staff.c`: owner/admin/mod/implementor roles, announcements, timed mutes, kicks and a bounded audit.
 - `extensions/hollowdeep_net.c`: per-connection Telnet and line-ending normalization for native and browser clients.
-- `extensions/help.84` through `help.90`: the added in-game help pages.
+- `extensions/hollowdeep_build.c`, `hollowdeep_ranges.c`: assigned world-building ranges and role-based DM tools.
+- `extensions/hollowdeep_bonus.c`: persistent timed monster XP/gold events with bounded multipliers.
+- `extensions/hollowdeep_help.c`: command-table help, role-aware DM guide and native skill eligibility.
+- `extensions/help.84` through `help.97`, plus repaired original pages: in-game help for every registered command.
 - `tests/`: native extension behavior tests and source preparation checks.
 - `bridge/` in the download: the Node.js WebSocket-to-Telnet bridge, including its dependency lockfile.
 - Original copyright and disclaimer notices. The downloadable kit also includes the unmodified `Mordor_3.00.tar.gz` distribution.
@@ -29,7 +32,7 @@ sudo apt-get install python3 build-essential gcc-multilib libc6-dev-i386
 
 The original world files serialize native C structures. A normal 64-bit executable is incompatible with that data, so the build refuses to proceed without a working 32-bit compiler and runtime. Do not remove `-m32` to bypass this check.
 
-The updated original engine compiles and links as an ELF32 executable. The extension, staff, stance, input and preparation checks run locally; 32-bit harnesses can also run through QEMU i386. The existing live native connection was confirmed by the host, but the new commands have not yet been installed there. Local socket restrictions prevent a complete updated multiplayer runtime test in this workspace. Run the disposable runtime test on a host with local TCP access; the GitHub verification workflow includes it.
+The updated original engine compiles and links as an ELF32 executable. The extension, staff, stance, input and preparation checks run locally; 32-bit harnesses can also run through QEMU i386. The full updated ELF32 multiplayer test passed locally through QEMU, including private staff chat, command discovery, building, role revocation and restart persistence. New source features still require the guarded live update; these tests use disposable worlds. GitHub verification also runs the native checks.
 
 Connection compatibility fixes handle CRLF and CR-NUL split across TCP reads, remove Telnet negotiation from player input, preserve prompts during negotiation-only reads, and keep password echo disabled during character creation. Preparation also corrects the original weather-array declaration and oversized lockout-message writes for modern compilers.
 
@@ -68,7 +71,7 @@ python3 manage.py sync-extensions --work ../hollowdeep-world
 python3 manage.py build --work ../hollowdeep-world
 ```
 
-`sync-extensions` keeps backups of replaced files. It does not restart a running server. Save and quit test characters, stop the development process, and start the rebuilt engine again. If you edit files directly in `hollowdeep-world/src_3.00`, use `build` without synchronization; synchronization replaces the eight extension C/header files and associated help pages with the kit copies. It refuses older prepared checkouts that lack the new staff and stance hooks. Use the guarded native updater for the known live installation, or prepare a separate development checkout; keep the existing world and saves intact. Never prepare over a running world.
+`sync-extensions` keeps backups of replaced files. It does not restart a running server. Save and quit test characters, stop the development process, and start the rebuilt engine again. If you edit files directly in `hollowdeep-world/src_3.00`, use `build` without synchronization; synchronization replaces the registered extension C/header files and associated help pages with the kit copies. It refuses older prepared checkouts that lack the new staff and stance hooks. Use the guarded native updater for the known live installation, or prepare a separate development checkout; keep the existing world and saves intact. Never prepare over a running world.
 
 For broader engine changes, open the prepared `src_3.00` directory in your preferred code editor or import selected files into the browser workshop. Command registration is in `global.c`; player and room types are in `mstruct.h`; constants and class IDs are in `mtype.h`. `manage.py` documents each compatibility edit. When adding a new C file, register its handler and add its object to the prepared Makefile.
 
@@ -77,6 +80,10 @@ For broader engine changes, open the prepared `src_3.00` directory in your prefe
 | Command | Behavior |
 | --- | --- |
 | `hcommands [mobile\|social]` | Added commands and compact original-game guidance. |
+| `spells` / `spell` | Alphabetical list of learned spells and current mana; casting requirements still apply. |
+| `hbuild` / `hbuild mine` | Owner-assigned room ranges, room creation, names, descriptions and exits. |
+| `hdm` | Scoped teleport, summon and HP/mana restoration powers. |
+| `hbonus` | Show timed monster reward events; mods/implementors/admins/owners manage them within their role limits. |
 | `hclass` / `hclass mage` | Guidance for your current class or a named original class. |
 | `hclass progress` | Read-only original XP/gold thresholds and training eligibility checks. |
 | `hquest` | List available, active and claimed Chronicles. |
@@ -128,3 +135,17 @@ The [server guide](https://github.com/soulkeeper420420/HollowDeep-MUD/blob/main/
 ## License
 
 Keep the original Mordor copyright and credits unchanged. Its authors permit free-of-charge use under the included COPYRIGHT terms; commercial use requires their permission. This kit grants no additional rights to their engine or to Atlas. The development commands do not publish the website or restart an existing supervised game. Deployment installers are separate tools with their own checks.
+
+### Command parser boundary repair
+
+The original parser could copy a sixth significant word into its five-token array. This caused Ubuntu to abort the candidate game on `hbuild name Hall of the Seven Lanterns`. Preparation now bounds both token-copy paths, terminates token/full-command strings, and bounds separator lookahead. The complete original text remains available to builder commands. Native builds keep `_FORTIFY_SOURCE=3` and stack protection enabled.
+
+`tests/test_parser.py --source /path/to/prepared/src_3.00 --cc /path/to/gcc32` compiles the actual prepared parser with memory checks and exercises long room text, five/six-word boundaries, numeric selectors, articles and empty/long inputs. It is also mandatory in the generated native updater. The full multiplayer test covers room editing and persistence with those same build protections enabled.
+
+## Help, skills and future progression
+
+`help commands [page]` indexes the actual registered names and aliases. `help search <text> [page]` searches them; `help search` alone describes the original search skill. `dmcommands` (alias `dmhelp`) shows role and builder tools; `dmcommands native [page]` lists eligible original caretaker/DM commands. All protected commands still enforce their own restrictions.
+
+`skills` shows class/level-eligible native abilities; `skills all` lists all 18 catalogued abilities. Known magic remains in `spells`. These are reference views, not a new skill-point system. Staff badges and `staffclan` derive from validated staff roles on every use.
+
+Read [level and XP investigation](../docs/LEVELS_AND_EXPERIENCE.md) before changing progression. It documents the level-25 discontinuity, stat-table bounds, monk progression defect, and save-compatible migration requirements. [Future releases](../docs/FUTURE_RELEASES.md) and [quest-area designs](../docs/ATLAS_RESEARCH_AND_QUEST_DESIGN.md) are proposals, not activated gameplay.
