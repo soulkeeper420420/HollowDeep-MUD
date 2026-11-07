@@ -1,5 +1,11 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 123 audit monitor success logging installed and manually verified
+
+On the VPS, the operator backed up `/usr/local/bin/hd-audit-alert` to a timestamped `.before-step123-` copy, installed a shell-syntax-checked wrapper, and ran one manual check. The wrapper now logs UTC `AUDIT OK` on healthy checks and `AUDIT RECOVERED` when the failure marker clears. It keeps failure-only Discord alerts and duplicate-alert suppression; routine success does not post to Discord. The manual invocation logged `2026-11-07T23:25:01Z AUDIT OK` in `/var/log/hd-audit-health.log`. Immediately afterward, `hd-admin` reported valid audit JSON (2 saved findings, 6 events), acceptable permissions, active cron, configured hourly alerts, and a previously observed 23:00 UTC cron launch.
+
+**Verification boundary:** The 23:25 entry came from a **manual invocation**, not cron. A scheduled `AUDIT OK` line has **not yet been observed** after this change. The revised script was installed directly on the VPS; this GitHub commit documents that host change only and does not deploy the script or touch live MUD processes. The private Discord webhook and audit records remain excluded.
+
 ## 2026-11-07 — Step 122 cron launch and audit health verified on VPS
 
 The operator ran `hd-admin` on the HollowDeep VPS. Output: `Audit JSON OK | saved findings: 2 | events: 6`; `Permissions: OK`; `Cron service: active`; `Hourly alert: configured`; and `Scheduled cron launch: observed: 2026-11-07T23:00:01.622974+00:00`. This verifies the deployed helper's read-only health checks and observed scheduled **launch**, but does **not** prove that the scheduled audit check itself completed successfully. No native MUD files or processes were modified by this documentation update.
