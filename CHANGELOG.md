@@ -1,5 +1,11 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Steps 100–108 private audit permissions and hourly Discord failure monitoring
+
+VPS operator confirmed the investigation review directory is mode `700`, owned by `www-data`, with three private files at mode `600`. An hourly root cron entry was installed for `hd-audit-alert`, cron was active, and a manual healthy test reported `MONITOR OK`. Private health logging and a four-week `logrotate` policy were configured; adding `su root root` cleared the logrotate dry-run permissions warning.
+
+A replacement Discord webhook was stored as a root-owned mode-`600` private file and returned HTTP 200 to a status-only check. The failure-alert wrapper uses a marker to suppress duplicate messages until the health check recovers. A simulated checker failure produced an alert that the operator **confirmed receiving in Discord #change-log**, followed by a successful normal check. This does not verify actual cron execution or full audit transactionality. Actual PHP and shell changes were made on the VPS; this GitHub update documents the observed setup and never includes the private webhook or investigation data.
+
 ## 2026-11-07 — Step 99Z reusable audit health command verified
 
 The VPS operator created root-only `/usr/local/bin/hd-audit-check` to parse private `statuses.json` and all nonempty `history.jsonl` entries, then report the audit event count. The mobile terminal returned `AUDIT HEALTH OK` and `4`. The check does not detect tampered-but-valid JSON, missing events, or transactional inconsistencies. Only documentation was published to GitHub; the private data remains on the VPS, with no native MUD changes.
