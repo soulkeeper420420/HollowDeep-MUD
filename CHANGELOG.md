@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 130 direct audit page jump browser-verified
+
+Added a Go to page numeric control to the VPS Operations Overview's paginated audit activity list. The control retains activity filters and search queries, uses the existing bounded page range, and preserves per-event View History links. The operator verified browser navigation between pages 1 and 2, filter/search retention, and history drilldown. The installer retained `operations-overview.php.before-step130-20261107-234638`; staged and deployed PHP lint passed. See the [VPS investigation console guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub publication is documentation only and does not deploy PHP, expose private audit data, or modify/restart the native MUD.
+
 ## 2026-11-07 — Step 129 audit search pagination browser-verified
 
 The VPS Operations Overview now paginates matching Recent Audit Activity at five events per page with Previous/Next links, preserving the activity filter and search query. The operator confirmed browser navigation across the existing six events (five on page one and one on page two), search/filter retention, and View History links. The installer saved `operations-overview.php.before-step129-20261107-234426`, and staged and installed PHP lint passed. The total Audit Events card remains unchanged by filters. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This publication documents a PHP website change already installed on the VPS; it does not deploy source, publish private records, or touch/restart native MUD services.
