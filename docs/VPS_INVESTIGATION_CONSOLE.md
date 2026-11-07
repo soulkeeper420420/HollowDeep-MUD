@@ -30,6 +30,10 @@ The current endpoint appends an audit event **before** the status-file replaceme
 
 On November 7, 2026, the operator backed up the deployed `/admin/room-investigation-queue.php`, added a separate `queue-mobile.css` stylesheet, and included it from the queue page. The stylesheet uses a mobile media query (up to 700px) to display each investigation table row as a vertical card, with labeled priority, category, source, destination and detail, followed by existing Inspect, View History, Investigation Notes, Review status and Save controls. Desktop table layout is intended to remain unchanged. `php -l` passed, and an authenticated mobile screenshot confirmed the rendered card layout with the saved Room 1508 note and controls visible without sideways scrolling. This is visual verification, not full cross-browser or desktop regression testing. The website PHP/CSS change was performed on the VPS, **not** deployed from this repository. Before publishing actual website source here, review and sanitize the deployed files.
 
+## Mobile audit history (Step 99R)
+
+On November 7, 2026 the VPS operator backed up `room-investigation-history.php` and added `history-mobile.css`, included from the page. At screen widths up to 700px, the six-column audit table renders each event as a vertical card with Date, Admin, Finding, Previous, New and Notes changed fields. `php -l` passed. A screenshot on a mobile browser confirmed two visible events for one finding: one status change from `awaiting` to `follow_up`, and a subsequent notes-only change where status remained `follow_up` and `notes_changed` showed Yes. The history page preserves admin-only access. This confirms the rendered mobile view; it does not prove desktop regression coverage or transactional audit durability.
+
 ## Safe verification on the VPS
 
 Run read-only checks without touching the live MUD:
