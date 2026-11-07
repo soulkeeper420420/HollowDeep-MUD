@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 99S audit write-order improvement (VPS)
+
+The operator installed a PHP endpoint patch moving the audit-history append to after the atomic status-file rename, with a timestamped backup and passing PHP lint. A later mobile terminal check showed four entries in `history.jsonl` (earlier verification showed two), consistent with further audit recording. The exact source of each additional entry was not independently inspected. This reduces the risk of recording a successful audit event when the status rename fails, **but is not a fully transactional update**: an audit append failure may now leave a saved status without history. The PHP change occurred on the VPS; this commit documents it only and does not deploy code or restart the MUD.
+
 ## 2026-11-07 — Step 99R mobile audit history cards verified
 
 The VPS operator added `history-mobile.css` to the admin Audit History page after creating a backup, and `php -l` passed. The authenticated mobile screenshot confirms stacked audit cards instead of a sideways-scrolling table. Fields include timestamp, administrator, finding, previous/new status and whether notes changed. Two events are visible: `awaiting` → `follow_up`, and a later `follow_up` → `follow_up` update with notes changed. This is a VPS website change documented in GitHub, not a GitHub-driven deployment. Audit write ordering remains a separate reliability improvement; the MUD server was not modified.
