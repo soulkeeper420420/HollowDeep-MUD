@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 125 Operations Overview installed and browser-verified on VPS
+
+Installed `/admin/operations-overview.php` on the Ubuntu PHP website via the VPS-local Step 125 installer. The installer created a timestamped Admin Dashboard backup (`dashboard.php.before-step125-20261107-232947`), added navigation to the Operations Overview, and passed PHP syntax checks for both files. The operator confirmed the page loaded and displayed correctly in the browser. The read-only, admin-only page shows investigation totals, review progress, latest audit events, monitoring guidance, and links to administrator tools. See the [VPS investigation-console guide](docs/VPS_INVESTIGATION_CONSOLE.md#step-125--operations-overview-host-verified-november-7-2026). This GitHub update documents the VPS work only; it does not deploy PHP, publish private audit data, or alter/restart the game. Scheduled cron success after the logging change remains separately unverified.
+
 ## 2026-11-07 — Step 123 audit monitor success logging installed and manually verified
 
 On the VPS, the operator backed up `/usr/local/bin/hd-audit-alert` to a timestamped `.before-step123-` copy, installed a shell-syntax-checked wrapper, and ran one manual check. The wrapper now logs UTC `AUDIT OK` on healthy checks and `AUDIT RECOVERED` when the failure marker clears. It keeps failure-only Discord alerts and duplicate-alert suppression; routine success does not post to Discord. The manual invocation logged `2026-11-07T23:25:01Z AUDIT OK` in `/var/log/hd-audit-health.log`. Immediately afterward, `hd-admin` reported valid audit JSON (2 saved findings, 6 events), acceptable permissions, active cron, configured hourly alerts, and a previously observed 23:00 UTC cron launch.
