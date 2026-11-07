@@ -177,6 +177,12 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step133.py
 
 The installer retained `operations-overview.php.before-step133-20261107-235104` and passed PHP lint on the staged and installed page. The operator confirmed date filters, validation, navigation, search, sorting and View History in the browser. This was installed directly on the VPS; this documentation commit does not deploy PHP, include investigation data, or modify or restart the native MUD.
 
+## Step 134 — Reset Operations Overview audit filters (host-verified November 7, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step134.py` to add a conditional **Reset Filters** link to the administrator Operations Overview. The link appears when audit activity, search, sort, date range, page size, or current page differs from its default, and navigates to `operations-overview.php` without query parameters. Default settings are All Activity, empty search/date fields, Newest first, five events per page and Page 1.
+
+The installer backed up `operations-overview.php.before-step134-20261107-235258`, and staged and deployed PHP syntax checks passed. The operator **confirmed Reset Filters returned the controls to defaults and View History still worked in the browser**. The change was installed directly on the VPS, not deployed by GitHub. No private investigation data or native MUD files were changed.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
