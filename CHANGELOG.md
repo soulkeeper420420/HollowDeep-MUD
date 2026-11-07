@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 122 cron execution evidence added to hd-admin
+
+Published an update to `tools/hd-admin.py` that looks for a cron `CMD` entry launching `/usr/local/bin/hd-audit-alert` in syslog or the cron journal, and reports an observed launch or `not yet observed (or logs unavailable)`. This avoids mistaking cron configuration reloads for job execution and eliminates repeated manual greps. It cannot prove the health check succeeded, and the upgraded version's actual Linode run is still pending. The source update and guide are committed on GitHub; existing VPS cron, webhook, audit records, game files, and services were not changed by this GitHub publication.
+
 ## 2026-11-07 — Step 119 one-command private backup verified on Linode
 
 The operator ran `hd-admin backup` after verifying the one-command health check. The command reported `PRIVATE BACKUP OK` with a private archive in `/root/hd-audit-backups/` and `No live files were restored or changed.` Its implementation locks the same audit review lock while copying and verifies expected archive entries and archived status JSON. This is a successful private archive creation/validation test, **not** a full restoration test or proof of two-file transactional audit writes. Private backups and webhook credentials were not published. No live MUD data or services were changed.
