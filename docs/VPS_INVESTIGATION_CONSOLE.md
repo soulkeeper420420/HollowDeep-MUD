@@ -107,6 +107,20 @@ Commands:
 
 Keep the real audit records and webhook out of GitHub/Discord. This source tool deliberately contains no webhook URL and performs no GitHub or Discord posting itself; announcements must be explicitly authorized and performed through configured workflows.
 
+### Step 122 — Scheduled cron launch evidence
+
+Version [`ace35a3`](https://github.com/soulkeeper420420/HollowDeep-MUD/commit/ace35a3bd9648d7b2445683e30d03833d9dccf36) extends `hd-admin` to search `/var/log/syslog` and, if needed, `journalctl -u cron` for a **cron CMD** entry invoking `/usr/local/bin/hd-audit-alert`. A cron **RELOAD** alone is not execution evidence. If no matching event appears, the tool displays `not yet observed (or logs unavailable)` without claiming success. A matching CMD proves a scheduled launch, not a successful health-check run or delivered notification.
+
+Upgrade the installed root-only script after reviewing the pinned source:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/ace35a3bd9648d7b2445683e30d03833d9dccf36/tools/hd-admin.py -o /tmp/hd-admin.py
+python3 -m py_compile /tmp/hd-admin.py && cp /usr/local/bin/hd-admin /root/hd-admin.prev && install -m 700 /tmp/hd-admin.py /usr/local/bin/hd-admin
+hd-admin
+```
+
+No cron modifications, Discord posts, MUD restarts, or changes to live investigation data are made by the upgrade. The new version's **live VPS execution has not yet been confirmed**.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
