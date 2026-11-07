@@ -159,6 +159,12 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step130.py
 
 The installer retained `operations-overview.php.before-step130-20261107-234638`; both staged and deployed PHP syntax checks passed. Installation occurred on the VPS, not through this GitHub repository. Neither private audit data nor the running native MUD was changed by this documentation update.
 
+## Step 131 — Adjustable Operations Overview audit page size (host-verified November 7, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step131.py`. The admin-only Operations Overview accepts GET `audit_per_page` values of **5, 10, 25, or 50**, defaulting to five for invalid input. It preserves page size through Previous/Next links and the Go to page form, alongside activity filters, search and View History drilldowns. The installer retained `operations-overview.php.before-step131-20261107-234823` and passed staged and installed PHP lint.
+
+The operator confirmed all four sizes (with six existing audit events), search, activity filters, navigation and View History in the authenticated browser. This documentation does not itself deploy the VPS PHP code or expose private audit records, and no running MUD service or game files were changed.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
