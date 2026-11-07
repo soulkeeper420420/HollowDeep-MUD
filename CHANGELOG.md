@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 133 UTC audit date range browser-verified
+
+The VPS Operations Overview now filters matching audit activity by optional UTC From Date and To Date, validating calendar dates and reporting an invalid reversed range. The operator confirmed same-day and open-ended date filtering, reversed-date validation, preserved selections through search/sorting/pagination, and View History drilldowns in the browser. The installer backed up `operations-overview.php.before-step133-20261107-235104`; staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub commit records separately installed VPS PHP work; it does not publish private audit records, deploy PHP, or alter/restart the native game.
+
 ## 2026-11-07 — Step 132 audit chronological sorting browser-verified
 
 The VPS PHP Operations Overview now supports Newest first and Oldest first sorting of matching audit events, preserving activity filters, audit search, page size, Previous/Next, Go to page, and View History. The operator confirmed the sorting and navigation scenarios in the authenticated browser with six existing events. The installer saved `operations-overview.php.before-step132-20261107-234939`; staged and deployed PHP lint checks passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub publication documents a separately installed VPS PHP change; it does not publish private records or change/restart the native MUD.
