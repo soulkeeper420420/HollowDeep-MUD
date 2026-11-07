@@ -11,7 +11,7 @@
 - Current report: 4,030 rooms, 9,551 valid exits, 12 missing destination exits, 552 one-way exits, 38 isolated rooms and 8 duplicate groups. These are snapshot-analysis findings; they are not instructions to change live room data.
 - Room 3470's binary exists but appears unusually short; its missing snapshot merits manual inspection. Do not call the game room corrupted without further proof.
 
-## Review workflow and unresolved audit issue
+## Review workflow and verified November 7 browser test
 
 The queue and endpoint contain forms for statuses `awaiting`, `reviewed`, `follow_up` and notes up to 8,000 bytes. The intended storage is private, outside the webroot:
 
@@ -21,9 +21,9 @@ The queue and endpoint contain forms for statuses `awaiting`, `reviewed`, `follo
 
 The form POSTs to `/admin/room-investigation-status.php`. Its source uses admin authentication, CSRF validation, finding ID validation against the current report, exclusive file locking, and an atomic status-file rename. The audit append runs only when status or notes actually change.
 
-**Not verified / current blocker:** During checks on November 7, 2026, `statuses.json` remained a three-byte empty object (`{}`) with zero saved findings, and `history.jsonl` remained zero bytes with zero audit events, even after a reported browser Save and redirect. The form markup, Nginx document root (`/var/www/hollowdeep/public`), file permissions, PHP syntax, and www-data workers were checked. A browser redirect does not prove persistence. Do not announce the review/audit functionality as fixed.
+**Verified on the live VPS and mobile browser, November 7, 2026:** A POST to `room-investigation-status.php` returned HTTP 303; after the change, `statuses.json` contained 186 bytes and `history.jsonl` 231 bytes (previously 3 and 0 bytes). The authenticated Audit History page displayed the administrator's event. The Investigation Queue displayed 609 awaiting findings and one Follow-up Required finding. The Room 1508 investigation note appeared in the Notes editor and, per operator confirmation, survived Save and browser refresh. The Audit History link is also visible and works in the Admin Dashboard navigation. These are **manual functional checks**, not a full reliability or security audit; no native game deployment or restart occurred.
 
-The current endpoint appends an audit event **before** the status-file replacement, so a later storage failure could leave an audit entry without a matching committed status. A future reliability patch should address this ordering/transactional limitation after the basic Save issue is diagnosed.
+The current endpoint appends an audit event **before** the status-file replacement, so a later storage failure could leave an audit entry without a matching committed status. A future reliability patch should address this ordering/transactional limitation; successful browser saves do not resolve it.
 
 ## Safe verification on the VPS
 
