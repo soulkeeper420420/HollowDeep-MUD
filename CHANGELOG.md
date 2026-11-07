@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 134 Reset Audit Filters browser-verified
+
+The VPS Operations Overview now offers a contextual Reset Filters link that restores All Activity, an empty search/date range, Newest first, five events per page and Page 1. The operator confirmed the reset and existing View History drilldown in the authenticated browser. The installer retained `operations-overview.php.before-step134-20261107-235258`; both staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This commit publishes documentation only: no VPS PHP deployment, private audit data publication, native MUD changes, or restarts.
+
 ## 2026-11-07 — Step 133 UTC audit date range browser-verified
 
 The VPS Operations Overview now filters matching audit activity by optional UTC From Date and To Date, validating calendar dates and reporting an invalid reversed range. The operator confirmed same-day and open-ended date filtering, reversed-date validation, preserved selections through search/sorting/pagination, and View History drilldowns in the browser. The installer backed up `operations-overview.php.before-step133-20261107-235104`; staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub commit records separately installed VPS PHP work; it does not publish private audit records, deploy PHP, or alter/restart the native game.
