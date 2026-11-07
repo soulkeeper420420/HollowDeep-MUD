@@ -75,6 +75,19 @@ AUDIT HEALTH OK
 
 The command is a **read-only syntax and count check**; it does not establish provenance, authenticity, chronological integrity, completeness, or that each audit entry corresponds to a committed status change. It should be run by an authorized administrator with access to the private storage directory. Never publish actual statuses, audit entries, or backup archives.
 
+## Hourly health monitoring and Discord failure alerts (Steps 100–108)
+
+Host-reported setup on November 7, 2026:
+
+- The private `investigation-reviews` directory was verified mode `700` and owned `www-data:www-data`; `statuses.json`, `statuses.lock` and `history.jsonl` were mode `600`, same owner.
+- Root-only `/usr/local/bin/hd-audit-check` validates status and history JSON. `/etc/cron.d/hd-audit-health` invokes `/usr/local/bin/hd-audit-alert` at minute zero each hour. `systemctl is-active cron` returned `active`, and a manual run returned `MONITOR OK`. **An actual scheduled execution has not yet been independently verified.**
+- Local output appends to `/var/log/hd-audit-health.log` (mode `600`). A weekly `logrotate` policy keeps four compressed rotations, with `su root root`; the dry run no longer reported a directory-permissions error.
+- The live Discord webhook is held privately in `/root/.config/hollowdeep/discord-webhook`, owned `root:root` with mode `600`; the directory is mode `700`. The operator checked the webhook using a status-only GET and received HTTP 200. **Never print or commit this URL.**
+- The root-only `hd-audit-alert` calls the health checker. On detected failure it posts a generic message to Discord and creates `/root/.config/hollowdeep/audit-failed` only after successful webhook delivery. While that marker exists, repeat alerts are suppressed. A later successful check removes it.
+- A deliberately failing `hd-audit-check` placed under a temporary test `PATH` triggered a simulated notification; the operator confirmed seeing the message in Discord `#change-log`. Subsequently the real health check returned `MONITOR OK`. This tests one failure and recovery, **not** scheduled execution, rate-limit resilience, or guaranteed alert delivery.
+
+The test file `/root/hd-test/hd-audit-check` can be deleted after confirmation using `rm -f /root/hd-test/hd-audit-check`; do not change the installed `/usr/local/bin/hd-audit-check`. The source PHP audit append is still nontransactional after the status commit. Automated health checks only validate JSON syntax and cannot detect valid-but-missing/tampered events.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
