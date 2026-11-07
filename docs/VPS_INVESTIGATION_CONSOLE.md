@@ -135,6 +135,12 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step126.py
 
 This is a PHP website change performed on the VPS; this GitHub guide is documentation only and does not deploy that PHP source or change the live game.
 
+## Step 127 — Operations Overview audit activity filters (host-verified November 7, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step127.py`, updating the admin-only `/admin/operations-overview.php` with a GET `activity` selector: **All Activity**, **Status Changes**, and **Notes Changes**. It applies the filter while reading audit events, displays the latest five matching events, and preserves the overall Audit Events card count. The installer retained `operations-overview.php.before-step127-20261107-233821`; PHP lint passed for staged and installed code. The operator confirmed **all three filters and the Step 126 View History link work in the browser**.
+
+This was installed directly on the VPS, not deployed from GitHub. The monitor, private investigation data and native MUD game were not modified by this documentation update.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
