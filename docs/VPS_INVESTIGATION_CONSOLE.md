@@ -171,6 +171,12 @@ The operator installed `/root/hollowdeep-dev/room-browser/install_step132.py`, a
 
 The installer retained `operations-overview.php.before-step132-20261107-234939`; staged and installed PHP lint passed. This feature was installed directly on the VPS. GitHub documentation does not deploy PHP, include private audit records, or alter/restart the live MUD.
 
+## Step 133 — UTC audit date range filtering (host-verified November 7, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step133.py` to the admin-only Operations Overview. The Recent Audit Activity controls accept optional GET `audit_from` and `audit_to` dates in `YYYY-MM-DD` format, validate actual calendar dates, compare the UTC date portion of audit timestamps, and display an error for a From Date later than the To Date. Both dates are preserved through Previous/Next and Go to page alongside activity filters, search, chronological sort, and page size. Audit Events continues reporting the overall count.
+
+The installer retained `operations-overview.php.before-step133-20261107-235104` and passed PHP lint on the staged and installed page. The operator confirmed date filters, validation, navigation, search, sorting and View History in the browser. This was installed directly on the VPS; this documentation commit does not deploy PHP, include investigation data, or modify or restart the native MUD.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
