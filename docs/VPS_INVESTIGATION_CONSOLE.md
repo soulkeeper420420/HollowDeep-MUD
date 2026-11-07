@@ -51,6 +51,17 @@ PY
 
 For a browser Save test: use an authenticated admin session, change a finding from Awaiting Review to Follow-up Required, enter a unique note, and inspect the browser Network POST to `room-investigation-status.php`. Check its response code and then inspect both storage files. Do **not** post session cookies, CSRF tokens, passwords, private logs or credentials into issues or public chat.
 
+## Private backup and integrity checks (Steps 99U–99W)
+
+On November 7, 2026, the VPS operator created a private audit data archive under `/root/hd-audit-backups/`, outside the web root, using:
+
+```bash
+install -d -m 700 /root/hd-audit-backups
+tar -czf /root/hd-audit-backups/audit-$(date +%s).tgz -C /var/lib/hollowdeep investigation-reviews
+```
+
+The operator reported an approximately 550-byte compressed archive. Status data passed `python3 -m json.tool`, and all four then-recorded audit-history lines parsed as JSON. `tar -tzf` listed the directory and `history.jsonl`, `statuses.lock`, `statuses.json`. This verifies the archive directory listing can be read, **not** a complete restore or all-file extraction. Archives must remain private: do not commit or post investigation data, locks, session data or credentials. For subsequent checks run `gzip -t /root/hd-audit-backups/*.tgz` if there is just one matching archive; for multiple backups, test each separately. Restore only following an explicit recovery plan and an offline verification, never over active storage casually.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
