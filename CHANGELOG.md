@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Additional PC verification of investigation Save and audit persistence
+
+The VPS operator observed a real HTTP `POST /admin/room-investigation-status.php` returning **303**, followed by a **200** response from the Investigation Queue. An immediate read-only check showed **2 saved findings** and **6 audit events** in private VPS storage. This confirms another successful Save request and persistent records beyond the earlier four-event check. It does not establish that all six events correspond to this single POST or prove crash-safe two-file transactions. The published guide remains applicable; no live MUD code, room binaries, or services were changed by this documentation update.
+
 ## 2026-11-07 — Step 122 cron execution evidence added to hd-admin
 
 Published an update to `tools/hd-admin.py` that looks for a cron `CMD` entry launching `/usr/local/bin/hd-audit-alert` in syslog or the cron journal, and reports an observed launch or `not yet observed (or logs unavailable)`. This avoids mistaking cron configuration reloads for job execution and eliminates repeated manual greps. It cannot prove the health check succeeded, and the upgraded version's actual Linode run is still pending. The source update and guide are committed on GitHub; existing VPS cron, webhook, audit records, game files, and services were not changed by this GitHub publication.
