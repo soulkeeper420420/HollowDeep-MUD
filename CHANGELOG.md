@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 135 quick UTC date presets browser-verified
+
+The VPS Operations Overview now offers Today (UTC), Last 7 Days and Last 30 Days audit date shortcuts, retaining search, activity filter, sort and page size while returning to Page 1. The operator verified the three presets, preservation of selections, and Reset Filters in the authenticated browser. The Step 135 installer saved `operations-overview.php.before-step135-20261107-235454`; staged and deployed PHP lint passed. The [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md) describes the controls. This GitHub documentation commit does not deploy PHP, include private audit data, or alter/restart the native MUD.
+
 ## 2026-11-07 — Step 134 Reset Audit Filters browser-verified
 
 The VPS Operations Overview now offers a contextual Reset Filters link that restores All Activity, an empty search/date range, Newest first, five events per page and Page 1. The operator confirmed the reset and existing View History drilldown in the authenticated browser. The installer retained `operations-overview.php.before-step134-20261107-235258`; both staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This commit publishes documentation only: no VPS PHP deployment, private audit data publication, native MUD changes, or restarts.
