@@ -165,6 +165,12 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step131.py
 
 The operator confirmed all four sizes (with six existing audit events), search, activity filters, navigation and View History in the authenticated browser. This documentation does not itself deploy the VPS PHP code or expose private audit records, and no running MUD service or game files were changed.
 
+## Step 132 — Operations Overview audit chronological sorting (host-verified November 7, 2026)
+
+The operator installed `/root/hollowdeep-dev/room-browser/install_step132.py`, adding a GET `audit_sort` selector with **Newest first** (default) and **Oldest first** to the admin-only Operations Overview. Sorting is applied to matching audit entries before pagination and preserves existing activity filters, text search, page size, Previous/Next, direct page jump, and View History links. The operator reported that both sorting orders and pagination/filter/history combinations passed an authenticated browser test with six audit events.
+
+The installer retained `operations-overview.php.before-step132-20261107-234939`; staged and installed PHP lint passed. This feature was installed directly on the VPS. GitHub documentation does not deploy PHP, include private audit records, or alter/restart the live MUD.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
