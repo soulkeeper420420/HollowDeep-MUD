@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 127 audit activity filters browser-verified
+
+On the VPS PHP Operations Overview, added an activity selector for All Activity, Status Changes and Notes Changes. The view shows up to five latest matching events without changing the total Audit Events count; the existing per-event View History links remain available. The operator reported that **all three filter choices and the history link passed browser verification**. The installer saved `operations-overview.php.before-step127-20261107-233821`; both staged and installed PHP lint checks passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub commit documents the VPS installation; it does not deploy PHP, publish private audit data, or modify or restart the native MUD.
+
 ## 2026-11-07 — Step 126 audit history drilldown browser-verified
 
 Added a Finding History column to the deployed PHP Operations Overview Recent Audit Activity table on the VPS. Its per-event View History link targets the matching finding's authenticated audit history; nonconforming IDs do not become links. A timestamped backup (`operations-overview.php.before-step126-20261107-233545`) was retained, staged and installed PHP lint passed, and the operator confirmed the link works in the browser. The [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md#step-126--recent-audit-history-drilldown-host-verified-november-7-2026) documents the change. This GitHub commit publishes documentation only; no PHP deployment, game modifications, or MUD restart was performed by GitHub.
