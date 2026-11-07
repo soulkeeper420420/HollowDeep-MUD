@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 119 one-command private backup verified on Linode
+
+The operator ran `hd-admin backup` after verifying the one-command health check. The command reported `PRIVATE BACKUP OK` with a private archive in `/root/hd-audit-backups/` and `No live files were restored or changed.` Its implementation locks the same audit review lock while copying and verifies expected archive entries and archived status JSON. This is a successful private archive creation/validation test, **not** a full restoration test or proof of two-file transactional audit writes. Private backups and webhook credentials were not published. No live MUD data or services were changed.
+
 ## 2026-11-07 — Step 118 VPS one-command tool installed and verified
 
 The operator installed the published `tools/hd-admin.py` on the Linode at `/usr/local/bin/hd-admin` and ran its default health check. The output confirmed valid audit JSON, one saved investigation, four audit events, correct private storage permissions, an active cron service and a configured hourly alert entry. This establishes that the read-only `status` command works on the host; the separate `hd-admin backup` command has not yet been tested there, and actual scheduled cron execution remains unconfirmed. No MUD service was restarted.
