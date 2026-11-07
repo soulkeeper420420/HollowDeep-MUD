@@ -153,6 +153,12 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step129.py
 
 The installer retained the timestamped backup `operations-overview.php.before-step129-20261107-234426` and passed PHP lint on both the staged and installed page. The operator **confirmed both pages, navigation, retained filters/search and View History links in the browser**. This is a VPS-local admin PHP change; the GitHub guide does not deploy code or publish private audit data. No native MUD modifications or restarts occurred.
 
+## Step 130 — Operations Overview direct audit page jump (host-verified November 7, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step130.py`, adding a **Go to page** numeric form alongside Step 129's Previous/Next navigation in the administrator Operations Overview. The form preserves the GET `activity` filter and `audit_q` query, uses the existing page limit (1 through the available page count, capped at 1000), and retains Step 126's View History links. With six audit events, the operator confirmed navigation between page 1 (five events) and page 2 (one event), filter/search retention, and working history links in the authenticated browser.
+
+The installer retained `operations-overview.php.before-step130-20261107-234638`; both staged and deployed PHP syntax checks passed. Installation occurred on the VPS, not through this GitHub repository. Neither private audit data nor the running native MUD was changed by this documentation update.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
