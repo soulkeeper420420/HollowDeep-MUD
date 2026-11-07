@@ -183,6 +183,12 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step134.py
 
 The installer backed up `operations-overview.php.before-step134-20261107-235258`, and staged and deployed PHP syntax checks passed. The operator **confirmed Reset Filters returned the controls to defaults and View History still worked in the browser**. The change was installed directly on the VPS, not deployed by GitHub. No private investigation data or native MUD files were changed.
 
+## Step 135 — Quick UTC audit date presets (host-verified November 7, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step135.py` to add **Today (UTC)**, **Last 7 Days**, and **Last 30 Days** preset links to the administrator Operations Overview. The links compute UTC calendar dates (today, six days earlier or 29 days earlier) and populate both audit date fields. They retain activity filters, text search, chronological sort and page size while resetting pagination to Page 1. The existing Reset Filters link returns to an unrestricted default view.
+
+The installer retained `operations-overview.php.before-step135-20261107-235454`; staged and deployed PHP lint passed. The operator **confirmed all three date presets, preserved search/sort settings and Reset Filters in the browser**. The live PHP change was made on the VPS and is documented here; GitHub publication neither deploys it nor changes private investigation records or the native MUD.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
