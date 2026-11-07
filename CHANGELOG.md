@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 118 one-command VPS audit administrator published
+
+Added [`tools/hd-admin.py`](tools/hd-admin.py), a standard-library Python helper for the separate VPS PHP investigation console. The default `hd-admin` command reads and validates status/audit JSON, checks private permissions and existing hourly cron configuration. Explicit `hd-admin backup` acquires the PHP-compatible exclusive lock and creates a private validated backup archive under `/root/hd-audit-backups`. The script contains no credentials, webhook URLs or private audit data. No game binary changes, MUD restarts, automated live deployments or GitHub/Discord posting actions were added. This source was published to GitHub; **Linode installation and live execution remain unverified**.
+
 ## 2026-11-07 — Steps 100–108 private audit permissions and hourly Discord failure monitoring
 
 VPS operator confirmed the investigation review directory is mode `700`, owned by `www-data`, with three private files at mode `600`. An hourly root cron entry was installed for `hd-audit-alert`, cron was active, and a manual healthy test reported `MONITOR OK`. Private health logging and a four-week `logrotate` policy were configured; adding `su root root` cleared the logrotate dry-run permissions warning.
