@@ -62,6 +62,8 @@ tar -czf /root/hd-audit-backups/audit-$(date +%s).tgz -C /var/lib/hollowdeep inv
 
 The operator reported an approximately 550-byte compressed archive. Status data passed `python3 -m json.tool`, and all four then-recorded audit-history lines parsed as JSON. `tar -tzf` listed the directory and `history.jsonl`, `statuses.lock`, `statuses.json`. This verifies the archive directory listing can be read, **not** a complete restore or all-file extraction. Archives must remain private: do not commit or post investigation data, locks, session data or credentials. For subsequent checks run `gzip -t /root/hd-audit-backups/*.tgz` if there is just one matching archive; for multiple backups, test each separately. Restore only following an explicit recovery plan and an offline verification, never over active storage casually.
 
+On November 7, 2026, the operator additionally ran `gzip -t` successfully (`BACKUP OK`) and streamed `investigation-reviews/statuses.json` out of the archive through `python3 -m json.tool` (`RECOVERY READ OK`). Those checks validate compressed-stream integrity and archived status JSON parseability, **not** a full production restore or point-in-time consistency under concurrent writes. Do not restore over live storage without scheduling an exclusive lock/maintenance procedure.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
