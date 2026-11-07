@@ -121,6 +121,14 @@ hd-admin
 
 No cron modifications, Discord posts, MUD restarts, or changes to live investigation data are made by the upgrade. The new version's **live VPS execution has not yet been confirmed**.
 
+## Step 125 — Operations Overview (host-verified November 7, 2026)
+
+The VPS operator installed `/var/www/hollowdeep/public/admin/operations-overview.php` using `/root/hollowdeep-dev/room-browser/install_step125.py`. The installer backed up the existing Admin Dashboard as `dashboard.php.before-step125-20261107-232947` and added an Operations Overview navigation link. PHP lint passed for both the new page and modified dashboard; the operator **confirmed the admin page loads and displays correctly in a browser**.
+
+The admin-only overview reads existing investigation reports, `statuses.json`, and `history.jsonl` without changing them. It displays Total Findings, Awaiting Review, Reviewed, Follow-up Required, Audit Events, progress percentage/bar, the latest five parsed audit events, a monitoring-information section, and navigation to investigation tools. It intentionally does not read root-only cron logs. This is a browser functional verification, not a comprehensive concurrency or security audit.
+
+Access the page at `https://hollowdeepmud.com/admin/operations-overview.php` with administrator credentials. This PHP installation is on the VPS; **the GitHub documentation does not deploy the PHP source**. The native MUD game and room binaries were not changed or restarted. The hourly schedule's successful post-upgrade run was still pending verification at this point.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
