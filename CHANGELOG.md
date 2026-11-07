@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Steps 99U–99W private audit backup checks
+
+On the VPS, a root-only backup directory was created and an approximately 550-byte compressed `investigation-reviews` archive retained privately. The statuses JSON parsed successfully and four recorded audit events were valid JSON. `tar -tzf` confirmed the archive's visible directory listing includes `history.jsonl`, `statuses.json` and `statuses.lock`. This does not establish a full restore test or transactional durability. Private backup contents were **not** uploaded to GitHub or Discord. No game files or services were touched.
+
 ## 2026-11-07 — Step 99S audit write-order improvement (VPS)
 
 The operator installed a PHP endpoint patch moving the audit-history append to after the atomic status-file rename, with a timestamped backup and passing PHP lint. A later mobile terminal check showed four entries in `history.jsonl` (earlier verification showed two), consistent with further audit recording. The exact source of each additional entry was not independently inspected. This reduces the risk of recording a successful audit event when the status rename fails, **but is not a fully transactional update**: an audit append failure may now leave a saved status without history. The PHP change occurred on the VPS; this commit documents it only and does not deploy code or restart the MUD.
