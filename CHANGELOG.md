@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Steps 99X–99Y backup compression and recovery-read verified
+
+Host operator confirmed `gzip -t` returned `BACKUP OK`, then streamed the archived `investigation-reviews/statuses.json` through the JSON parser with `RECOVERY READ OK`. This provides evidence the archive's compressed stream and status JSON can be read without modifying live files. It does **not** verify a complete restoration, consistency of a backup taken during a simultaneous write, or crash-safe audit transactionality. Private backup data stays on the VPS and was not uploaded.
+
 ## 2026-11-07 — Steps 99U–99W private audit backup checks
 
 On the VPS, a root-only backup directory was created and an approximately 550-byte compressed `investigation-reviews` archive retained privately. The statuses JSON parsed successfully and four recorded audit events were valid JSON. `tar -tzf` confirmed the archive's visible directory listing includes `history.jsonl`, `statuses.json` and `statuses.lock`. This does not establish a full restore test or transactional durability. Private backup contents were **not** uploaded to GitHub or Discord. No game files or services were touched.
