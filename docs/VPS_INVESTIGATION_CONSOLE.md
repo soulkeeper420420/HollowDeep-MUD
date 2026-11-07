@@ -88,6 +88,25 @@ Host-reported setup on November 7, 2026:
 
 The test file `/root/hd-test/hd-audit-check` can be deleted after confirmation using `rm -f /root/hd-test/hd-audit-check`; do not change the installed `/usr/local/bin/hd-audit-check`. The source PHP audit append is still nontransactional after the status commit. Automated health checks only validate JSON syntax and cannot detect valid-but-missing/tampered events.
 
+## One-command administrator tool (Step 118)
+
+The reviewed helper is published as [`tools/hd-admin.py`](../tools/hd-admin.py) for **the separate VPS PHP investigation console**. Publishing this file to GitHub does not install or deploy it on the VPS. The tool requires root, uses Python's standard library, and never modifies game source, live room binaries, the MUD process, or the website PHP.
+
+Install on the VPS from an explicitly pinned Git commit (adjust the commit only after review):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/92ad126576a32cba56e9bc63a5d60124dea9b289/tools/hd-admin.py -o /tmp/hd-admin.py
+python3 -m py_compile /tmp/hd-admin.py && install -m 700 /tmp/hd-admin.py /usr/local/bin/hd-admin
+hd-admin
+```
+
+Commands:
+
+- `hd-admin` or `hd-admin status` — read and parse status/audit JSON, verify private file/directory permissions and ownership consistency, check whether cron is active and whether the hourly alert entry is configured. It **does not** prove scheduled execution or actual Discord delivery.
+- `hd-admin backup` — explicitly create a private, mode-600 `.tgz` backup under root-owned `/root/hd-audit-backups`; hold the same exclusive flock on `statuses.lock` used by the PHP status updater while copying. Validate the archive entries and archived status JSON before marking backup complete. It does **not** perform a full restore test.
+
+Keep the real audit records and webhook out of GitHub/Discord. This source tool deliberately contains no webhook URL and performs no GitHub or Discord posting itself; announcements must be explicitly authorized and performed through configured workflows.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
