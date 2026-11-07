@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 99R mobile audit history cards verified
+
+The VPS operator added `history-mobile.css` to the admin Audit History page after creating a backup, and `php -l` passed. The authenticated mobile screenshot confirms stacked audit cards instead of a sideways-scrolling table. Fields include timestamp, administrator, finding, previous/new status and whether notes changed. Two events are visible: `awaiting` → `follow_up`, and a later `follow_up` → `follow_up` update with notes changed. This is a VPS website change documented in GitHub, not a GitHub-driven deployment. Audit write ordering remains a separate reliability improvement; the MUD server was not modified.
+
 ## 2026-11-07 — Step 99Q mobile investigation cards verified
 
 On the live VPS, the operator added `queue-mobile.css` and included it in `room-investigation-queue.php`, after backing up the queue. PHP lint passed. An authenticated phone screenshot verified vertical investigation cards showing priority, category, room source/destination, detail, Inspect and History links, persisted Room 1508 notes, Review status and Save without horizontal table scrolling. This was a VPS website change; GitHub documentation publication does not itself deploy PHP/CSS, and no live Mordor MUD files or services were changed. Desktop regression testing and stronger audit transactionality remain future work.
