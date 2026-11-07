@@ -64,6 +64,17 @@ The operator reported an approximately 550-byte compressed archive. Status data 
 
 On November 7, 2026, the operator additionally ran `gzip -t` successfully (`BACKUP OK`) and streamed `investigation-reviews/statuses.json` out of the archive through `python3 -m json.tool` (`RECOVERY READ OK`). Those checks validate compressed-stream integrity and archived status JSON parseability, **not** a full production restore or point-in-time consistency under concurrent writes. Do not restore over live storage without scheduling an exclusive lock/maintenance procedure.
 
+## Reusable audit health command (Step 99Z)
+
+The operator installed `/usr/local/bin/hd-audit-check` as a root-only executable (`chmod 700`) on November 7, 2026. The command parses `statuses.json` as JSON, parses all nonblank `history.jsonl` lines, then prints `AUDIT HEALTH OK` and the history line count on success. A mobile-terminal check returned:
+
+```text
+AUDIT HEALTH OK
+4
+```
+
+The command is a **read-only syntax and count check**; it does not establish provenance, authenticity, chronological integrity, completeness, or that each audit entry corresponds to a committed status change. It should be run by an authorized administrator with access to the private storage directory. Never publish actual statuses, audit entries, or backup archives.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
