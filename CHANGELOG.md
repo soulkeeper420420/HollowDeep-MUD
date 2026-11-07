@@ -1,5 +1,11 @@
 # HollowDeep release notes
 
+## 2026-11-07 — VPS investigation-console documentation (audit persistence under investigation)
+
+Published [VPS investigation-console guide](docs/VPS_INVESTIGATION_CONSOLE.md) describing the separate Ubuntu/PHP administrator room diagnostics, report snapshot inputs, review workflow, safe checks and publication boundaries. The reported room analysis includes 4,030 snapshot rooms and 9,551 exits. This documentation release does not change or restart the native game or VPS website.
+
+**Unresolved:** A browser Save redirected to the Investigation Queue but the host's `statuses.json` contained zero findings and `history.jsonl` contained zero audit events. The audit feature is **not** verified; investigate the live POST response and runtime execution before claiming the functionality works. Discord destination requested: `#change-log`; channel posting is not yet connected or confirmed.
+
 ## 2026-11-06 — One-file updater
 
 Added `hollowdeep-update.py`: upload one file and run `python3 /root/hollowdeep-update.py`. It embeds the existing reviewed installers, verifies their hashes and chooses the matching completed installation or its own known rollback. Unknown/unfinished records are refused. Existing updater safeguards and source payloads are unchanged. Twelve launcher tests cover version selection, bundle integrity, malformed records, no-install verification and child error handling. This does not establish live installation.
