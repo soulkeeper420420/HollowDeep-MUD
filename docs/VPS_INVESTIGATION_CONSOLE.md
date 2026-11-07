@@ -129,6 +129,12 @@ The admin-only overview reads existing investigation reports, `statuses.json`, a
 
 Access the page at `https://hollowdeepmud.com/admin/operations-overview.php` with administrator credentials. This PHP installation is on the VPS; **the GitHub documentation does not deploy the PHP source**. The native MUD game and room binaries were not changed or restarted. The hourly schedule's successful post-upgrade run was still pending verification at this point.
 
+## Step 126 — Recent audit history drilldown (host-verified November 7, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step126.py`, which added a **Finding History** column to the Step 125 Recent Audit Activity table in `/admin/operations-overview.php`. Valid 64-character hexadecimal finding IDs link to `room-investigation-history.php?id=...`; invalid or unavailable IDs render as `Unavailable`. The installer retained a timestamped backup, `operations-overview.php.before-step126-20261107-233545`. Both staged and installed PHP lint checks passed, and the operator confirmed the history link worked in an authenticated browser.
+
+This is a PHP website change performed on the VPS; this GitHub guide is documentation only and does not deploy that PHP source or change the live game.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
