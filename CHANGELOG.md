@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 99Z reusable audit health command verified
+
+The VPS operator created root-only `/usr/local/bin/hd-audit-check` to parse private `statuses.json` and all nonempty `history.jsonl` entries, then report the audit event count. The mobile terminal returned `AUDIT HEALTH OK` and `4`. The check does not detect tampered-but-valid JSON, missing events, or transactional inconsistencies. Only documentation was published to GitHub; the private data remains on the VPS, with no native MUD changes.
+
 ## 2026-11-07 — Steps 99X–99Y backup compression and recovery-read verified
 
 Host operator confirmed `gzip -t` returned `BACKUP OK`, then streamed the archived `investigation-reviews/statuses.json` through the JSON parser with `RECOVERY READ OK`. This provides evidence the archive's compressed stream and status JSON can be read without modifying live files. It does **not** verify a complete restoration, consistency of a backup taken during a simultaneous write, or crash-safe audit transactionality. Private backup data stays on the VPS and was not uploaded.
