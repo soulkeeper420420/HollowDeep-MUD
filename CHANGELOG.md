@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 131 adjustable audit page size browser-verified
+
+The VPS Operations Overview now offers a Results per page selector with choices **5, 10, 25 and 50**. Page size is retained across previous/next pagination and direct page jump along with existing activity filters, audit search, and View History links. The operator confirmed the four page-size options and existing navigation/search functionality with six saved audit events. The installer preserved `operations-overview.php.before-step131-20261107-234823` and passed PHP syntax checks before and after installation. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). GitHub publication documents the separately installed VPS PHP change; no private records, game files or service restarts are involved.
+
 ## 2026-11-07 — Step 130 direct audit page jump browser-verified
 
 Added a Go to page numeric control to the VPS Operations Overview's paginated audit activity list. The control retains activity filters and search queries, uses the existing bounded page range, and preserves per-event View History links. The operator verified browser navigation between pages 1 and 2, filter/search retention, and history drilldown. The installer retained `operations-overview.php.before-step130-20261107-234638`; staged and deployed PHP lint passed. See the [VPS investigation console guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub publication is documentation only and does not deploy PHP, expose private audit data, or modify/restart the native MUD.
