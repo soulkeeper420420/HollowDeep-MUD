@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 122 cron launch and audit health verified on VPS
+
+The operator ran `hd-admin` on the HollowDeep VPS. Output: `Audit JSON OK | saved findings: 2 | events: 6`; `Permissions: OK`; `Cron service: active`; `Hourly alert: configured`; and `Scheduled cron launch: observed: 2026-11-07T23:00:01.622974+00:00`. This verifies the deployed helper's read-only health checks and observed scheduled **launch**, but does **not** prove that the scheduled audit check itself completed successfully. No native MUD files or processes were modified by this documentation update.
+
 ## 2026-11-07 — Additional PC verification of investigation Save and audit persistence
 
 The VPS operator observed a real HTTP `POST /admin/room-investigation-status.php` returning **303**, followed by a **200** response from the Investigation Queue. An immediate read-only check showed **2 saved findings** and **6 audit events** in private VPS storage. This confirms another successful Save request and persistent records beyond the earlier four-event check. It does not establish that all six events correspond to this single POST or prove crash-safe two-file transactions. The published guide remains applicable; no live MUD code, room binaries, or services were changed by this documentation update.
