@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 128 Operations Overview audit search browser-verified
+
+The VPS PHP Operations Overview now supports a GET `audit_q` search (100-character limit) over administrator names, finding identifiers and old/new review statuses, combined with the existing All/Status/Notes activity filter. The operator confirmed browser searches, retained query text, combined filters, and per-event View History links. The installer retained `operations-overview.php.before-step128-20261107-234036` and passed staged and installed PHP lint. The page continues showing the latest five matching entries while the summary reports all audit events. The [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md) now documents this verified behavior. This repository commit records the separately deployed VPS feature; it does not deploy PHP, include private audit records, or modify/restart the game.
+
 ## 2026-11-07 — Step 127 audit activity filters browser-verified
 
 On the VPS PHP Operations Overview, added an activity selector for All Activity, Status Changes and Notes Changes. The view shows up to five latest matching events without changing the total Audit Events count; the existing per-event View History links remain available. The operator reported that **all three filter choices and the history link passed browser verification**. The installer saved `operations-overview.php.before-step127-20261107-233821`; both staged and installed PHP lint checks passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub commit documents the VPS installation; it does not deploy PHP, publish private audit data, or modify or restart the native MUD.
