@@ -1,10 +1,14 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 99Q mobile investigation cards verified
+
+On the live VPS, the operator added `queue-mobile.css` and included it in `room-investigation-queue.php`, after backing up the queue. PHP lint passed. An authenticated phone screenshot verified vertical investigation cards showing priority, category, room source/destination, detail, Inspect and History links, persisted Room 1508 notes, Review status and Save without horizontal table scrolling. This was a VPS website change; GitHub documentation publication does not itself deploy PHP/CSS, and no live Mordor MUD files or services were changed. Desktop regression testing and stronger audit transactionality remain future work.
+
 ## 2026-11-07 — VPS admin investigation notes and audit history verified on mobile
 
 Host operator verified the separate PHP investigation console on `hollowdeepmud.com`: a status Save returned HTTP 303; `statuses.json` grew from 3 to 186 bytes and `history.jsonl` from 0 to 231 bytes. The authenticated Audit History viewer displayed the event; the Admin Dashboard navigation link was added and verified in the mobile browser. The Investigation Notes field was visible, and the Room 1508 note remained after Save and refresh. Shared progress showed 609 awaiting and one Follow-up Required finding.
 
-These results verify **basic live save, audit and mobile-navigation behavior**, not transactional audit reliability. The audit append still precedes the atomic status replacement, creating a possible phantom event if the subsequent write fails. Responsive table layout remains improvable. This changelog records the existing VPS work, not a deployment of PHP from this GitHub repository; no game source, world binaries or MUD services were changed.
+These results verify **basic live save, audit and mobile-navigation behavior**, not transactional audit reliability. The audit append still precedes the atomic status replacement, creating a possible phantom event if the subsequent write fails. The mobile investigation queue was subsequently improved; see the Step 99Q entry above. This changelog records the existing VPS work, not a deployment of PHP from this GitHub repository; no game source, world binaries or MUD services were changed.
 
 ## 2026-11-07 — Initial VPS investigation-console documentation (historical status)
 
