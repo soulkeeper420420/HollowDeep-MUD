@@ -1,10 +1,16 @@
 # HollowDeep release notes
 
-## 2026-11-07 — VPS investigation-console documentation (audit persistence under investigation)
+## 2026-11-07 — VPS admin investigation notes and audit history verified on mobile
+
+Host operator verified the separate PHP investigation console on `hollowdeepmud.com`: a status Save returned HTTP 303; `statuses.json` grew from 3 to 186 bytes and `history.jsonl` from 0 to 231 bytes. The authenticated Audit History viewer displayed the event; the Admin Dashboard navigation link was added and verified in the mobile browser. The Investigation Notes field was visible, and the Room 1508 note remained after Save and refresh. Shared progress showed 609 awaiting and one Follow-up Required finding.
+
+These results verify **basic live save, audit and mobile-navigation behavior**, not transactional audit reliability. The audit append still precedes the atomic status replacement, creating a possible phantom event if the subsequent write fails. Responsive table layout remains improvable. This changelog records the existing VPS work, not a deployment of PHP from this GitHub repository; no game source, world binaries or MUD services were changed.
+
+## 2026-11-07 — Initial VPS investigation-console documentation (historical status)
 
 Published [VPS investigation-console guide](docs/VPS_INVESTIGATION_CONSOLE.md) describing the separate Ubuntu/PHP administrator room diagnostics, report snapshot inputs, review workflow, safe checks and publication boundaries. The reported room analysis includes 4,030 snapshot rooms and 9,551 exits. This documentation release does not change or restart the native game or VPS website.
 
-**Unresolved:** A browser Save redirected to the Investigation Queue but the host's `statuses.json` contained zero findings and `history.jsonl` contained zero audit events. The audit feature is **not** verified; investigate the live POST response and runtime execution before claiming the functionality works. Discord destination requested: `#change-log`; channel posting is not yet connected or confirmed.
+**Historical note:** At this stage, the first Save checks had not produced persistent data. Later live testing on the same date confirmed saves and audit records; see the verified entry above. Discord webhook posting was subsequently confirmed by the operator; automatic GitHub release announcements still require the repository secret and separate workflow verification.
 
 ## 2026-11-06 — One-file updater
 
