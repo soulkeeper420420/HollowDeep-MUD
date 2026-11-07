@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 126 audit history drilldown browser-verified
+
+Added a Finding History column to the deployed PHP Operations Overview Recent Audit Activity table on the VPS. Its per-event View History link targets the matching finding's authenticated audit history; nonconforming IDs do not become links. A timestamped backup (`operations-overview.php.before-step126-20261107-233545`) was retained, staged and installed PHP lint passed, and the operator confirmed the link works in the browser. The [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md#step-126--recent-audit-history-drilldown-host-verified-november-7-2026) documents the change. This GitHub commit publishes documentation only; no PHP deployment, game modifications, or MUD restart was performed by GitHub.
+
 ## 2026-11-07 — Step 125 Operations Overview installed and browser-verified on VPS
 
 Installed `/admin/operations-overview.php` on the Ubuntu PHP website via the VPS-local Step 125 installer. The installer created a timestamped Admin Dashboard backup (`dashboard.php.before-step125-20261107-232947`), added navigation to the Operations Overview, and passed PHP syntax checks for both files. The operator confirmed the page loaded and displayed correctly in the browser. The read-only, admin-only page shows investigation totals, review progress, latest audit events, monitoring guidance, and links to administrator tools. See the [VPS investigation-console guide](docs/VPS_INVESTIGATION_CONSOLE.md#step-125--operations-overview-host-verified-november-7-2026). This GitHub update documents the VPS work only; it does not deploy PHP, publish private audit data, or alter/restart the game. Scheduled cron success after the logging change remains separately unverified.
