@@ -34,6 +34,31 @@ def validate():
                 count += 1
     return len(status), count
 
+def scheduled_run():
+    """Find evidence cron launched the wrapper; do not confuse reload with CMD."""
+    needle = "/usr/local/bin/hd-audit-alert"
+    lines = []
+    try:
+        with Path("/var/log/syslog").open(encoding="utf-8", errors="replace") as stream:
+            lines = stream.readlines()[-20000:]
+    except OSError:
+        pass
+    if not any("CMD (" in x and needle in x for x in lines):
+        try:
+            result = subprocess.run(
+                ["journalctl", "-u", "cron", "--since", "48 hours ago",
+                 "--no-pager", "-o", "short-iso"],
+                capture_output=True, text=True, timeout=8, check=False)
+            if result.returncode == 0:
+                lines = result.stdout.splitlines()
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    launches = [x for x in lines if "CMD (" in x and needle in x]
+    if not launches:
+        return "not yet observed (or logs unavailable)"
+    item = launches[-1]
+    return "observed: " + item.split(" localhost ")[0].strip()[:40]
+
 def status():
     findings, count = validate()
     paths = [(DATA, 0o700)] + [(DATA / f, 0o600) for f in FILES]
@@ -59,7 +84,8 @@ def status():
     print("Permissions:", "OK" if not issues else "; ".join(issues))
     print("Cron service:", "active" if active else "not confirmed")
     print("Hourly alert:", "configured" if configured else "not confirmed")
-    print("Checks syntax and settings, not whether scheduled execution occurred.")
+    print("Scheduled cron launch:", scheduled_run())
+    print("Launch evidence does not prove the audit check succeeded.")
     return 0 if not issues and active and configured else 1
 
 def backup():
