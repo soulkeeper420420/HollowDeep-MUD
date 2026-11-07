@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 118 VPS one-command tool installed and verified
+
+The operator installed the published `tools/hd-admin.py` on the Linode at `/usr/local/bin/hd-admin` and ran its default health check. The output confirmed valid audit JSON, one saved investigation, four audit events, correct private storage permissions, an active cron service and a configured hourly alert entry. This establishes that the read-only `status` command works on the host; the separate `hd-admin backup` command has not yet been tested there, and actual scheduled cron execution remains unconfirmed. No MUD service was restarted.
+
 ## 2026-11-07 — Step 118 one-command VPS audit administrator published
 
 Added [`tools/hd-admin.py`](tools/hd-admin.py), a standard-library Python helper for the separate VPS PHP investigation console. The default `hd-admin` command reads and validates status/audit JSON, checks private permissions and existing hourly cron configuration. Explicit `hd-admin backup` acquires the PHP-compatible exclusive lock and creates a private validated backup archive under `/root/hd-audit-backups`. The script contains no credentials, webhook URLs or private audit data. No game binary changes, MUD restarts, automated live deployments or GitHub/Discord posting actions were added. This source was published to GitHub; **Linode installation and live execution remain unverified**.
