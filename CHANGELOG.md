@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-07 — Step 132 audit chronological sorting browser-verified
+
+The VPS PHP Operations Overview now supports Newest first and Oldest first sorting of matching audit events, preserving activity filters, audit search, page size, Previous/Next, Go to page, and View History. The operator confirmed the sorting and navigation scenarios in the authenticated browser with six existing events. The installer saved `operations-overview.php.before-step132-20261107-234939`; staged and deployed PHP lint checks passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub publication documents a separately installed VPS PHP change; it does not publish private records or change/restart the native MUD.
+
 ## 2026-11-07 — Step 131 adjustable audit page size browser-verified
 
 The VPS Operations Overview now offers a Results per page selector with choices **5, 10, 25 and 50**. Page size is retained across previous/next pagination and direct page jump along with existing activity filters, audit search, and View History links. The operator confirmed the four page-size options and existing navigation/search functionality with six saved audit events. The installer preserved `operations-overview.php.before-step131-20261107-234823` and passed PHP syntax checks before and after installation. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). GitHub publication documents the separately installed VPS PHP change; no private records, game files or service restarts are involved.
