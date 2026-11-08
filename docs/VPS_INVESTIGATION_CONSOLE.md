@@ -430,6 +430,14 @@ The operator compiled an isolated ELF32 C harness with the Stage 5I hardened, re
 
 **Evidence:** private report `/root/hollowdeep-dev/gm-v5/cadence-tests/v5j-mrwSq7EP/v5j-results.json`; source `/root/hollowdeep-dev/gm-v5/integration/v5i-RtYRcHXk/gm_bridge_v5i.c` remained unchanged, the recorded live v3 binary SHA-256 was verified, and `hollowdeep.service` was active. No socket was deployed, no moderation actions were enabled and no MUD restart occurred.
 
+## GM Stage 5K — bounded response-write budget regression (operator-tested, November 8, 2026)
+
+Stage 5J exposed a truncated `capabilities` response (56 of 58 bytes) at 100 ms per simulated game-loop tick. The operator then ran `/root/hollowdeep_v5k_response_budget.sh` against an isolated source copy at `/root/hollowdeep-dev/gm-v5/integration/v5k-xPAZZNA1/gm_bridge_v5k.c`. The Stage 5I original remained unchanged. The test-only C implementation now permits at most **four nonblocking send attempts per connected client per tick**, stops promptly on `EAGAIN`/`EINTR`, retains a **1,000 ms input deadline**, and uses a distinct **2,000 ms pending-output deadline**. It keeps a maximum of four client slots and test-only seven-byte write caps with periodic simulated `EAGAIN`.
+
+**Results:** All four repeated cadence tests delivered a full **58-byte** JSON `ALLOW` response: 1 ms tick → **5.49 ms** total; 20 ms → **81.01 ms**; 50 ms → **231.53 ms**; 100 ms → **481.56 ms**. The 100 ms/tick regression from Stage 5J passed. The default compiled ELF32 module remained disabled and had no socket dependencies; the test-only ELF32 module compiled. The running production v3 binary hash remained verified and `hollowdeep.service` remained active. No native game installation, PHP integration, moderation command execution, service restart, or persistent socket occurred. Private test report: `/root/hollowdeep-dev/gm-v5/integration/v5k-xPAZZNA1/v5k-results.json`.
+
+**Remaining nonproduction gates:** This validates complete response delivery in the four simulated cadences, not true worst-case Mordor game-loop latency or real kernel backpressure. Stage 5L should test fairness under concurrent partial clients, full client-slot pressure, deadlines, disconnects, descriptor cleanup and latency distribution. Native role/identity authorization, PHP session binding, persistent replay semantics, audit outcome guarantees, full protocol parsing and test-game integration are not implemented. Do not deploy the bridge to production based on these tests.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
