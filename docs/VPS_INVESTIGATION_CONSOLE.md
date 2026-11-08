@@ -397,6 +397,23 @@ The operator built an isolated 32-bit C module `gm_bridge_v5f.c` using the prese
 
 **Limits:** The mock's static, canonical message format is not a complete JSON protocol; its `SO_PEERCRED` check only verifies same UID as the test server and does not bind a PHP administrator to a native GM identity. The 64-entry replay cache is process-local and ephemeral. The code attempts non-blocking `send` once and closes the client without buffering partial responses; accepted sockets are processed in a bounded loop but game-loop latency under load has **not** been measured. The no-op build and offline tests do not establish production game-loop safety, authorization, reliable delivery, crash persistence, audit records or deployment readiness. Next acceptance gate: benchmark tick work under bounded concurrency, test partial-write and disconnect behavior, inspect file-descriptor lifecycle and error handling, then use a separate nonproduction Mordor instance before any action endpoint.
 
+## GM Stage 5G — isolated ELF32 bridge tick benchmark (operator-tested, November 8, 2026)
+
+The operator compiled the previously isolated `gm_bridge_v5f.c` test-only C implementation into a standalone ELF32 benchmark harness and measured the per-call wall time of `hd_gm_bridge_tick()` using `CLOCK_MONOTONIC` and a one-millisecond gap between calls. No native Mordor process or PHP site was connected, and no game files, systemd units, staff records or website files were modified.
+
+| Metric | Idle (1,200 calls) | Loaded (3,000 calls) |
+|---|---:|---:|
+| Minimum tick time | 0.00586 ms | 0.00577 ms |
+| Mean tick time | 0.00860 ms | 0.00901 ms |
+| P95 tick time | 0.01257 ms | 0.01193 ms |
+| P99 tick time | 0.02538 ms | 0.05427 ms |
+| Maximum observed | 0.19959 ms | 0.24227 ms |
+| Ticks > 1 ms / > 5 ms | 0 / 0 | 0 / 0 |
+
+During the loaded run, all 80 local read-only capability requests returned valid replies, with **64 ALLOW** and **16 DENY** results as expected from the test-only 64-entry fail-closed replay cache. There were no reported request exceptions. The disposable sockets were removed at the end. The production `hollowdeep.service` remained active and the running executable retained v3 SHA-256 `b072d152efa769c5f06fcc6f2350387b4d75eec09780687f5b18f5b960143cd5`. Private results: `/root/hollowdeep-dev/gm-v5/benchmarks/v5g-KdjN2xPw/v5g-results.json`.
+
+**Scope and caveats:** These 4,200 tick timings are a synthetic isolated run with a bounded, relatively light 80-request load, *not* an upper bound on real game-loop stalls or proof of worst-case latency. The `send(..., MSG_DONTWAIT)` response path sends once and closes, without handling a partial write; saturated send buffers or delayed/broken clients still need adversarial tests. The mock test does not provide PHP-to-native authentication, in-game staff identity binding, durable audit, persistent replay protection or any live moderation. Before a nonproduction integration, exercise stalled clients, short writes, FD exhaustion and process shutdown paths, plus source-level review of the event-loop budget and deadlines. Do not enable or deploy the bridge to the production game based on this benchmark alone.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
