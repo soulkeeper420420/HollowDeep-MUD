@@ -480,6 +480,18 @@ The operator ran a **read-only** runtime-isolation preflight against the running
 
 **Next Stage 5P:** Read-only targeted source review of `main`/argv, TCP bind/listen and port selection, config keys and file path construction (with secrets redacted from terminal output). Require independent test filesystem namespace, nonproduction credentials and verified listener isolation before a future test-run proposal.
 
+## GM Stage 5P — targeted native startup, listener and data-path audit (operator-tested, November 8, 2026)
+
+The operator ran a targeted **read-only** inspection of native game startup, network binding and persistent-file access in the isolated Stage 5N source tree. Running production v3 and offline v5N executable hashes both matched the recorded trusted values, and no executable was started, source altered or service restarted.
+
+**Observed startup and networking:** The running MUD process had three arguments: executable, a numeric value deliberately withheld, and option `-r`. The game entry point is `main.c:24`, while the main game TCP listener code in `io.c:182–209` uses `socket(AF_INET,...)`, `inet_addr(getenv(...)?getenv(...):fallback)` to select its address, `htons(port)` for the port and `bind`/`listen`. This indicates that an environment variable may affect the listener address; the scan redacted its exact name and fallback and **did not establish an independently configurable, loopback-only test listener**. The production process was previously verified as bound to `0.0.0.0:4040`. Other source sites such as `io.c:386` mention `INADDR_ANY` but must be interpreted in function context, not assumed to be second listeners.
+
+**Persistent data candidates:** The scanner recorded 126 possible file-operation sites (including reads and writes; textual matches may overcount). The core `files2.c` routines use `open`, `rename`, `unlink` and other operations. The separate staff module defines `HOLLOWDEEP_DATA_DIR` and `HD_STAFF_FILE`; `hollowdeep.c` and `hollowdeep_stance.c` also define/use HollowDeep data-directory macros. The local `.hollowdeep.json` parses as JSON and has a `default_bind` key, but the scan does not establish whether native Mordor reads or honors it; configuration values and private player/staff records were not printed. The report found multiple `main` candidates in helper tools (`auth.c`, `finger.c`, etc.), so `main.c` should be treated as the actual game entry point based on the established build/link context rather than on a generic `main` text search alone.
+
+**Explicit block:** No independent test account, isolated world, player/staff database separation, verified absolute/relative path confinement, loopback-only test listener or network namespace exists yet. Starting the offline executable is **not authorized by this audit**; no second MUD process was launched. The private report is `/root/hollowdeep-dev/gm-v5/runtime-isolation/v5p-GUwmZ7Pf/v5p-audit.json`.
+
+**Stage 5Q next:** Inspect tightly bounded, string-literal-redacted source context around `main.c` argument handling, `io.c` bind setup, and staff/data path macros; classify path macros as relative/absolute and find all environment-variable usage **by name only**. Determine whether the native world and port can be isolated before preparing a nonproduction process sandbox. Do not run the game or alter production services in Stage 5Q.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
