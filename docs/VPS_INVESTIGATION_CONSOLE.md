@@ -466,6 +466,20 @@ The operator ran `/root/hollowdeep_v5n_full_build.sh` using the isolated preserv
 
 **Next gate (Stage 5O, runtime isolation preflight):** Before running a second game process, inspect the actual native startup arguments, working directory, relative and absolute file paths, persistent world/player/staff database access, configuration dependencies, log paths, TCP bind addresses/port defaults, and existing systemd sandbox. Prepare a *separate* test identity, private working world, private logs and run directory, bind restrictions, and a non-conflicting loopback-only listener if the game supports it. Merely choosing a different `WorkingDirectory` or port does not isolate hard-coded paths. Do not launch a second MUD, copy private player records to a public destination, or use the production world's writable directories until every access path is reviewed and isolation enforced.
 
+## GM Stage 5O — runtime-isolation preflight and launch blocker (operator-tested, November 8, 2026)
+
+The operator ran a **read-only** runtime-isolation preflight against the running known-good native v3 executable and the complete offline Stage 5N ELF32 build. Both executable hashes were verified. The offline binary was **not executed**.
+
+**Running production boundary (point-in-time):** `hollowdeep.service` runs as `hollowdeep:hollowdeep`, working directory `/srv/hollowdeep/world`, with `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes`, `NoNewPrivileges=yes` and `ReadWritePaths=/srv/hollowdeep/world /srv/hollowdeep/world /var/lib/hollowdeep/gm-presence`. No `RuntimeDirectory`, `IPAddressDeny`, `IPAddressAllow` or explicit `RestrictAddressFamilies` restrictions were reported. The running game process had **three process arguments** (contents deliberately not displayed) and listened on **0.0.0.0:4040**; this is all-interfaces IPv4 binding, not loopback-only.
+
+**World layout (names only):** Working directory contains `.hollowdeep.json`, `bin`, `docs`, `help`, `hollowdeep-data`, `log`, `objmon`, `player`, `post`, `rooms`, `src_3.00` and additional harmless files. No world file contents, player records, staff state or secrets were printed or copied.
+
+**Native source index:** Scanner inspected **74 C/H files** and reported **102 candidate file/network API call sites**, **70 locations with an absolute-path-looking string literal**, and **26 configuration macro candidates**. Recorded call-site mentions: `accept` 2, `accept4` 1, `bind` 2, `fopen` 11, `getenv` 2, `listen` 2, `mkdir` 3, `open` 32, `rename` 15, `socket` 4, `unlink` 31. These are **static text-search candidates**, not distinct runtime calls, validated filesystem destinations, or proof of write paths; absolute literals can also be harmless paths, strings and comments. Private inspection report: `/root/hollowdeep-dev/gm-v5/runtime-isolation/v5o-NBLr2Qm8/v5o-preflight.json`.
+
+**Gate remains blocked:** No nonproduction service UID, independent world or player/staff databases, validated relative/absolute path isolation, selected loopback-only port, network restriction or separate logging has been configured. Starting the offline build with merely a different working directory is unsafe until source, startup arguments and config file resolution are audited. No second game process, systemd change, bridge socket or GM actions occurred; production remained active and unchanged.
+
+**Next Stage 5P:** Read-only targeted source review of `main`/argv, TCP bind/listen and port selection, config keys and file path construction (with secrets redacted from terminal output). Require independent test filesystem namespace, nonproduction credentials and verified listener isolation before a future test-run proposal.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
