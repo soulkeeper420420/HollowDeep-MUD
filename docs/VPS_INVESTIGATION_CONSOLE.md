@@ -375,6 +375,14 @@ GitHub publication documents the independent VPS deployment only; it does not up
 
 **Next release gate:** Freeze and compare the complete staged v3 source and release manifest; establish reproducible build provenance; separately assess systemd socket restrictions and ownership. Only then prototype a native-process-owned, **read-only** `capabilities` operation, with explicit web-to-native identity binding, mutual request authentication and controlled authorization. Do not enable arbitrary command strings, live moderation, or speculative automatic retries.
 
+## GM Stage 5C — native v3 baseline preservation (operator-verified, November 8, 2026)
+
+The operator ran `/root/hollowdeep_v5c_baseline.sh` on the separate production VPS without changing the MUD service, the website, or any game files. The executable read from `/proc/<MainPID>/exe` **and** the retained release binary `/root/hollowdeep-dev/releases/gm-presence-v3/frp.v3` each matched the previously recorded v3 SHA-256: `b072d152efa769c5f06fcc6f2350387b4d75eec09780687f5b18f5b960143cd5`.
+
+The staged tree `/root/hollowdeep-dev/gm-presence-v3-20261108-020814/source` had 133 regular source-tree files, including the v3 player-presence publisher markers. The code inventory of staged and live trees each contained 74 `.c`, `.h`, `.S`, or Makefile-named files; **only `io.c` differed** in that inventory. The live `/srv/hollowdeep/world/src_3.00/io.c` lacks the v3 publisher present in staged `io.c`. This is a code-inventory comparison rather than an all-file identity check; it does not prove a bit-for-bit reproducible compilation or that the running executable's entire source provenance is established.
+
+A private, root-only snapshot was preserved at `/root/hollowdeep-dev/gm-v5/baselines/v3-20261108-034207/v3-source-baseline.tar.gz`, with source manifest at `/root/hollowdeep-dev/gm-v5/baselines/v3-20261108-034207/manifest.json`. Archive SHA-256: `791debfa2f347ba729c66bad3449f1e3748db7e92541dd4d169c7baf2da87084`. **Keep this private baseline and the known-good release executable intact; do not compile the older live source tree over v3**. Build provenance remains a separate pre-deployment validation requirement. The production service remained active, no restart occurred, and no native or web GM action channel was deployed.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
