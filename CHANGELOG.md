@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — GM Stage 5H 13/13 isolated fault tests
+
+The operator ran a disposable native C bridge fault harness and passed 13 of 13 scheduled checks for private socket permissions, early disconnect recovery, malformed and oversize frame handling, stalled-client timeouts, exhaustion/recovery of four client slots, and no observed descriptor leak (six file descriptors before and after). Production `hollowdeep.service` stayed active and the native v3 executable remained unchanged; no GM command, web bridge, or MUD restart occurred. **Release blocked:** source inspection confirmed that `reply_and_close()` performs a single non-blocking send followed by a close, without short-write buffering or retry. Stage 5I must correct and test response delivery before any nonproduction integration or deployment. See the [VPS operations guide](docs/VPS_INVESTIGATION_CONSOLE.md).
+
 ## 2026-11-08 — GM Stage 5G isolated bridge latency benchmark
 
 The operator benchmarked a separate ELF32 `hd_gm_bridge_tick()` test harness for **4,200** calls (1,200 idle; 3,000 under an 80-request local load). Idle mean/p95/p99/max were **0.00860/0.01257/0.02538/0.19959 ms**; loaded mean/p95/p99/max were **0.00901/0.01193/0.05427/0.24227 ms**. No measured tick exceeded 1 ms. All 80 loaded requests returned valid replies (64 allowed and 16 denied at the test-only replay-cache limit) with no reported request errors. The temporary socket was removed. The live v3 binary hash remained unchanged and the production game service remained active, with no native deployment or restart. These isolated figures are **not** a production/worst-case latency guarantee. Partial nonblocking writes, stalled clients, resource exhaustion, actual game workload, web/native identity binding, durable audit and persistent replay protection remain untested or unimplemented. See the [VPS operations guide](docs/VPS_INVESTIGATION_CONSOLE.md).
