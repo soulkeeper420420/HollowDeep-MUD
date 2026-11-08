@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — GM Stage 5C v3 native source baseline preserved
+
+The operator completed a read-only production source/binary reconciliation. The running executable and retained v3 release binary had identical SHA-256 `b072d152efa769c5f06fcc6f2350387b4d75eec09780687f5b18f5b960143cd5`. Staged v3 source contained 133 files; the stage/live code inventories each held 74 code/Makefile files and differed only in `io.c`, where the older production source lacks the deployed v3 player-presence publisher. A private, root-only v3 source archive and manifest were saved at `/root/hollowdeep-dev/gm-v5/baselines/v3-20261108-034207/`; archive SHA-256 `791debfa2f347ba729c66bad3449f1e3748db7e92541dd4d169c7baf2da87084`. No game restart, production file changes, or live GM command integration occurred. Build provenance remains unproven; do not rebuild from the older live `io.c` tree. See the [VPS operations guide](docs/VPS_INVESTIGATION_CONSOLE.md).
+
 ## 2026-11-08 — GM Stage 5A/5B bridge readiness and isolated socket test
 
 Completed a **non-deploying** bridge-readiness inspection and six-case isolated Unix-domain socket protocol test for the proposed GM moderation integration. Stage 5A established native staff identity checks, site authentication function candidates, runtime service account and sandbox restrictions, and that no PHP-to-native identity binding or bridge currently exists. Stage 5B verified all six disposable mock tests passed: read-only capability allowance, replay rejection, mutation denial for mute and shutdown, and malformed-request rejection for identity injection and a missing request ID. The socket was removed. These results do **not** verify production admin authentication, native GM authorization, persisted replay protection or any live moderation action.
