@@ -646,6 +646,18 @@ The operator ran `/root/hollowdeep_v5ac_semantic_review.sh` against the private 
 
 **Next gate (Stage 5AD):** A conservative new root-private *test-only* source trial may repair only `dm2.c` numeric type formatting, bounds/short-range validation and initialization order after strict source-shape checks, then perform another 54-object offline link and preserve mode 0600. Queue/rename and `loge` repairs need separate controlled design and testing. Do not run Mordor, change production, or infer runtime safety from a warning reduction.
 
+## GM Fast-track — consolidated test-only formatting repairs and offline rebuild (operator-tested, November 8, 2026)
+
+The operator ran a terminal-safe inline fast-track script, `/root/hollowdeep_fasttrack.sh`, from the verified, already offline Stage 5AB private source. The original Stage 5AB baseline and running production v3 executable checks passed. The script created a new root-private workspace at `/root/hollowdeep-dev/gm-v5/runtime-isolation/fasttrack-w0vHP3u9`, applied the reviewed patch payload with a verified patch SHA-256 and zero-fuzz `patch --dry-run`, then matched the exact before/after source checksums for **eight** patched files: `action.c`, `command5.c`, `creature.c`, `dm2.c`, `dm6.c`, `memory.c`, `player.c`, `post.c`. Original Stage 5T and Stage 5AB sources were not altered; the presence publisher remained a no-op and bridge source remained disabled. All **3/3** negative guard checks passed.
+
+**Full offline native build:** all **54/54** C objects compiled and the isolated ELF32 native executable linked. The new binary is `/root/hollowdeep-dev/gm-v5/runtime-isolation/fasttrack-w0vHP3u9/bin/frp.fasttrack.test-only`, SHA-256 `6cb30c636645813bc67255eb4535df1f5677e2e695f9fa0aac5ca1c98a91feef`, left **mode 0600**, never executed. The test binary had no known production presence literal and the disabled bridge object had no network dependencies.
+
+**Compiler warnings:** compared with Stage 5AB, **40 → 29**: `format-overflow` **9 → 0**, `format` **2 → 0**, `unused-result` **29 → 29**. Elimination of formatting diagnostics does not establish correct file-save/backup rollback, memory ownership, command authorization, runtime safety or freedom from vulnerabilities. The **29 unchecked-return warnings remain** and need functional triage, especially file and socket/error paths. The separate sandbox's **10/10** probe success predates this new game binary and must be revalidated under any eventual launch configuration.
+
+**Artifacts:** private `terminal.log`, `build.log`, source tree, object files and `fasttrack-report.json` are in `fasttrack-w0vHP3u9`. The operator observed exit code **0** with the production game active, no restart, no installed test service, no test executable launch and no native GM bridge activity. These are results of a tool script and operator-reported output, not independent dynamic game tests.
+
+**Next consolidated gate:** Triage all 29 remaining ignored-result sites directly from the new `build.log`, examine the full save/rename/queue/rollback/error paths, and inspect what resources and nonproduction synthetic world would be needed for an isolated runtime. Continue not to run Mordor until the significant I/O and isolation risks are resolved. One bundled read-only inspection is preferable to many per-file terminal stages.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
