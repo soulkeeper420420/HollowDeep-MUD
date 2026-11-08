@@ -263,6 +263,16 @@ The operator installed `/var/www/hollowdeep/public/admin/world-builder-intellige
 
 **Verification/scope:** the operator reported that summary statistics, room 1508 and map navigation, incoming/outgoing connections, available draft comparisons and investigation links worked in the authenticated browser. This is a functional check, not an exhaustive parser or security audit. Installation created a separate PHP admin page; no live game data or running MUD service was changed. GitHub publication records verified VPS behavior but does not deploy PHP or publish private draft contents.
 
+## World Builder Studio v3 — structured proposals and review workflow (host-verified November 8, 2026)
+
+The VPS operator installed `/root/install_hollowdeep_world_builder_v3.sh`, creating the separate admin-only PHP page `/admin/world-builder-review.php` at `/var/www/hollowdeep/public/admin/world-builder-review.php`. Staged and installed PHP lint both passed. The installer reported a new page with no preceding v3 PHP version to back up. The operator confirmed all v3 browser acceptance tests passed.
+
+**Features:** proposal editor for known snapshot rooms; proposed name, description and zone; structured exit proposals entered as `direction:destination` per line; syntax validation, duplicate-direction detection and destination-exists checks against numeric room JSON snapshots; private, per-room proposal files with Draft and Ready for Review statuses; zone-based proposal summary and filtered change-review queue; v1/v2 navigation and existing investigation links. The review status is administrative only, not an approval or deployment.
+
+**Safety and scope:** v3 proposals are stored separately under `/var/lib/hollowdeep/world-studio/proposals/`, owned by `www-data` with a private 0700 directory and 0600 individual JSON files. An authenticated admin session, session CSRF token, input-length checks, file lock and same-directory temporary file rename protect the v3 save workflow. Invalid structured exits are rejected rather than overwriting a saved proposal. Empty proposed exit text means no exit entries proposed; it does **not** remove existing game exits. This is a browser functional verification, not an exhaustive security audit, native Mordor compatibility test or guarantee that exit topology is sound.
+
+The installer did not edit live MUD room binaries, source, snapshots or investigation records and did not restart the game. GitHub publishing records the operator-verified VPS deployment; it does not deploy PHP or publish any private proposal contents.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
