@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — Step 143 Clear Activity Filter browser-verified
+
+The VPS administrator Operations Overview now includes a contextual **Clear Activity Filter** shortcut that restores All Activity while preserving search text, change type, UTC date range, sort order and page size, and resets pagination to Page 1. The operator verified the shortcut from Status Changes and Notes Changes and confirmed Clear Search, Clear Dates, Clear Change Type, Reset Filters and View History still work in the browser. Installer backup: `operations-overview.php.before-step143-20261108-001441`; staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub update documents a separately installed VPS PHP change without deploying PHP, disclosing private audit records, or altering/restarting the native MUD.
+
 ## 2026-11-08 — Step 142 Clear Change Type browser-verified
 
 The VPS administrator Operations Overview now provides a contextual **Clear Change Type** link, returning the change-type selector to All Changes while retaining activity, search, UTC dates, sort and page size and resetting to Page 1. The operator browser-verified the shortcut from Status Only and Notes Only and confirmed preserved selections, Clear Dates, Clear Search, Reset Filters, and View History. Step 142 backup: `operations-overview.php.before-step142-20261108-001329`; staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub publication is documentation only and does not deploy PHP, publish private records or modify/restart the live MUD.
