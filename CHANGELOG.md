@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — Step 137 audit change-type filter browser-verified
+
+The VPS Operations Overview now filters audit activity by All Changes, Status Only, Notes Only, and Status & Notes while keeping the full-history breakdown counters independent of filtering. The filter combines with existing search, date presets, sort and pagination, and Reset Filters restores All Changes. The operator confirmed the four choices and existing navigation in the authenticated browser. Installer backup: `operations-overview.php.before-step137-20261108-000651`; staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub documentation update does not deploy PHP, publish private records, or touch the running MUD.
+
 ## 2026-11-08 — Step 136 audit change breakdown browser-verified
 
 The VPS Operations Overview now displays full-history audit counts for Status Changes Only, Notes Changes Only, and Status & Notes Changed; events with neither recorded change are accounted for separately. Counts are calculated before filtering so they do not fluctuate with search, date ranges, sorting or pagination. The operator confirmed the counters, totals and View History drilldown in an authenticated browser. The Step 136 installer saved `operations-overview.php.before-step136-20261108-000507` and passed PHP lint before and after installation. See the [VPS investigation console guide](docs/VPS_INVESTIGATION_CONSOLE.md). GitHub documentation publication does not deploy PHP, publish private audit data, or modify or restart the native MUD.
