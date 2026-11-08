@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — Step 139 All Audit Events card browser-verified
+
+The VPS Operations Overview now offers a fourth clickable audit breakdown card, **All Audit Events**, which clears only the change-type filter while retaining activity, search, date range, sort and page-size selections and resetting to Page 1. The full-history event total remains stable across filtered views. The operator confirmed all card links, preserved controls, Reset Filters and View History in the authenticated browser. Backup: `operations-overview.php.before-step139-20261108-000940`; staged and deployed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub publication does not deploy PHP, publish private data or modify/restart the MUD.
+
 ## 2026-11-08 — Step 138 clickable audit breakdown browser-verified
 
 The VPS administrator Operations Overview now makes its three full-history audit breakdown counters clickable, setting the corresponding Change Type filter while retaining search, date, sorting, activity and page-size settings and resetting to Page 1. The selected card is marked for the operator. The operator browser-verified all three cards, stable totals, Reset Filters and View History. The Step 138 installer saved `operations-overview.php.before-step138-20261108-000813`; staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). GitHub publication is documentation only; it does not deploy PHP, expose private audit records, or touch native MUD processes.
