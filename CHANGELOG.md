@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — Step 136 audit change breakdown browser-verified
+
+The VPS Operations Overview now displays full-history audit counts for Status Changes Only, Notes Changes Only, and Status & Notes Changed; events with neither recorded change are accounted for separately. Counts are calculated before filtering so they do not fluctuate with search, date ranges, sorting or pagination. The operator confirmed the counters, totals and View History drilldown in an authenticated browser. The Step 136 installer saved `operations-overview.php.before-step136-20261108-000507` and passed PHP lint before and after installation. See the [VPS investigation console guide](docs/VPS_INVESTIGATION_CONSOLE.md). GitHub documentation publication does not deploy PHP, publish private audit data, or modify or restart the native MUD.
+
 ## 2026-11-07 — Step 135 quick UTC date presets browser-verified
 
 The VPS Operations Overview now offers Today (UTC), Last 7 Days and Last 30 Days audit date shortcuts, retaining search, activity filter, sort and page size while returning to Page 1. The operator verified the three presets, preservation of selections, and Reset Filters in the authenticated browser. The Step 135 installer saved `operations-overview.php.before-step135-20261107-235454`; staged and deployed PHP lint passed. The [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md) describes the controls. This GitHub documentation commit does not deploy PHP, include private audit data, or alter/restart the native MUD.
