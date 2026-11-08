@@ -213,6 +213,12 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step139.py
 
 The installer backed up `operations-overview.php.before-step139-20261108-000940`; staged and installed PHP lint passed. The operator confirmed all four cards, preserved selections, Reset Filters and View History in the authenticated browser. GitHub publication documents the VPS change but does not deploy PHP, include private audit records, or alter/restart the native MUD.
 
+## Step 140 — Clear only audit date filters (host-verified November 8, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step140.py` to add a contextual **Clear Dates** link to the admin-only Operations Overview. The link appears when either UTC From Date or To Date is populated; clicking it empties `audit_from` and `audit_to`, retains the existing activity, search, change type, sort and page-size selections, and returns to Page 1. Unlike Reset Filters, Clear Dates does not reset other controls.
+
+The installer retained `operations-overview.php.before-step140-20261108-001115`; staged and deployed PHP lint passed. The operator confirmed Clear Dates with preset and one-sided ranges, preserved controls, existing audit cards, Reset Filters and View History in the authenticated browser. This documentation does not deploy VPS PHP, expose private investigation records, or modify/restart native MUD services.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
