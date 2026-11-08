@@ -195,6 +195,12 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step136.py
 
 The installer retained `operations-overview.php.before-step136-20261108-000507`; staged and deployed PHP lint checks passed. The operator confirmed the counters, filter-independent totals and View History links in the browser. This was installed directly on the VPS; GitHub documentation does not deploy PHP or publish audit data, and no native MUD files or processes were changed.
 
+## Step 137 — Audit change-type filtering (host-verified November 8, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step137.py` in the admin-only Operations Overview. The new GET `change_type` selector supports **All Changes**, **Status Only**, **Notes Only**, and **Status & Notes**. It classifies each audit event by whether `old_status` differs from `new_status` and whether `notes_changed` is true, applying the selection after the Step 136 full-history counters are calculated. The selection persists through Previous/Next, direct page jump, and UTC date presets; Reset Filters returns it to All Changes. The existing activity, text, date, sort and page-size controls remain available.
+
+The installer retained `operations-overview.php.before-step137-20261108-000651`; staged and deployed PHP lint passed. The operator **confirmed all four change-type selections and their interaction with existing controls in the browser**. GitHub publication is documentation only and does not deploy PHP, publish private audit data, or modify/restart the native MUD.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
