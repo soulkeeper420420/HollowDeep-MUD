@@ -1,5 +1,11 @@
 # HollowDeep release notes
 
+## 2026-11-08 — GM Moderation Center v4 Stage 4 read-only reference installed
+
+Added a **separate administrator-only read-only** VPS moderation reference at `/admin/gm-moderation-v4.php`. The page documents native `hstaff` and `hmoderate` operations, HollowDeep staff ranks and target protections, audit ordering, and the security prerequisites for a future native moderation RPC bridge. Source review in `hollowdeep_staff.c` shows moderator-level gates for announce/mute/unmute/kick, administrator gates for roster audit and role changes, target/rank checks, required online targets for mute/kick, and the attempt to persist an audit entry before major side effects. Audit entries are **not** definitive execution receipts; no replay protection or live web-action interface is provided.
+
+The operator reported staged/temporary/installed `php -l` checks passed, `hollowdeep.service` active, existing GM command catalog unchanged and **no native game modifications or restart**. An authenticated mobile screenshot verified initial rendering of the `hstaff whoami`, `hstaff list`, and `hstaff audit` operation cards with expected labels. The remaining operations, full navigation, and cross-browser checks are **not yet browser-verified**. Live moderation actions remain disabled. See the [VPS investigation and operations guide](docs/VPS_INVESTIGATION_CONSOLE.md). GitHub documentation does not deploy the VPS PHP source or disclose staff, player or audit records.
+
 ## 2026-11-08 — GM Console v4 Stage 3 native dispatcher permission labels installed
 
 The operator installed the Stage 3 permission-label update to the separate administrator-only `/admin/live-gm-console-v4.php` page. Source inspection of `hollowdeep_help.c:20–30` verified that native `*` command IDs 101–149 normally require a native `CARETAKER` character class; IDs 106, 119, 129, 141, 144, 145, 146 and 148 require native `DM`; ID 113 (`*flushrooms`) additionally requires a configured nonempty `DMNAME2` and exact operator-name match. The dashboard now labels these **dispatcher-level** requirements while continuing to mark additional per-handler restrictions and equivalence to HollowDeep's separate staff-role model as unresolved.
