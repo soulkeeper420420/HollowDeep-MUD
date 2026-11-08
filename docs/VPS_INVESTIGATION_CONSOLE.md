@@ -243,6 +243,16 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step144.py
 
 The installer retained `operations-overview.php.before-step144-20261108-001632`; staged and installed PHP lint both passed. The operator confirmed Clear Sort, retained selections, and existing controls in an authenticated browser. GitHub publication documents separately installed VPS PHP; it does not deploy PHP, publish private investigation records, or change/restart native MUD services.
 
+## World Builder Studio v1 — visual room exploration and private drafts (host-verified November 8, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/world-studio/install_v1.py`, creating admin-only `/admin/world-builder-studio.php` at `/var/www/hollowdeep/public/admin/world-builder-studio.php`. PHP lint passed for the staged and deployed page. It was a new page, so no previous-version PHP backup was needed.
+
+**Features:** visual schematic SVG map of up to 36 rooms per page with detected same-page connections; room ID/name/description search; zone filtering where known snapshot fields supply zone labels; room inspector with detected exits; and direct links to existing Room Browser, Connection Inspector, Investigation Queue and Investigation Dashboard. Authentication uses the existing PHP `require_admin()` bootstrap. This is a schematic connectivity visualization, **not** geographic/world-coordinate mapping. Snapshot field extraction is schema-tolerant but may omit unsupported fields.
+
+**Private builder drafts:** proposed name, description, exit-design notes and builder notes are written to standalone, per-room JSON draft files under `/var/lib/hollowdeep/world-studio/drafts/` (www-data-owned, mode 0700 directory, 0600 files). Draft saves require a valid admin session and session CSRF token, validate known snapshot room IDs and field lengths, use an exclusive lock and same-directory temporary-file rename, and redirect after saving. Drafts are **not** applied to game data or investigation records. The initial installer created only the admin PHP page and the private drafts directory, with no native Mordor engine/world edits or restarts.
+
+**Verification:** The operator reported that the full browser acceptance check passed: map node selection, room 1508 search, zone browsing where populated, draft save/refresh persistence, and investigation links. This is a functional browser test, not a complete security review or proof that every snapshot's fields are normalized perfectly. The GitHub publication is documentation only; it does not deploy PHP or publish private draft data.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
