@@ -1,5 +1,11 @@
 # HollowDeep release notes
 
+## 2026-11-08 — Live GM Console v4 native command catalog, initial browser verification
+
+Deployed a new administrator-only, **read-only** GM command reference at `/admin/live-gm-console-v4.php` on the separate Ubuntu VPS. Stage 1 discovered 59 `dm_*` and `hd_staff_*` native C functions in eight source files and grouped them into five preliminary categories. Stage 2 mapped the actual `global.c` command registry into 54 `*`-prefixed registrations and aliases for 49 distinct handlers, preserving the 59-function catalog. The page displays command names, native handler names, command IDs, source line references and explicit authorization uncertainty; it cannot execute GM commands.
+
+The operator reported successful PHP lint for staged and installed pages, an active `hollowdeep.service`, no native game changes and no service restart. An authenticated mobile screenshot confirmed the registered `*teleport` card correctly displayed `dm_teleport`, command ID 101, `global.c:431`, an authorization notice and execution disabled. Search/filter behavior, all command cards and exact per-command staff permissions remain **unverified**. Native dispatcher checks and per-handler caretaker-class checks must not be mistaken for automatic parity with HollowDeep's separate player/moderator/implementor/administrator/owner staff-role hierarchy. A timestamped local v4 backup was retained. See the [VPS investigation and operations guide](docs/VPS_INVESTIGATION_CONSOLE.md). GitHub publication is documentation only; it does not deploy the VPS console or include private player data.
+
 ## 2026-11-08 — Live GM Console v3 authenticated player presence, production verified
 
 Activated the native Mordor 3.00 **count-only authenticated-session publisher** in `frp.new`, backed by a strict-permission JSON snapshot at `/var/lib/hollowdeep/gm-presence/status.json`, a schema/freshness/ownership-validating extension to the existing root-run GM monitor, and an admin-only `/admin/live-gm-console-v3.php` dashboard. The dashboard distinguishes authenticated characters from established TCP connections; missing or stale native data appears as **Unavailable**, not zero. No character names, IP addresses, messages or credentials are published and GM commands remain disabled.
