@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — GM Stage 5D isolated native C bridge test passed
+
+The operator compiled a **standalone ELF32** Unix-domain socket protocol stub and passed eight local checks: read-only capabilities, replay rejection, mute/shutdown denial, actor-injection denial, missing request ID, wrong protocol-version type and oversize frame rejection. Its temporary private socket was removed. The prototype is **not** connected to PHP or the native Mordor game, and its UID check, strict-format parser and in-memory replay set are test-only rather than production authentication or audit controls. The live game service remained active; no native files or website were changed and no restart or live GM commands occurred. Further isolated source-loop integration and administrator-to-native identity design remain prerequisites. See the [VPS operations guide](docs/VPS_INVESTIGATION_CONSOLE.md).
+
 ## 2026-11-08 — GM Stage 5C v3 native source baseline preserved
 
 The operator completed a read-only production source/binary reconciliation. The running executable and retained v3 release binary had identical SHA-256 `b072d152efa769c5f06fcc6f2350387b4d75eec09780687f5b18f5b960143cd5`. Staged v3 source contained 133 files; the stage/live code inventories each held 74 code/Makefile files and differed only in `io.c`, where the older production source lacks the deployed v3 player-presence publisher. A private, root-only v3 source archive and manifest were saved at `/root/hollowdeep-dev/gm-v5/baselines/v3-20261108-034207/`; archive SHA-256 `791debfa2f347ba729c66bad3449f1e3748db7e92541dd4d169c7baf2da87084`. No game restart, production file changes, or live GM command integration occurred. Build provenance remains unproven; do not rebuild from the older live `io.c` tree. See the [VPS operations guide](docs/VPS_INVESTIGATION_CONSOLE.md).
