@@ -225,6 +225,12 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step141.py
 
 The installer retained `operations-overview.php.before-step141-20261108-001220`; staged and installed PHP lint passed. The operator confirmed the Clear Search behavior, preserved settings and existing cards/drilldowns in the browser. This guide documents the PHP change installed separately on the VPS; GitHub publication does not deploy PHP, reveal private investigation records, or modify/restart the native MUD.
 
+## Step 142 — Clear only audit Change Type (host-verified November 8, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step142.py` on the admin-only Operations Overview. The contextual **Clear Change Type** link appears when the GET `change_type` selection is not `all`; clicking it restores **All Changes** without clearing activity, audit search, UTC date range, chronological sorting or page-size preferences, and resets audit pagination to Page 1. Existing clickable audit breakdown cards, Clear Dates, Clear Search, Reset Filters and View History remain available.
+
+The installer retained `operations-overview.php.before-step142-20261108-001329`; both staged and deployed PHP lint checks passed. The operator **confirmed the shortcut and preserved controls in the browser**. The live PHP edit took place on the VPS. Publishing this guide does not deploy PHP, expose private investigation data or modify/restart the native MUD.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
