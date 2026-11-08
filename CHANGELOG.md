@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — GM Stage 5J cadence test exposes truncated response
+
+The operator tested the isolated 32-bit native response-buffering prototype at simulated game-loop intervals of 1, 20, 50 and 100 ms, with deliberately limited seven-byte writes and periodic `EAGAIN`. The read-only capability response was complete at 1 ms (11.93 ms total), 20 ms (201.77 ms) and 50 ms (532.11 ms). At **100 ms/tick**, the connection closed after **1,082.0 ms**, delivering **56 of 58 response bytes**. Stage 5J therefore found a **response deadline/throughput defect** in the test-only one-send-attempt-per-tick implementation. Production executable verification passed, `hollowdeep.service` stayed active, the Stage 5I source remained unchanged, and no website or game integration, command execution or restart occurred. Stage 5K must apply a strictly bounded multi-write-per-tick budget with a separate response deadline and repeat cadence/fault tests before any nonproduction Mordor integration. See the [VPS operations guide](docs/VPS_INVESTIGATION_CONSOLE.md).
+
 ## 2026-11-08 — GM Stage 5H 13/13 isolated fault tests
 
 The operator ran a disposable native C bridge fault harness and passed 13 of 13 scheduled checks for private socket permissions, early disconnect recovery, malformed and oversize frame handling, stalled-client timeouts, exhaustion/recovery of four client slots, and no observed descriptor leak (six file descriptors before and after). Production `hollowdeep.service` stayed active and the native v3 executable remained unchanged; no GM command, web bridge, or MUD restart occurred. **Release blocked:** source inspection confirmed that `reply_and_close()` performs a single non-blocking send followed by a close, without short-write buffering or retry. Stage 5I must correct and test response delivery before any nonproduction integration or deployment. See the [VPS operations guide](docs/VPS_INVESTIGATION_CONSOLE.md).
