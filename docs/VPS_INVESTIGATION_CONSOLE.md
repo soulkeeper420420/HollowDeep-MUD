@@ -283,6 +283,14 @@ The VPS operator installed `/root/install_hollowdeep_world_builder_v4.sh`, creat
 
 **Verification:** The operator confirmed the package counters, warnings and dependencies when applicable, zone/review filtering, links to v3, and JSON manifest download through authenticated browser testing. This is a functional browser check rather than a security audit or deployability assessment. GitHub publication documents the independently installed VPS PHP change and includes no private proposal contents.
 
+## World Builder Studio v5 — read-only change impact analyzer (host-verified November 8, 2026)
+
+The VPS operator installed `/root/install_hollowdeep_world_builder_v5.sh`, adding the standalone admin-only PHP page `/admin/world-builder-impact.php` at `/var/www/hollowdeep/public/admin/world-builder-impact.php`. Both staged and deployed PHP syntax checks passed; the installer reported a new page, so no previous v5 page backup was needed. The operator reported that **all v5 browser verification tests passed**.
+
+**Features:** read-only, schema-tolerant scan of numeric room JSON snapshots and private v3 proposal metadata; a clickable, schematic two-hop neighborhood map with at most 25 rooms, including a visual indicator for neighboring rooms with proposals; per-room incoming and outgoing exit lists; a comparison table showing detected existing destinations against explicit proposed exit entries (omitted proposals **do not** mean deletion); risk notices for missing current or proposed destination snapshots, self-loops, high connection count, proposal baseline name/zone drift, missing Ready for Review status and links to other proposed rooms; cross-proposal dependency links and a manual impact review checklist. The analyzer offers navigation to existing v1–v4 builder tools and the investigation queue.
+
+**Safety and interpretation:** v5 reads snapshots and proposal records but writes neither. The room graph is schematic, not geographical or a simulation of a modified world. The heuristics are advisory, not a completeness proof, human approval, native Mordor file compatibility certification or deployment authorization. No source, native room binaries, live MUD processes, investigation data or private proposals were modified by this install. GitHub publication records the verified VPS deployment but does not deploy PHP or publish private data.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
