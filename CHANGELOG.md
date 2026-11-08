@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — Step 144 Clear Sort browser-verified
+
+The VPS administrator Operations Overview now has a contextual **Clear Sort** link that resets Oldest first to Newest first while preserving the activity, search, change type, UTC date range and page-size settings, and returning pagination to Page 1. The operator confirmed the shortcut with filters selected and verified that Clear Dates, Clear Search, Clear Change Type, Clear Activity Filter, Reset Filters, and View History still work in the authenticated browser. Installer backup: `operations-overview.php.before-step144-20261108-001632`; staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub documentation commit does not deploy PHP, expose private records, or modify/restart the native MUD.
+
 ## 2026-11-08 — Step 143 Clear Activity Filter browser-verified
 
 The VPS administrator Operations Overview now includes a contextual **Clear Activity Filter** shortcut that restores All Activity while preserving search text, change type, UTC date range, sort order and page size, and resets pagination to Page 1. The operator verified the shortcut from Status Changes and Notes Changes and confirmed Clear Search, Clear Dates, Clear Change Type, Reset Filters and View History still work in the browser. Installer backup: `operations-overview.php.before-step143-20261108-001441`; staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub update documents a separately installed VPS PHP change without deploying PHP, disclosing private audit records, or altering/restarting the native MUD.
