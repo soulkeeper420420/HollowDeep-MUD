@@ -273,6 +273,16 @@ The VPS operator installed `/root/install_hollowdeep_world_builder_v3.sh`, creat
 
 The installer did not edit live MUD room binaries, source, snapshots or investigation records and did not restart the game. GitHub publishing records the operator-verified VPS deployment; it does not deploy PHP or publish any private proposal contents.
 
+## World Builder Studio v4 — read-only change-package validation and manifest (host-verified November 8, 2026)
+
+The VPS operator installed `/root/install_hollowdeep_world_builder_v4.sh`, creating the separate admin-only `/admin/world-builder-packages.php` page at `/var/www/hollowdeep/public/admin/world-builder-packages.php`. Staged and deployed PHP syntax checks passed, and the operator reported that all v4 browser acceptance tests passed. It was a new page with no prior v4 PHP backup required.
+
+**Features:** read-only scan of v3 proposal records under `/var/lib/hollowdeep/world-studio/proposals/`; package counters for all proposals, drafts, records with warnings, records ready for review without detected warnings, and invalid/skipped files; checks for missing source snapshots, recorded baseline name/zone drift, invalid workflow statuses, malformed or inconsistent exit text/structured data, missing destination snapshots and dependencies on other proposed rooms. Zone and review-state filters provide a cross-room change-review queue with links back to the v3 proposal editor. The administrator can download a JSON **review manifest** containing IDs, workflow statuses, proposed zones, exit destinations, dependencies and warnings, not full builder notes or descriptions. Export is generated on demand and is not saved server-side.
+
+**Limitations:** 'ready without detected warnings' is not game-engine compatibility certification, human approval or permission to deploy. v3 does not record full source snapshot hashes, so complete drift detection is not possible. An exit to an existing snapshot can still violate native MUD constraints. Exports may contain private planning metadata and should be kept private. Neither viewing nor exporting alters proposals, native game files, investigation records, or MUD services.
+
+**Verification:** The operator confirmed the package counters, warnings and dependencies when applicable, zone/review filtering, links to v3, and JSON manifest download through authenticated browser testing. This is a functional browser check rather than a security audit or deployability assessment. GitHub publication documents the independently installed VPS PHP change and includes no private proposal contents.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
