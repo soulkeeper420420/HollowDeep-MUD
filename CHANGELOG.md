@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — World Builder Studio v1 browser-verified
+
+Installed a new admin-only VPS PHP **World Builder Studio** at `/admin/world-builder-studio.php`, providing a schematic SVG room-connection map, room search, zone browsing where snapshot metadata supports it, room inspector and exit listing, private per-room proposed name/description/exits/notes drafts, and navigation into existing investigation tools. A staged and installed PHP syntax check passed; the operator confirmed the map, room 1508 search, zone UI, draft persistence, and investigation links in the authenticated browser. Installer: `/root/hollowdeep-dev/world-studio/install_v1.py`. The new page had no previous version to back up. Draft JSON is stored privately under `/var/lib/hollowdeep/world-studio/drafts/` and is **never applied to live game data** by this release. See the [VPS investigation and World Builder guide](docs/VPS_INVESTIGATION_CONSOLE.md). GitHub publication documents the VPS install; it does not deploy PHP, private drafts, or room files, and does not restart the MUD.
+
 ## 2026-11-08 — Step 144 Clear Sort browser-verified
 
 The VPS administrator Operations Overview now has a contextual **Clear Sort** link that resets Oldest first to Newest first while preserving the activity, search, change type, UTC date range and page-size settings, and returning pagination to Page 1. The operator confirmed the shortcut with filters selected and verified that Clear Dates, Clear Search, Clear Change Type, Clear Activity Filter, Reset Filters, and View History still work in the authenticated browser. Installer backup: `operations-overview.php.before-step144-20261108-001632`; staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub documentation commit does not deploy PHP, expose private records, or modify/restart the native MUD.
