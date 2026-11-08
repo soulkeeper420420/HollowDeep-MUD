@@ -1,5 +1,11 @@
 # HollowDeep release notes
 
+## 2026-11-08 — GM Stage 5A/5B bridge readiness and isolated socket test
+
+Completed a **non-deploying** bridge-readiness inspection and six-case isolated Unix-domain socket protocol test for the proposed GM moderation integration. Stage 5A established native staff identity checks, site authentication function candidates, runtime service account and sandbox restrictions, and that no PHP-to-native identity binding or bridge currently exists. Stage 5B verified all six disposable mock tests passed: read-only capability allowance, replay rejection, mutation denial for mute and shutdown, and malformed-request rejection for identity injection and a missing request ID. The socket was removed. These results do **not** verify production admin authentication, native GM authorization, persisted replay protection or any live moderation action.
+
+A running-executable hash check confirmed native v3 player-presence SHA-256 `b072d152efa769c5f06fcc6f2350387b4d75eec09780687f5b18f5b960143cd5`. However, live `src_3.00/io.c` lacks the active publisher, whereas the staged v3 source contains it. **Reconcile and preserve the staged baseline before compiling**; do not rebuild from the older live source tree. The private production presence snapshot was fresh and the game service remained active. No native code, website code, service units, world or player files were changed and no MUD restart occurred. See the [VPS operations guide](docs/VPS_INVESTIGATION_CONSOLE.md). GitHub publication is documentation only.
+
 ## 2026-11-08 — GM Moderation Center v4 Stage 4 read-only reference installed
 
 Added a **separate administrator-only read-only** VPS moderation reference at `/admin/gm-moderation-v4.php`. The page documents native `hstaff` and `hmoderate` operations, HollowDeep staff ranks and target protections, audit ordering, and the security prerequisites for a future native moderation RPC bridge. Source review in `hollowdeep_staff.c` shows moderator-level gates for announce/mute/unmute/kick, administrator gates for roster audit and role changes, target/rank checks, required online targets for mute/kick, and the attempt to persist an audit entry before major side effects. Audit entries are **not** definitive execution receipts; no replay protection or live web-action interface is provided.
