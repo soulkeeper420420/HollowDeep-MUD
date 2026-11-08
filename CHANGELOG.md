@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — Step 140 Clear Dates browser-verified
+
+The VPS PHP Operations Overview now provides a contextual **Clear Dates** shortcut that removes only audit From/To date restrictions, preserves the activity, text-search, change-type, sorting and page-size settings, and returns to Page 1. The operator verified preset and open-ended dates, preserved controls, Reset Filters, all four audit cards and View History in the authenticated browser. Installer backup: `operations-overview.php.before-step140-20261108-001115`; staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub documentation commit neither deploys PHP nor publishes private records or restarts/modifies the MUD.
+
 ## 2026-11-08 — Step 139 All Audit Events card browser-verified
 
 The VPS Operations Overview now offers a fourth clickable audit breakdown card, **All Audit Events**, which clears only the change-type filter while retaining activity, search, date range, sort and page-size selections and resetting to Page 1. The full-history event total remains stable across filtered views. The operator confirmed all card links, preserved controls, Reset Filters and View History in the authenticated browser. Backup: `operations-overview.php.before-step139-20261108-000940`; staged and deployed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub publication does not deploy PHP, publish private data or modify/restart the MUD.
