@@ -1,5 +1,11 @@
 # HollowDeep release notes
 
+## 2026-11-08 — GM Console v4 Stage 3 native dispatcher permission labels installed
+
+The operator installed the Stage 3 permission-label update to the separate administrator-only `/admin/live-gm-console-v4.php` page. Source inspection of `hollowdeep_help.c:20–30` verified that native `*` command IDs 101–149 normally require a native `CARETAKER` character class; IDs 106, 119, 129, 141, 144, 145, 146 and 148 require native `DM`; ID 113 (`*flushrooms`) additionally requires a configured nonempty `DMNAME2` and exact operator-name match. The dashboard now labels these **dispatcher-level** requirements while continuing to mark additional per-handler restrictions and equivalence to HollowDeep's separate staff-role model as unresolved.
+
+The permission scanner processed 54 registrations and 49 handlers, flagging 18 high-impact handler groups for further audit. Source review resolved two definition-scanner misses (`dm_finger` and `dm_list`). The installer reported source verification passed, staged and installed PHP lint passed, an atomic PHP page replacement and a backup at `/root/hollowdeep-dev/gm-v4/backups/live-gm-console-v4-before-permissions-20261108-032231.php`. The operator confirmed `hollowdeep.service` active, 59-function catalog preserved, **GM command execution disabled**, no native game change and no MUD restart. **Stage 3 browser validation remains pending**; do not conflate source-backed labels with a complete security review. See the [VPS operations guide](docs/VPS_INVESTIGATION_CONSOLE.md). GitHub publishing does not deploy VPS PHP or source binaries.
+
 ## 2026-11-08 — Live GM Console v4 native command catalog, initial browser verification
 
 Deployed a new administrator-only, **read-only** GM command reference at `/admin/live-gm-console-v4.php` on the separate Ubuntu VPS. Stage 1 discovered 59 `dm_*` and `hd_staff_*` native C functions in eight source files and grouped them into five preliminary categories. Stage 2 mapped the actual `global.c` command registry into 54 `*`-prefixed registrations and aliases for 49 distinct handlers, preserving the 59-function catalog. The page displays command names, native handler names, command IDs, source line references and explicit authorization uncertainty; it cannot execute GM commands.
