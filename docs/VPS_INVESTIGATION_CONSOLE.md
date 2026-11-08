@@ -576,6 +576,26 @@ The operator tested the proposed isolation boundaries with a **short-lived trans
 
 **Next gate (Stage 5Y):** Perform a **read-only** source-context audit of all 12 format-overflow warnings using the guarded private source, identifying destination declaration/type and size, expression, tainted inputs, adjacent bounds validation and feasible mitigation. Preserve source, hashes and service state; no automatic blind `sprintf` replacement and no game start. Separately confirm the transient sandbox report schema and successes before subsequent isolation work.
 
+## GM Stage 5Y — guarded source context audit for 15 format warnings (operator-tested, November 8, 2026)
+
+The operator ran `/root/hollowdeep_v5y_buffer_audit.sh`, verifying the Stage 5T guarded source hashes, the offline Stage 5U ELF32 binary SHA-256, mode **0600**, and the prior **10/10** transient systemd sandbox result. The running production v3 MUD stayed active with its verified native executable hash, and no game was launched. The warning inventory remained **44** warnings: **29** unused-result, **12** format-overflow, and **3** other format diagnostics. All **15/15** format-warning source contexts were indexed and printed with double-quoted literals redacted. These were *code-location/context collection*, not completed safety reviews or fixes.
+
+**Concrete candidates:**
+- `files2.c:96,217,528`: `sprintf(filebak,...,file)` with both `file` and `filebak` declared `char[256]`, immediately before `rename` and `open` flows. Check required backup suffix and combined buffer capacity, plus return-code behavior, before changing.
+- `command5.c:593`, `dm6.c:61`, `post.c:172,197`: path formatting into `char file[80]`, with `PLAYERPATH` or `POSTPATH` and native player names. Resolve max names and path macros before editing; some are followed by `unlink` or file I/O.
+- `post.c:99`: message formatting into `char outstr[85]` with player name and date; exact output length, subsequent `strncpy` behavior, NUL termination, and write semantics remain unverified.
+- `creature.c:565`: `sprintf` into `char file[80]` from `OBJPATH`, creature name and level; adjacent `char tmp[2048]` and `tmp[n]=0` after `read(fd,tmp,2048)` suggest an additional independent possible out-of-bounds/error-index hazard when `n` is -1 or 2048. This needs context review, not an automatic patch.
+- `player.c:348`: post path into `str`, declaration not found in the preceding 180 lines.
+- `action.c:380`: format into `obj_ptr->name`, a struct member; requires member declaration and name-size validation.
+- `memory.c:87`: string into `char buf[80]` then `loge(buf)`; check both length bounds and whether `loge` treats its argument as a format string.
+- Other `format` warnings at `dm2.c:607,619` and `dm3.c:852` require review of complete GCC diagnostics and callee signatures. `dm2.c:619` is immediately followed in the excerpt by `zero(new_rom,sizeof(room))`, possibly clearing fields just assigned; check actual control flow and semantics.
+
+**Remaining safety gate:** The report contains no established maximum formatted output lengths, source-input trust boundaries, field capacities, truncation/error behavior, patches or runtime validation. The remaining **29** unchecked-result warnings are unreviewed. In particular, a passing build and sandbox probe do not authorize running the game.
+
+**Artifacts:** `/root/hollowdeep-dev/gm-v5/runtime-isolation/v5y-Jbr6S1bA/v5y-format-audit.json`, source `/root/hollowdeep-dev/gm-v5/runtime-isolation/v5t-nBFclfGN/source`, and Stage 5U private `build.log`.
+
+**Next gate (Stage 5Z diagnostic precision pass):** Collect **sanitized** actual format specifier patterns and literal lengths, multi-line call argument expressions, destination type/declaration/size and struct-member definitions, and any GCC warning continuation notes. Do not automate blind `sprintf` substitutions or source patches until capacity and truncation semantics are known. No game start, no source/site/service alteration.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
