@@ -207,6 +207,12 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step138.py
 
 The installer retained `operations-overview.php.before-step138-20261108-000813`; staged and deployed PHP lint passed. The operator confirmed all three cards and their interaction with filters/navigation in the browser. This is a separately installed VPS PHP change; publishing this guide does not deploy PHP, publish private audit records, or modify/restart the native MUD.
 
+## Step 139 — All Audit Events clickable card (host-verified November 8, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step139.py` to add an **All Audit Events** card alongside the existing three clickable breakdown cards. Clicking this card sets GET `change_type=all` without clearing the activity filter, text search, sort order, page size or UTC date range, and returns the audit list to Page 1. Its count reflects the sum of full-history status-only, notes-only, both-changed and neither-changed events; it is independent of displayed filters. Clicking the other cards continues to select their categories.
+
+The installer backed up `operations-overview.php.before-step139-20261108-000940`; staged and installed PHP lint passed. The operator confirmed all four cards, preserved selections, Reset Filters and View History in the authenticated browser. GitHub publication documents the VPS change but does not deploy PHP, include private audit records, or alter/restart the native MUD.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
