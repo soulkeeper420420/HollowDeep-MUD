@@ -556,6 +556,16 @@ Systemd `255 (255.4-1ubuntu8.18)` was observed. Static `systemd-analyze verify` 
 
 **Next gate (Stage 5W):** Provision only a new restricted, locked noninteractive test UID/group and empty owned directory skeleton, with fail-closed preflight checks, no test credentials and **no** production data copy, native executable launch, ports, firewall, service install or restart. Verify permissions/ownership and production binary unchanged; Stage 5W is not runtime authorization. Classify and review the high-priority warnings and prove mount/network confinement prior to any actual game test.
 
+## GM Stage 5W — locked nonproduction identity and empty directory provisioning (operator-tested, November 8, 2026)
+
+The operator ran `/root/hollowdeep_v5w_provision_identity.sh` with the known-good running v3 and Stage 5U offline SHA-256 baselines verified. **This stage intentionally changed only the host's nonproduction account and empty test-directory state**: it created and password-locked a new noninteractive system identity `hollowdeep-test` (**UID 995, GID 986**, `/usr/sbin/nologin`) and **13 empty directories** under `/var/lib/hollowdeep-test` and `/run/hollowdeep-test` owned by that identity with mode **0700**. All **13/13** directory ownership/mode checks passed. No world, player, room, staff, game credentials or other production data was copied. The test-only ELF32 binary remained under the private root-only development workspace with mode **0600**; no binary was installed.
+
+An actual unprivileged probe (using `setpriv` to switch to the new UID/GID and clear supplementary groups) confirmed that **9/9 known production locations denied write access** and **6/6 private test locations permitted required access**. This test covers only the enumerated paths under current DAC permissions; it does not prove that all dynamic file paths are safe, that production directories are unreadable, or that a future mount/network namespace will enforce the drafted policy. The production `hollowdeep.service` remained active with the original binary unchanged, and no test service, port, test game, native bridge or GM actions were activated; no production restart occurred.
+
+**Evidence:** `/root/hollowdeep-dev/gm-v5/runtime-isolation/v5w-HiatBVl2/v5w-provisioning.json` and `access-check.json`, with the original successful Stage 5V private report at `/root/hollowdeep-dev/gm-v5/runtime-isolation/v5v-BYDO2aP2/v5v-preflight.json`.
+
+**Next gate (Stage 5X):** Review warning source context for the **12 format-overflow** compiler warnings and run only a **harmless, time-limited, transient systemd sandbox probe** as `hollowdeep-test` to verify namespace segregation and production path inaccessibility. Explicitly do not execute Mordor, install a persistent service, copy production data, attach a bridge, or claim game-runtime readiness based on this limited sandbox test. Preserve strict nonproduction-only changes and verify the running production executable before and afterward.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
