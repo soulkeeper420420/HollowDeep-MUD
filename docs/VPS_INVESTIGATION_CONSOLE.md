@@ -237,6 +237,12 @@ The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step143.py
 
 The installer retained `operations-overview.php.before-step143-20261108-001441`; staged and installed PHP lint both passed. The operator confirmed the link's behavior with both activity choices and existing controls in an authenticated browser. The VPS PHP change was installed independently of GitHub; publishing this guide does not deploy PHP, expose private investigation records, or modify/restart the live native MUD.
 
+## Step 144 — Clear only audit sort order (host-verified November 8, 2026)
+
+The VPS operator installed `/root/hollowdeep-dev/room-browser/install_step144.py` to add a contextual **Clear Sort** link on the administrator Operations Overview. When GET `audit_sort` is **Oldest first**, the shortcut restores **Newest first**, preserves activity, text search, change type, UTC date range and results-per-page preferences, and resets the audit list to Page 1. Existing Clear Dates, Clear Search, Clear Change Type, Clear Activity Filter, Reset Filters and View History remain available.
+
+The installer retained `operations-overview.php.before-step144-20261108-001632`; staged and installed PHP lint both passed. The operator confirmed Clear Sort, retained selections, and existing controls in an authenticated browser. GitHub publication documents separately installed VPS PHP; it does not deploy PHP, publish private investigation records, or change/restart native MUD services.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
