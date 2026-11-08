@@ -253,6 +253,16 @@ The VPS operator installed `/root/hollowdeep-dev/world-studio/install_v1.py`, cr
 
 **Verification:** The operator reported that the full browser acceptance check passed: map node selection, room 1508 search, zone browsing where populated, draft save/refresh persistence, and investigation links. This is a functional browser test, not a complete security review or proof that every snapshot's fields are normalized perfectly. The GitHub publication is documentation only; it does not deploy PHP or publish private draft data.
 
+## World Builder Intelligence v2 — read-only connection graph and draft comparison (host-verified November 8, 2026)
+
+The operator installed `/var/www/hollowdeep/public/admin/world-builder-intelligence.php`, separate from the existing World Builder Studio v1 editor. A terminal run reported successful PHP lint of the staged file `/tmp/hollowdeep-world-intelligence-v2.php` and installed file, and the operator confirmed the v2 browser acceptance tests passed.
+
+**New features:** read-only scan of existing numeric room JSON snapshots (maximum 12,000 files using the v1-compatible, schema-tolerant name/zone/description/exit parser); world summary counts for detected exits, missing destination snapshots and exits with no detected reciprocal link; room-ID selector; clickable SVG neighborhood graph up to 25 rooms and two links from the selected room; incoming and outgoing exit listings; v1 private draft inventory and side-by-side comparison of current name/description against proposed name/description, plus exit-design and builder notes; links to the v1 editor, existing Connection Inspector, Investigation Queue and Investigation Dashboard.
+
+**Interpretation:** this graph is schematic, not geographical. Exit statistics are derived from supported snapshot fields and can differ from the established world-connection report. A missing reciprocal link can be intentional and is not automatically an error. Drafts are **read only in v2**, and draft comparisons are proposals, not deployed edits. This release neither reads nor writes native MUD room binaries.
+
+**Verification/scope:** the operator reported that summary statistics, room 1508 and map navigation, incoming/outgoing connections, available draft comparisons and investigation links worked in the authenticated browser. This is a functional check, not an exhaustive parser or security audit. Installation created a separate PHP admin page; no live game data or running MUD service was changed. GitHub publication records verified VPS behavior but does not deploy PHP or publish private draft contents.
+
 ## Publishing policy
 
 Publish **reviewed and tested** code, guides and changelogs to the `soulkeeper420420/HollowDeep-MUD` GitHub repository. For this separate VPS console, obtain a reviewed, sanitized copy of the actual deployed PHP/installer files before publishing source. Do not infer that the current GitHub repository's Sites/Node frontend deploys the VPS PHP console.
