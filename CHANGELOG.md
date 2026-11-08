@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-08 — Step 142 Clear Change Type browser-verified
+
+The VPS administrator Operations Overview now provides a contextual **Clear Change Type** link, returning the change-type selector to All Changes while retaining activity, search, UTC dates, sort and page size and resetting to Page 1. The operator browser-verified the shortcut from Status Only and Notes Only and confirmed preserved selections, Clear Dates, Clear Search, Reset Filters, and View History. Step 142 backup: `operations-overview.php.before-step142-20261108-001329`; staged and installed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub publication is documentation only and does not deploy PHP, publish private records or modify/restart the live MUD.
+
 ## 2026-11-08 — Step 141 Clear Search browser-verified
 
 The VPS administrator Operations Overview now has a contextual **Clear Search** link, which empties only the audit text search, retains activity, change type, UTC date range, sort and page size, and resets to Page 1. The operator browser-verified it with other filters selected, including confirmation that Clear Dates, Reset Filters, clickable audit cards and View History still function. Installer backup: `operations-overview.php.before-step141-20261108-001220`; staged and deployed PHP lint passed. See the [VPS investigation guide](docs/VPS_INVESTIGATION_CONSOLE.md). This GitHub publication documents separately installed PHP only; it does not deploy PHP, publish private audit records or modify/restart the native MUD.
