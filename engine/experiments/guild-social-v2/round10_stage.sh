@@ -10,7 +10,7 @@ TEST_SRC="$ROOT/round9-X6jx4lbm/src"
 BASE="/root/hollowdeep-dev/gm-v5/runtime-isolation/fasttrack-v19-stage-i6d5S65m/rootfs"
 EXPECTED="0cbaae7ddd4621933ed60e7edceeb0d08fe6e197b856c1ba8ce1a55abccdec29"
 # Immutable revision that contains all V2 experiment components.
-COMMIT="ae49643d6063ac5d6f5ac1af538f94e592e1607c"
+COMMIT="87015cd8b36e30e5b66fbd97706e3e69689ca67c"
 RAW="https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/$COMMIT/engine/experiments/guild-social-v2"
 
 echo "=== HOLLOWDEEP ROUND 10 CHARTER + GUILD HALL PLAYTEST ==="
