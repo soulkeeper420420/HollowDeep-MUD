@@ -247,7 +247,7 @@ static int hd11_atomic_player_write(const char *name,
 
     fd = mkstemp(temporary);
     if (fd < 0) return(-1);
-    if (fchmod(fd, 0660) < 0) goto done;
+    if (fchmod(fd, 0600) < 0) goto done;
     while (written < size) {
         n = write(fd, payload + written, size - written);
         if (n < 0 && errno == EINTR) continue;
