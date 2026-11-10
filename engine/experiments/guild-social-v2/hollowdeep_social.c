@@ -448,18 +448,16 @@ static void clan_help(creature *player)
     print(player->fd, "CLANS: clan list | info <name> | roster | invites\n");
     print(player->fd, "clan create <name> | invite <player> | accept <name> | decline <name>\n");
     print(player->fd, "clan promote <player> | demote <player> | kick <player>\n");
-    print(player->fd, "clan transfer <player> | leave | clanchat <message>\n");
-#ifdef HD_GUILD_STAGING_FREE_CREATE
-    print(player->fd, "TEST SERVER ONLY: create is deed-free in this staging build.\n");
-#else
-    print(player->fd, "Founding disabled until physical charter deed validation is installed.\n");
-#endif
+    print(player->fd, "clan transfer <player> | leave | hall | clanchat <message>\n");
+    print(player->fd, "Buy an unused Clan Deed at Guild Registry to found a guild.\n");
 }
 int hd_player_clan(creature *player, cmd *command)
 {
     struct hd_guild_state *s;
     struct hd_member *self, *other;
     creature *target;
+    object *charter;
+    int hall;
     char verb[25] = "", action[25] = "", arg[25] = "", extra;
     char guildname[25], targetname[20];
     int tokens, mine, other_ix, gid, ix, j, total;
@@ -470,6 +468,7 @@ int hd_player_clan(creature *player, cmd *command)
         print(player->fd, "Guild records unavailable or invalid. No change made.\n");
         goto done;
     }
+    hd_reconcile_spent(player, s);
     tokens = sscanf(command->fullstr, "%24s %24s %24s %c",
                     verb, action, arg, &extra);
     mine = member_index(s, player->name);
@@ -488,7 +487,8 @@ int hd_player_clan(creature *player, cmd *command)
             for (j = 0; j < s->member_count; j++)
                 if (!strcasecmp(s->members[j].guild, s->guilds[gid].name))
                     total++;
-            print(player->fd, "Guild: %s | Members: %d\n", s->guilds[gid].name, total);
+            print(player->fd, "Guild: %s | Members: %d | Hall: %d\n",
+                  s->guilds[gid].name, total, s->guilds[gid].hall);
         }
     } else if (tokens == 2 && !strcmp(action, "roster")) {
         if (!self) print(player->fd, "You are not in a guild.\n");
@@ -500,28 +500,56 @@ int hd_player_clan(creature *player, cmd *command)
                          s->members[j].rank == 2 ? "Leader" :
                          s->members[j].rank == 1 ? "Officer" : "Member");
         }
+    } else if (tokens == 2 && !strcmp(action, "hall")) {
+        if (!self) print(player->fd, "You are not in a guild.\n");
+        else {
+            gid = guild_index(s, self->guild);
+            print(player->fd, "Your guild hall entrance: %d\n",
+                  gid >= 0 ? s->guilds[gid].hall : 0);
+        }
     } else if (tokens == 2 && !strcmp(action, "invites")) {
         print(player->fd, "Pending invitations:\n");
         for (j = 0; j < s->invite_count; j++)
             if (!strcasecmp(s->invites[j].name, player->name))
                 print(player->fd, "  %s\n", s->invites[j].guild);
     } else if (tokens == 3 && !strcmp(action, "create")) {
-#ifndef HD_GUILD_STAGING_FREE_CREATE
-        print(player->fd, "Clan creation requires a physical clan deed; not enabled.\n");
-#else
         if (self) print(player->fd, "Leave your existing guild first.\n");
         else if (!identifier(arg, sizeof(guildname)) || s->guild_count == HD_MAX_GUILDS ||
-                 s->member_count == HD_MAX_MEMBERS || guild_index(s, arg) >= 0)
+                 s->member_count == HD_MAX_MEMBERS ||
+                 s->redemption_count == HD_MAX_REDEMPTIONS ||
+                 guild_index(s, arg) >= 0)
             print(player->fd, "Invalid, duplicate or unavailable guild name.\n");
+        else if ((hall = hd_choose_hall(s)) < 0)
+            print(player->fd, "No starter guild hall is available yet.\n");
+        else if (!(charter = hd_unused_deed(player, s)))
+            print(player->fd, "You need an unused, purchased Clan Deed from Guild Registry.\n");
         else {
             normalized(arg, guildname, sizeof(guildname));
-            strcpy(s->guilds[s->guild_count++].name, guildname);
+            strcpy(s->guilds[s->guild_count].name, guildname);
+            s->guilds[s->guild_count++].hall = hall;
             strcpy(s->members[s->member_count].guild, guildname);
             snprintf(s->members[s->member_count].name, 20, "%.19s", player->name);
             s->members[s->member_count++].rank = 2;
-            dirty = 1;
+            strcpy(s->redemptions[s->redemption_count].token, charter->use_output);
+            snprintf(s->redemptions[s->redemption_count].founder, 20, "%.19s", player->name);
+            s->redemption_count++;
+            /* One atomic registry commit carries the guild, its leader,
+             * the hall assignment and the irrevocably spent deed serial.
+             * On storage failure, the physical deed remains unchanged.
+             * A crash after commit can leave an already-spent deed in the
+             * native player file, but cannot redeem that serial again.
+             */
+            if (!save_guilds(s)) {
+                print(player->fd, "Guild storage failed; Clan Deed not consumed.\n");
+            } else {
+                del_obj_crt(charter, player);
+                free_obj(charter);
+                F_SET(player, PSAVES);
+                save_ply(player);
+                F_CLR(player, PSAVES);
+                print(player->fd, "Guild records updated. Clan Deed redeemed. Hall entrance: %d\n", hall);
+            }
         }
-#endif
     } else if (tokens == 3 && !strcmp(action, "invite")) {
         target = find_who(arg);
         if (!self || self->rank < 1) print(player->fd, "Officer rank required.\n");
