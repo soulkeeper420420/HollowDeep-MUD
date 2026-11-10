@@ -311,11 +311,28 @@ def tested():
     check("Three temporary characters saved",
           "saved" in sa.lower() and "saved" in sb.lower() and "saved" in sc.lower(),
           sa + sb + sc)
+    expected_players = [name_a, name_b, name_c]
+
+    def verify_native_saves(phase):
+        sizes = {}
+        for name in expected_players:
+            path = ROOT / "player" / name
+            sizes[name] = path.stat().st_size if path.is_file() else -1
+            check(phase + " native player save " + name,
+                  sizes[name] > 0, "bytes=" + str(sizes[name]))
+        if any(size <= 0 for size in sizes.values()):
+            raise RuntimeError(
+                "Native player save empty/missing at " + phase +
+                "; refusing restart or new-character login"
+            )
+
+    verify_native_saves("before restart")
     for client in CLIENTS:
         try: client.close()
         except OSError: pass
     CLIENTS.clear()
     server_stop()
+    verify_native_saves("after stop")
     server_start()
     a = reconnect(name_a, pw_a)
     guild_info = command(a, "clan info Nightfall")
@@ -349,10 +366,10 @@ def main():
             try: client.close()
             except OSError: pass
         server_stop()
-    print("=== ROUND 9 SUMMARY ===", flush=True)
+    print("=== ROUND 10 PERSISTENCE SUMMARY ===", flush=True)
     print("Passed:", PASS, flush=True)
     print("Failed:", FAIL, flush=True)
-    print("Shop + room gameplay:", "PASS" if status == 0 else "NEEDS REVIEW", flush=True)
+    print("Guild + hall + restart gameplay:", "PASS" if status == 0 else "NEEDS REVIEW", flush=True)
     print("Production MUD: NEVER ACCESSED", flush=True)
     return status
 
