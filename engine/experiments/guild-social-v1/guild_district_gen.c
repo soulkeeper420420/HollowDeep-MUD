@@ -189,6 +189,13 @@ int main(int argc, char **argv)
         fprintf(stderr, "Usage: guild-district-gen EMPTY_PRIVATE_ROOMS_DIRECTORY\n");
         return 2;
     }
+    /* Hard-bound this generator to the known private Round 8 workspace. */
+    if (strncmp(argv[1], "/root/hollowdeep-dev/guild-social-batch1/round8-", 51) != 0 ||
+        strlen(argv[1]) < 17 ||
+        strcmp(argv[1] + strlen(argv[1]) - 17, "/test-world/rooms") != 0) {
+        fprintf(stderr, "Refusing non-staging output path.\n");
+        return 2;
+    }
     if (sizeof(room) != 480 || sizeof(exit_) != 44 || sizeof(object) != 352 ||
         sizeof(int) != 4) {
         fprintf(stderr, "Unexpected native 32-bit ABI sizes: room=%lu exit=%lu item=%lu\n",
