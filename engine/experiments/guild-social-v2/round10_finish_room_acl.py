@@ -31,21 +31,34 @@ if len(matches) != 1:
                      str(len(matches)))
 match = matches[0]
 
-# An ANSI prototype has a brace immediately; a K&R definition has one or
-# more typed parameter declarations before the opening brace.
-body_tail = code[match.end():match.end() + 850]
-opening = re.search(r"\{", body_tail)
-if not opening:
-    raise SystemExit("STOP: Native function body brace not found")
-body_open = match.end() + opening.end()
-
-# Do not insert after an arbitrary brace in a distant function. There must
-# be a native ASSERTLOG(ply_ptr); statement shortly after this body brace.
-subsection = code[body_open:body_open + 1100]
-precondition = re.search(r"\bASSERTLOG\s*\(\s*ply_ptr\s*\)\s*;", subsection)
-if not precondition:
-    raise SystemExit("STOP: Native player precondition not found after body brace")
-absolute = body_open + precondition.end()
+# Match the assignment that actually commits a player to a room.
+# HollowDeep's native function body may have custom preamble code and need
+# not contain ASSERTLOG at all. Stop if the exact assignment is ambiguous.
+# Limit the scan to this function's first 8 KiB, and check the companion
+# room-number update so we do not accidentally patch a later function.
+body = code[match.end():match.end() + 8192]
+assignments = list(re.finditer(
+    r"(?m)^[ \\t]*ply_ptr->parent_rom[ \\t]*=[ \\t]*rom_ptr[ \\t]*;",
+    body,
+))
+if len(assignments) != 1:
+    print("=== NATIVE add_ply_rom CONTEXT FOR REVIEW ===")
+    for line in code[match.start():match.start() + 2400].splitlines()[:50]:
+        print(line)
+    raise SystemExit("STOP: Expected one room assignment in add_ply_rom, found " +
+                     str(len(assignments)))
+assignment = assignments[0]
+after_assignment = body[assignment.end():assignment.end() + 300]
+if not re.search(
+    r"ply_ptr->rom_num[ \\t]*=[ \\t]*rom_ptr->rom_num[ \\t]*;",
+    after_assignment,
+):
+    raise SystemExit("STOP: Native player room-number update not found after parent assignment")
+# Ensure the matched assignment is inside the function body.
+prefix = body[:assignment.start()]
+if "{" not in prefix:
+    raise SystemExit("STOP: No function body before native room assignment")
+absolute = match.end() + assignment.start()
 patch = r"""
 
     /* Defense-in-depth for all player-room insertion paths, including
