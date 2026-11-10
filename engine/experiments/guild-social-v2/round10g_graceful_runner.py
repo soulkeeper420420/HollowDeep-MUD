@@ -427,7 +427,7 @@ def tested():
           "6006" in c_hall, c_hall)
     c_funds = command(c, "score")
     check("Dawnwatch founder keeps 500 gold after restart",
-          bool(re.search(r"\\b500\\s+Gold Pieces\\b", c_funds, re.I)), c_funds)
+          bool(re.search(r"\b500\s+Gold Pieces\b", c_funds, re.I)), c_funds)
     c_inventory = command(c, "inventory")
     check("Second redeemed deed remains consumed after restart",
           "Clan Deed" not in c_inventory, c_inventory)
