@@ -55,3 +55,13 @@ void hd_social_color(int fd, int color)
 ```
 
 The source defines external declarations for these functions; the installer must add the adapters to the **copied staging `io.c`** before compiling. The stage-specific `HD_GUILD_STAGING_FREE_CREATE` flag remains unsafe for production.
+
+## Round 8 private Guild District room generator
+
+The original C file [`guild_district_gen.c`](./guild_district_gen.c) is a **disposable-world-only** serializer generator that builds 12 native-ABI room files `r06000` to `r06011`, including a flagged `RSHOPP` Guild Registry in room 6000 and its item stockroom 6001. The stockroom contains a **prototype** physical `Clan Deed` at **2500 gold** with inert marker `HdGuildDeedV1` in `key[2]`. It writes the original Mordor `write_rom` / `write_obj`-compatible 32-bit stream layout (matching the audited room/exit/object sizes). This is **a separate writer, not the engine's own `write_rom` function**; native loader round-trip and gameplay must be verified before adoption.
+
+The three example starter halls are disconnected from the public square, because no server-side membership-gated movement is implemented yet. The stockroom has no public exit or entrance. The generator refuses any output path outside a `/root/hollowdeep-dev/guild-social-batch1/round8-*/test-world/rooms` workspace, refuses unsafe output directories or any preexisting target file, and validates its own output. It **must not be used for production world creation**.
+
+**Important:** The `clan create` handler in the Round 6 deed-gated build currently denies all founding. The prototype item is not yet consumed by, or integrated with, the guild registry. Guild housing claims and restricted entry are not implemented, and the sample rooms are not connected to the production world. Passing a binary structure readback is not a native gameplay proof.
+
+Next milestone: use a completely disposable game rootfs with the Round 6 deed-gated binary to verify native room loading, `list`, purchase value and inventory, then integrate server-validated deed ownership/consumption/rollback and house access checks. Preserve the 18/18 Round 5 guild/chat regression suite. Report all findings before a live deployment.
