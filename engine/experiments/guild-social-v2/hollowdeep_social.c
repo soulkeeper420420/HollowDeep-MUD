@@ -39,15 +39,21 @@ extern void hd_social_color(int fd, int color);
 #define HD_MAX_INVITES 256
 #define HD_MAX_GUILD_FILE 65536
 #define HD_MAX_CHAT_USERS 128
+#define HD_MAX_REDEMPTIONS 256
+#define HD_CHARTER_PRICE 2500L
+#define HD_CHARTER_MARKER "HdGuildDeedV1"
+#define HD_CHARTER_PREFIX "HDG1"
 
-struct hd_guild { char name[25]; };
+struct hd_guild { char name[25]; int hall; };
+struct hd_redemption { char token[40]; char founder[20]; };
 struct hd_member { char guild[25], name[20]; int rank; };
 struct hd_invitation { char guild[25], name[20]; };
 struct hd_guild_state {
-    int guild_count, member_count, invite_count;
+    int guild_count, member_count, invite_count, redemption_count;
     struct hd_guild guilds[HD_MAX_GUILDS];
     struct hd_member members[HD_MAX_MEMBERS];
     struct hd_invitation invites[HD_MAX_INVITES];
+    struct hd_redemption redemptions[HD_MAX_REDEMPTIONS];
 };
 struct hd_chat_user { char name[20]; time_t last_chat; int global_off; };
 static struct hd_chat_user chat_users[HD_MAX_CHAT_USERS];
@@ -96,6 +102,37 @@ static int invitation_index(const struct hd_guild_state *s,
             !strcasecmp(s->invites[i].name, name)) return i;
     return -1;
 }
+static int hd_valid_token(const char *token)
+{
+    size_t i;
+    if (!token || strnlen(token, 40) != 36 ||
+        strncmp(token, HD_CHARTER_PREFIX, 4)) return 0;
+    for (i = 4; i < 36; i++)
+        if (!isxdigit((unsigned char)token[i])) return 0;
+    return 1;
+}
+static int hd_redeemed(const struct hd_guild_state *s, const char *token)
+{
+    int i;
+    for (i = 0; i < s->redemption_count; i++)
+        if (!strcmp(s->redemptions[i].token, token)) return 1;
+    return 0;
+}
+static int hd_hall_taken(const struct hd_guild_state *s, int hall)
+{
+    int i;
+    for (i = 0; i < s->guild_count; i++)
+        if (s->guilds[i].hall == hall) return 1;
+    return 0;
+}
+static int hd_choose_hall(const struct hd_guild_state *s)
+{
+    static const int halls[] = {6003, 6006, 6009};
+    int i;
+    for (i = 0; i < 3; i++)
+        if (!hd_hall_taken(s, halls[i])) return halls[i];
+    return -1;
+}
 static int secure_data_dir(void)
 {
     struct stat st;
@@ -107,7 +144,8 @@ static int load_guilds(struct hd_guild_state *s)
 {
     struct stat st;
     char line[160], name[25], guild[25], extra;
-    int fd, rank, i, j, leader_count;
+    int fd, rank, i, j, leader_count, format = 1, hall;
+    char token[40], founder[20];
     FILE *fp;
     if (!secure_data_dir()) return 0;
     fd = open(HD_GUILD_FILE, O_RDONLY | O_NOFOLLOW | O_NONBLOCK);
@@ -119,16 +157,22 @@ static int load_guilds(struct hd_guild_state *s)
     }
     fp = fdopen(fd, "r");
     if (!fp) { close(fd); return 0; }
-    if (!fgets(line, sizeof(line), fp) || strcmp(line, "HDGUILD1\n"))
-        goto invalid;
+    if (!fgets(line, sizeof(line), fp)) goto invalid;
+    if (!strcmp(line, "HDGUILD2\n")) format = 2;
+    else if (strcmp(line, "HDGUILD1\n")) goto invalid;
     while (fgets(line, sizeof(line), fp)) {
         if (!strchr(line, '\n')) goto invalid;
         if (line[0] == 'G' && line[1] == ' ') {
-            if (sscanf(line, "G %24s %c", guild, &extra) != 1 ||
+            hall = 0;
+            if ((format == 2 && sscanf(line, "G %24s %d %c", guild, &hall, &extra) != 2) ||
+                (format == 1 && sscanf(line, "G %24s %c", guild, &extra) != 1) ||
                 !identifier(guild, sizeof(guild)) ||
+                (hall != 0 && hall != 6003 && hall != 6006 && hall != 6009) ||
+                (hall && hd_hall_taken(s, hall)) ||
                 s->guild_count == HD_MAX_GUILDS || guild_index(s, guild) >= 0)
                 goto invalid;
-            strcpy(s->guilds[s->guild_count++].name, guild);
+            strcpy(s->guilds[s->guild_count].name, guild);
+            s->guilds[s->guild_count++].hall = hall;
         } else if (line[0] == 'M' && line[1] == ' ') {
             if (sscanf(line, "M %24s %24s %d %c",
                        guild, name, &rank, &extra) != 3 ||
@@ -149,6 +193,13 @@ static int load_guilds(struct hd_guild_state *s)
                 goto invalid;
             strcpy(s->invites[s->invite_count].name, name);
             strcpy(s->invites[s->invite_count++].guild, guild);
+        } else if (format == 2 && line[0] == 'R' && line[1] == ' ') {
+            if (sscanf(line, "R %39s %19s %c", token, founder, &extra) != 2 ||
+                !hd_valid_token(token) || !identifier(founder, 20) ||
+                hd_redeemed(s, token) || s->redemption_count == HD_MAX_REDEMPTIONS)
+                goto invalid;
+            strcpy(s->redemptions[s->redemption_count].token, token);
+            strcpy(s->redemptions[s->redemption_count++].founder, founder);
         } else goto invalid;
     }
     if (ferror(fp)) goto invalid;
@@ -176,15 +227,18 @@ static int save_guilds(const struct hd_guild_state *s)
     if (fchmod(fd, 0600)) { close(fd); unlink(temp); return 0; }
     fp = fdopen(fd, "w");
     if (!fp) { close(fd); unlink(temp); return 0; }
-    ok = fprintf(fp, "HDGUILD1\n") > 0;
+    ok = fprintf(fp, "HDGUILD2\n") > 0;
     for (i = 0; ok && i < s->guild_count; i++)
-        ok = fprintf(fp, "G %s\n", s->guilds[i].name) > 0;
+        ok = fprintf(fp, "G %s %d\n", s->guilds[i].name, s->guilds[i].hall) > 0;
     for (i = 0; ok && i < s->member_count; i++)
         ok = fprintf(fp, "M %s %s %d\n", s->members[i].guild,
                      s->members[i].name, s->members[i].rank) > 0;
     for (i = 0; ok && i < s->invite_count; i++)
         ok = fprintf(fp, "I %s %s\n", s->invites[i].guild,
                      s->invites[i].name) > 0;
+    for (i = 0; ok && i < s->redemption_count; i++)
+        ok = fprintf(fp, "R %s %s\n", s->redemptions[i].token,
+                     s->redemptions[i].founder) > 0;
     if (fflush(fp) || fsync(fd)) ok = 0;
     if (fclose(fp)) ok = 0;
     if (ok) ok = rename(temp, HD_GUILD_FILE) == 0;
