@@ -37,8 +37,11 @@ segment = code[start.start():end.start()]
 segment = one(
     segment, "*obj_ptr2 = *obj_ptr;",
     """*obj_ptr2 = *obj_ptr;
-    if (rom_ptr->rom_num == 6000 &&
-        !strcmp(obj_ptr->key[2], "HdGuildDeedV1") &&
+    if ((rom_ptr->rom_num == 6000
+#ifdef HD_ROUND9_ISOLATED_FUNDS
+        || rom_ptr->rom_num == 1
+#endif
+        ) && !strcmp(obj_ptr->key[2], "HdGuildDeedV1") &&
         !hd_guild_mint_deed(obj_ptr2)) {
         free(obj_ptr2);
         print(fd, "Guild Registry cannot issue a deed right now. No gold taken.\\n");
