@@ -25,7 +25,8 @@
 extern void print(int fd, const char *format, ...);
 extern creature *find_who(char *name);
 extern int Tablesize;
-extern plystruct Ply[PMAX];
+extern creature *hd_social_online_player(int fd);
+extern void hd_social_color(int fd, int color);
 
 #ifndef O_NOFOLLOW
 #define O_NOFOLLOW 0
@@ -256,6 +257,7 @@ static int check_chat(creature *player)
 int hd_global_chat(creature *player, cmd *command)
 {
     struct hd_chat_user *u, *recipient_pref;
+    creature *recipient;
     const char *message = message_body(command);
     int fd;
     u = chat_user(player->name);
@@ -288,13 +290,14 @@ int hd_global_chat(creature *player, cmd *command)
     }
     if (!check_chat(player)) return 0;
     for (fd = 0; fd < Tablesize; fd++) {
-        if (!Ply[fd].ply || Ply[fd].ply->fd != fd) continue;
-        if (F_ISSET(Ply[fd].ply, PIGNOR) && Ply[fd].ply != player) continue;
-        recipient_pref = chat_user(Ply[fd].ply->name);
+        recipient = hd_social_online_player(fd);
+        if (!recipient) continue;
+        if (F_ISSET(recipient, PIGNOR) && recipient != player) continue;
+        recipient_pref = chat_user(recipient->name);
         if (recipient_pref && recipient_pref->global_off) continue;
-        ANSI(fd, CYAN);
+        hd_social_color(fd, CYAN);
         print(fd, "[Global] %s: %s\n", player->name, message);
-        ANSI(fd, NORMAL);
+        hd_social_color(fd, NORMAL);
     }
     return 0;
 }
@@ -475,6 +478,7 @@ done:
 int hd_clan_chat(creature *player, cmd *command)
 {
     struct hd_guild_state *s;
+    creature *recipient;
     const char *message = message_body(command);
     int ix, j, fd, delivered = 0;
     if (!message_valid(message)) {
@@ -492,15 +496,16 @@ int hd_clan_chat(creature *player, cmd *command)
     }
     if (!check_chat(player)) goto done;
     for (fd = 0; fd < Tablesize; fd++) {
-        if (!Ply[fd].ply || Ply[fd].ply->fd != fd) continue;
-        j = member_index(s, Ply[fd].ply->name);
+        recipient = hd_social_online_player(fd);
+        if (!recipient) continue;
+        j = member_index(s, recipient->name);
         if (j < 0 || strcasecmp(s->members[ix].guild, s->members[j].guild))
             continue;
-        if (F_ISSET(Ply[fd].ply, PIGNOR) && Ply[fd].ply != player) continue;
-        ANSI(fd, MAGENTA);
+        if (F_ISSET(recipient, PIGNOR) && recipient != player) continue;
+        hd_social_color(fd, MAGENTA);
         print(fd, "[Guild: %s] %s: %s\n",
               s->members[ix].guild, player->name, message);
-        ANSI(fd, NORMAL);
+        hd_social_color(fd, NORMAL);
         delivered++;
     }
     if (!delivered) print(player->fd, "No online guild recipient was available.\n");
