@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
 #include "mstruct.h"
 
 #ifndef O_NOFOLLOW
@@ -22,7 +23,7 @@
 #define BASE_ROOM 6000
 #define ROOM_COUNT 12
 #define DEED_PRICE 2500L
-#define DEED_MAGIC 30001
+#define DEED_MARKER "HdGuildDeedV1"
 
 struct edge { const char *name; int target; };
 struct specification {
@@ -131,10 +132,9 @@ static int write_one(int dfd, int index)
         snprintf(deed.description, sizeof(deed.description), "A guild founding charter.");
         snprintf(deed.key[0], sizeof(deed.key[0]), "deed");
         snprintf(deed.key[1], sizeof(deed.key[1]), "charter");
-        snprintf(deed.key[2], sizeof(deed.key[2]), "guild");
+        snprintf(deed.key[2], sizeof(deed.key[2]), "%s", DEED_MARKER);
         deed.value = DEED_PRICE;
         deed.weight = 1;
-        deed.special = DEED_MAGIC;
         F_SET(&deed, OPERMT);
         /* Native write_obj emits object bytes then item-container count. */
         ok = put(fd, &deed, sizeof(deed)) && put_int(fd, 0);
@@ -173,7 +173,7 @@ static int check_one(int dfd, int index)
         ok = get(fd, &deed, sizeof(deed)) &&
              !strcmp(deed.name, "Clan Deed") &&
              deed.value == DEED_PRICE &&
-             deed.special == DEED_MAGIC &&
+             !strcmp(deed.key[2], DEED_MARKER) &&
              F_ISSET(&deed, OPERMT) && get_int(fd, &nested) && nested == 0;
     }
     ok = ok && get_string(fd) && get_string(fd) && get_string(fd);
