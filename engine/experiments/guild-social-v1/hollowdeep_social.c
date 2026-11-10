@@ -9,7 +9,6 @@
  * and atomic inventory+registry handling are implemented and tested.
  */
 #include "mstruct.h"
-#include "mextern.h"
 #include "hollowdeep_staff.h"
 #include "hollowdeep_social.h"
 #include <stdio.h>
@@ -25,6 +24,8 @@
 
 extern void print(int fd, const char *format, ...);
 extern creature *find_who(char *name);
+extern int Tablesize;
+extern plystruct Ply[PMAX];
 
 #ifndef O_NOFOLLOW
 #define O_NOFOLLOW 0
