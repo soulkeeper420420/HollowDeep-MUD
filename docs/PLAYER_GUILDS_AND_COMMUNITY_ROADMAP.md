@@ -75,3 +75,38 @@ Run a **read-only, bounded source audit** on the actual Linode native C source t
 ## Safe publishing
 
 Documentation and reviewed source can go to GitHub. Never publish private player saves, server credentials, private config, guild private chat, IP lists or database dumps. Announce features as **planned/staging** until native tests and separately approved production release pass.
+
+## Additional approved requirements: chat channels, charter merchant, and clan housing
+
+### Distinct readable game chat channels
+
+Introduce **`chat <message>`** for optional game-wide player conversation, separate from the existing privileged `broadcast` handler. Add **`clanchat <message>`** (optionally `gc`) restricted to members of the same player guild. Do not alias or repurpose existing `gtalk` (party), `say`, `tell`, `broadcast`, or `staffclan`. Proposed **default** palette, to be checked against the engine's actual ANSI palette:
+
+| Channel | Proposed color | Distinct prefix | Audience |
+| --- | --- | --- | --- |
+| Ordinary `say` / gameplay | Original coloring, unchanged | Existing | Local room |
+| Global `chat` | Bright cyan | `[Global]` | Opted-in online players |
+| Guild `clanchat` | Bright magenta / violet | `[Guild: Name]` | Same-guild online members |
+| `broadcast` | Existing color, unchanged | Existing | Existing broadcast audience |
+| `staffclan` | Existing color, unchanged | Existing | Authorized staff only |
+
+Render with existing engine color helpers when supported, respect client ANSI/color settings and never leak escape codes to no-color users. The channel **label must carry meaning without color**. Preserve mute/ignore rules; add per-channel opt-out for global chat, bounded printable message size and rate limits. Recheck sender identity and clan membership on every send. Prevent unauthorized raw ANSI injection and multiline spoofing. Global chat must **not** call the broadcast function: it needs its own permission, recipient filtering and output presentation.
+
+### Guild charter shop
+
+Build a normal in-game NPC vendor (tentatively **Charter Clerk**) in a **Guild Registry / Charter Hall** location. Sell a physical **Clan Deed / Charter** through the existing item/shop purchase mechanism; buying it spends real in-game gold using the engine's original secure purchase path. `clan create <name>` requires an owned, unspent valid deed, valid unique guild name, and character eligibility; create and deed consumption must succeed atomically or both fail. Avoid one-time 'consume then fail' loss, item duplication, deed resale exploits, and multiple guild ownership. The actual price, level requirements and whether the deed is tradeable are configurable decisions to confirm after examining original shop/item logic. **Do not fabricate a deployed merchant or item ID.**
+
+### Physical clan housing areas
+
+Reserve a **Guild District** attached to the normal world using supported exits and native room serialization. A newly created guild may claim one **Starter Hall** (entry, commons, meeting chamber) from a finite pool of allocated plots; access governed by guild membership and an explicit visitor policy. Create plot templates in disposable test rooms first. Save a mapping from stable guild ID to room/plot IDs outside raw fixed-layout room and character binaries if possible. Ensure permission checks happen server-side when entering locked private areas, not only on website buttons. No guild vault or shared item storage in first phase (high duplication and theft risk). Test how rooms load, save, and survive reboot before allowing dynamic allocation.
+
+### Work sequence
+
+1. Audit source for color/ANSI output, session/online-player enumeration, `broadcast`, `gtalk`, `staffclan`, and command-registration collisions.
+2. Audit item templates, NPC merchant inventory, buy/purchase gold deductions, and room storage/exits.
+3. Implement `chat` and `clanchat` in a checksum-verified isolated engine build with simulated two-user delivery tests.
+4. Implement persisted player guilds, invitations, roles and charter-based founding; run restart/persistence/anti-duplication tests.
+5. Create disposable Guild Registry shop and sample Starter Hall rooms; verify room binary integrity and access checks.
+6. After verified native staging, implement the PHP V7 guild directory, recruiting, guild notices, event calendar and opt-in public guild pages, then integrate only via a restricted data bridge.
+
+**Status:** requested and designed, **not installed**, no native files or production website changed. Do not conflate these features with the existing staff-only `staffclan`.
