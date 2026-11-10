@@ -73,3 +73,18 @@ The owner ran a **read-only** preflight on the Linode web host:
 The owner ran the guarded launch-preparation script successfully. A private rollback backup of the original root homepage and V6 source was created and checksummed; its location is retained privately on the host, **not** in this public document. A separate `/hollowdeep-launch-candidate/` directory was staged. All ten PHP source files passed `php -l`; Nginx configuration passed `nginx -t`; twelve candidate page/asset requests returned HTTP 200. The original root `index.php` checksum matched its preflight baseline, the V6 source was unchanged, and no service restarts, admin changes, database writes, or native game operations were performed.
 
 **Release is not approved or completed.** The candidate intentionally retains `noindex,nofollow` metadata and the preview notice. Before launch, manually check the mobile/desktop interface, confirm where the current 89-byte root homepage routes, prepare final production-only metadata/wording changes, and obtain explicit approval before changing the public root. Preserve the private backup and test a rollback after any approved switch. Avoid copying secrets or player data to public repositories.
+
+## November 9, 2026 — PHP V6 public website launch confirmed by operator
+
+**Update to the preceding launch-candidate section:** the owner explicitly asked to publish the current website for advertising. They then ran a guarded production launch script and reported **`=== HOLLOWDEEP WEBSITE LAUNCH COMPLETE ===`**.
+
+- Public entrypoint: [https://www.hollowdeepmud.com/](https://www.hollowdeepmud.com/). The root `index.php` now issues a temporary HTTP 302 redirect to `/hollowdeep-site/index.php`.
+- A separate public PHP release was installed at `/var/www/hollowdeep/public/hollowdeep-site/`; the earlier V6 preview and the launch candidate were left unchanged.
+- All **16 tested public PHP pages/assets** returned HTTP 200, including the new `community.php` page. Public release PHP syntax passed; `nginx -t` passed. The final local server-side `curl -L` check returned HTTP 200 at the expected release URL.
+- The public release removed the earlier preview `noindex,nofollow` instruction and added community navigation plus an announcement that player guilds, deed merchants and guild halls are **coming soon**. This is not a claim that the game features are live.
+- The original homepage is backed up privately under `/root/hollowdeep-public-launch-…/` with a verified checksum. **Never commit the exact private backup path or its files to this repository.** The source PHP and the deployed backups are on Linode, separate from the public Next.js source in this GitHub repository.
+- Reported unchanged: admin files, database, MUD engine, V6 preview and launch candidate. No service restarts occurred.
+
+**Verification boundary:** these are **operator-reported HTTPS checks from Linode**, not an independent browser review. Search-engine indexing, external desktop/mobile display, public community navigation, HTTPS headers on multiple clients and domain variants still deserve follow-up verification. Continue to use truthful "coming soon" language for unimplemented features.
+
+**Rollback:** preserve the private backup; replace only the root redirect entrypoint with the verified original root homepage if public routing fails. Do not remove `/hollowdeep-site/` or overwrite any Next.js deployment without separate review.
