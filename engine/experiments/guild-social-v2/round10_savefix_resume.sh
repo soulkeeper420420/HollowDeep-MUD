@@ -9,7 +9,7 @@ LIVE_ROOMS="/srv/hollowdeep/world/rooms"
 TEST_SRC="/root/hollowdeep-dev/guild-social-batch1/round9-X6jx4lbm/src"
 BASE="/root/hollowdeep-dev/gm-v5/runtime-isolation/fasttrack-v19-stage-i6d5S65m/rootfs"
 EXPECTED="0cbaae7ddd4621933ed60e7edceeb0d08fe6e197b856c1ba8ce1a55abccdec29"
-COMMIT="6eb1dfcc60610a4992da4f8f02ec8ec633a4d522"
+COMMIT="18c9bd0a9fdb8fa0a3fdd114b0825e75156bccde"
 RAW="https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/$COMMIT/engine/experiments/guild-social-v2"
 
 echo "=== HOLLOWDEEP ROUND 10 NATIVE SAVE COMPILER FIX ==="
