@@ -131,3 +131,11 @@ The owner ran the read-only source scan on the Linode Mordor 3.00 tree and suppl
 The audit reported: production source and world unchanged; no game-server restart; no player-file or website modifications. **No guild, global chat, charter deed or housing features have yet been implemented.**
 
 **Next probe required:** bounded source context for `global.c` command table, `io.c` broadcast formatting/color rules, `command7.c` buy/list semantics, `hollowdeep_staff.c` muted-chat rules, `mstruct.h` command structure, and room/character allocation. Then build/test patches on private checksum-verified copies only.
+
+## Experimental combined development build — November 9, 2026
+
+A new **unverified staging-only** original C module is published under [`engine/experiments/guild-social-v1/`](../engine/experiments/guild-social-v1/README.md). It combines proposed cyan global chat, separate magenta guild chat, file-backed guild registration/invites/ranks, and a read-only staff-role hub. It is **not yet compiled against the user's current C source**, not live and not gameplay-tested. The staged compile must confirm native type compatibility before anything else.
+
+For isolated smoke tests, `HD_GUILD_STAGING_FREE_CREATE` bypasses the still-unimplemented physical deed validation. **The test flag must never be used in a production deployment.** Without that flag, guild founding denies access, deliberately. The physical deed merchant and new guild housing rooms are **not implemented** by this experiment, and their integration remains mandatory before a public launch. The current `staffclan`, `hmoderate`, native `broadcast` and party `gtalk` are intentionally unchanged.
+
+The publicly visible [Atlas MUD website](https://www.atlasmud.com/) documents clans, shops, homes, and builder/staff concepts, but does not establish a reusable compatible staff implementation or grant permission to copy proprietary code. The `staffhub` experiment is an original read-only menu over the existing HollowDeep staff roles, not an Atlas source port.
