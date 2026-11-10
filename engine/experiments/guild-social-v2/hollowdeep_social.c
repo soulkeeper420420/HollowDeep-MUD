@@ -413,9 +413,8 @@ static void hd_reconcile_spent(creature *player, const struct hd_guild_state *s)
         changed = 1;
     }
     if (changed) {
-        F_SET(player, PSAVES);
+        /* Native HollowDeep saves players directly; PSAVES is undefined. */
         save_ply(player);
-        F_CLR(player, PSAVES);
         print(player->fd, "Previously redeemed Clan Deed reconciled.\n");
     }
 }
@@ -544,9 +543,8 @@ int hd_player_clan(creature *player, cmd *command)
             } else {
                 del_obj_crt(charter, player);
                 free_obj(charter);
-                F_SET(player, PSAVES);
+                /* Native HollowDeep saves players directly; PSAVES is undefined. */
                 save_ply(player);
-                F_CLR(player, PSAVES);
                 print(player->fd, "Guild records updated. Clan Deed redeemed. Hall entrance: %d\n", hall);
             }
         }
