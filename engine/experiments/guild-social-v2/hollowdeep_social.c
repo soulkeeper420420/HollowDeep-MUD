@@ -22,6 +22,8 @@
 #include <time.h>
 
 extern void print(int fd, const char *format, ...);
+/* Actual native files2.c K&R signature: save_ply(char *, creature *). */
+extern int save_ply(char *name, creature *player);
 extern creature *find_who(char *name);
 extern int Tablesize;
 extern creature *hd_social_online_player(int fd);
@@ -412,8 +414,9 @@ static void hd_reconcile_spent(creature *player, const struct hd_guild_state *s)
         changed = 1;
     }
     if (changed) {
-        /* Native HollowDeep saves players directly; PSAVES is undefined. */
-        save_ply(player);
+        /* Native save_ply requires both the character name and pointer. */
+        if (save_ply(player->name, player) < 0)
+            print(player->fd, "Spent deed reconciled, but player save failed. Contact staff.\n");
         print(player->fd, "Previously redeemed Clan Deed reconciled.\n");
     }
 }
@@ -542,8 +545,9 @@ int hd_player_clan(creature *player, cmd *command)
             } else {
                 del_obj_crt(charter, player);
                 free_obj(charter);
-                /* Native HollowDeep saves players directly; PSAVES is undefined. */
-                save_ply(player);
+                /* Guild ledger is already committed; preserve spent-serial safety even if player save fails. */
+                if (save_ply(player->name, player) < 0)
+                    print(player->fd, "Guild registered; character save failed. Report to staff.\n");
                 print(player->fd, "Guild records updated. Clan Deed redeemed. Hall entrance: %d\n", hall);
             }
         }
