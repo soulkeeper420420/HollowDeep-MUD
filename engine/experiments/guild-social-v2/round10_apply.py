@@ -79,10 +79,27 @@ for filename, func in (("command6.c", "go"), ("command10.c", "sneak")):
 # replaced by the safe public square BEFORE changing parent room pointers.
 p = src / "room.c"
 code = p.read_text()
-match = re.search(r"\bvoid\s+add_ply_rom\s*\([^)]*\)\s*\{", code)
-if not match:
-    raise SystemExit("STOP: Central native player-room insertion not found")
-tail = code[match.end():]
+# Accept either ANSI signatures or legacy K&R-style declarations between
+# the close parenthesis and the opening function brace. The patcher previously
+# required an immediate brace and failed on this native engine version.
+definitions = list(re.finditer(
+    r"(?m)^[ \t]*void[ \t]+add_ply_rom[ \t]*\([^(){};]*\)",
+    code,
+))
+if len(definitions) != 1:
+    raise SystemExit(
+        "STOP: Expected exactly one add_ply_rom declaration; got " +
+        str(len(definitions))
+    )
+match = definitions[0]
+lookahead = code[match.end():match.end()+700]
+brace = re.search(r"(?m)^[ \t]*\{", lookahead)
+if not brace:
+    raise SystemExit(
+        "STOP: Could not find add_ply_rom body after its native declaration"
+    )
+body_pos = match.end() + brace.end()
+tail = code[body_pos:]
 anchor = re.search(r"(\s*ASSERTLOG\s*\(\s*ply_ptr\s*\)\s*;)", tail)
 if not anchor:
     raise SystemExit("STOP: Native room precondition not found")
@@ -99,7 +116,7 @@ insertion = """
     }
 """
 tail = tail[:anchor.end()] + insertion + tail[anchor.end():]
-code = code[:match.end()] + tail
+code = code[:body_pos] + tail
 code = code[:match.start()] + "extern int hd_guild_can_enter(creature *, int);\n" + code[match.start():]
 p.write_text(code)
 print("Central native room ACL: protected hall entry redirected to public square")
