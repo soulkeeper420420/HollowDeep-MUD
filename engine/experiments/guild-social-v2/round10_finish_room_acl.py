@@ -65,9 +65,9 @@ code = code[:match.start()] + (
     "extern int hd_guild_can_enter(creature *, int);\n"
 ) + code[match.start():]
 
-target.write_text(code)
 assert code.count("extern int hd_guild_can_enter(creature *, int);") == 1
-assert code.count("if (!hd_guild_can_enter(ply_ptr, rom_ptr->rom_num))") == 1
+assert code.count("!hd_guild_can_enter(ply_ptr, rom_ptr->rom_num))") == 1
+target.write_text(code)
 print("Native player-room function layout: ACCEPTED")
 print("Central room ACL: PATCHED IN PRIVATE STAGING")
 print("Original live room.c: NOT MODIFIED")
