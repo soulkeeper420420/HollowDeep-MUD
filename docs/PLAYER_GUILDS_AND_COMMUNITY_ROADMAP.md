@@ -110,3 +110,24 @@ Reserve a **Guild District** attached to the normal world using supported exits 
 6. After verified native staging, implement the PHP V7 guild directory, recruiting, guild notices, event calendar and opt-in public guild pages, then integrate only via a restricted data bridge.
 
 **Status:** requested and designed, **not installed**, no native files or production website changed. Do not conflate these features with the existing staff-only `staffclan`.
+
+## Native source reconnaissance — November 9, 2026
+
+The owner ran the read-only source scan on the Linode Mordor 3.00 tree and supplied the results. These are **source locations**, not installed features:
+
+| Concern | Native source evidence | Implication |
+| --- | --- | --- |
+| Command dispatch | `global.c`: `buy` (258), `gtalk` (278), `broadcast` (281), `pledge` (294), `rescind` (295), `purchase` (296), `staffclan` (319) | Do not reuse existing verbs or handlers; new `chat`, `clan`, and `clanchat` require independent registrations |
+| Existing group chat | `command10.c` around line 251 | Maintain current party semantics |
+| Broadcast system | `io.c` around line 848 and `command4.c` around line 437 | New global chat must not invoke broadcast |
+| ANSI colors | `ANSI(fd, CYAN)`, `ANSI(fd, MAGENTA)`, `ANSI(fd, WHITE)`, `PANSIC` used in multiple sources | Distinct colored chat appears feasible; inspect how color preference and resets work first |
+| Shop implementation | `command7.c` `list` around 163 and `buy` around 205; `RSHOPP` in `mtype.h` | Reuse validated native shop inventory/gold path, don't guess deed item ID or price |
+| Existing unrelated purchase | `command10.c` `purchase` at 674 | Inspect semantics; not presumed to be ordinary shop purchase |
+| Binary world files | `files1.c` `write_rom` around 250, `read_rom` around 498; `mstruct.h` `exit_` | Guild district must be tested in disposable rooms, with validated exit serialization |
+| Character persistence | `files2.c` around 539 and 603; `files1.c` `write_crt` around 118 and `read_crt` around 429 | Prefer external versioned guild registry instead of changing existing creature binary layout |
+| Existing staff clan | `hollowdeep_staff.c` around 240 | Keep its role-controlled membership/chat isolated from player guilds |
+| Room inventory | Read-only scan counted 4,043 `r[0-9]*` room files | Do not assume unallocated room IDs or modify production world files |
+
+The audit reported: production source and world unchanged; no game-server restart; no player-file or website modifications. **No guild, global chat, charter deed or housing features have yet been implemented.**
+
+**Next probe required:** bounded source context for `global.c` command table, `io.c` broadcast formatting/color rules, `command7.c` buy/list semantics, `hollowdeep_staff.c` muted-chat rules, `mstruct.h` command structure, and room/character allocation. Then build/test patches on private checksum-verified copies only.
