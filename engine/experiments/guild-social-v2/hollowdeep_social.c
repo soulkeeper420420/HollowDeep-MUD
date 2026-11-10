@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
 #include <time.h>
 
 extern void print(int fd, const char *format, ...);
@@ -359,17 +360,15 @@ int hd_global_chat(creature *player, cmd *command)
  */
 int hd_guild_mint_deed(object *item)
 {
-    int fd, i;
+    int i;
     unsigned char bytes[16];
     char token[40];
     if (!item || strcmp(item->name, "Clan Deed") ||
         strcmp(item->key[2], HD_CHARTER_MARKER) ||
         item->value != HD_CHARTER_PRICE) return 0;
-    fd = open("/dev/urandom", O_RDONLY | O_NOFOLLOW);
-    if (fd < 0) return 0;
-    i = (int)read(fd, bytes, sizeof(bytes));
-    close(fd);
-    if (i != (int)sizeof(bytes)) return 0;
+    /* getrandom works inside the disposable chroot without a /dev mount. */
+    if (syscall(SYS_getrandom, bytes, sizeof(bytes), 0) != (long)sizeof(bytes))
+        return 0;
     strcpy(token, HD_CHARTER_PREFIX);
     for (i = 0; i < 16; i++)
         snprintf(token + 4 + 2*i, sizeof(token) - 4 - 2*i, "%02x", bytes[i]);
