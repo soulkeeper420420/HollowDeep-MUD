@@ -9,7 +9,7 @@ LIVE_ROOMS="/srv/hollowdeep/world/rooms"
 TEST_SRC="/root/hollowdeep-dev/guild-social-batch1/round9-X6jx4lbm/src"
 BASE="/root/hollowdeep-dev/gm-v5/runtime-isolation/fasttrack-v19-stage-i6d5S65m/rootfs"
 EXPECTED="0cbaae7ddd4621933ed60e7edceeb0d08fe6e197b856c1ba8ce1a55abccdec29"
-COMMIT="c5873c42ce315e43ad4f89ece1f8422fdc502269"
+COMMIT="f596392b8825cf5b66509b2798c22528c8a10d5a"
 RAW="https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/$COMMIT/engine/experiments/guild-social-v2"
 
 echo "=== HOLLOWDEEP ROUND 10 REPAIR AND RESUME ==="
