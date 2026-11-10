@@ -12,9 +12,9 @@ Base public origin: `https://www.hollowdeepmud.com`
 | V2 | `/hollowdeep-preview-v2/` | Mobile-facing landing, player portal, browser-local Chronicle planner | Four HTTP 200 responses, PHP lint passed |
 | V3 | `/hollowdeep-preview-v3/` | Adventurer's Tavern, Dungeon Delve, quiz, dice, searchable Codex | Six PHP pages and three assets HTTP 200, PHP lint passed |
 | V4 | `/hollowdeep-preview-v4/` | Daily Chronicle, Rune Memory, Tavern Passport stamps, mobile quick navigation | Ten HTTP 200 responses, PHP lint passed; **seven browser functional tests passed, zero failed** |
-| V5 | `/hollowdeep-preview-v5/` | Adventure Hub, activity links, summary of locally saved stamps/plans, surprise activity | Eleven HTTP 200 responses, PHP lint passed; **V5 client-side functional tests pending** |
+| V5 | `/hollowdeep-preview-v5/` | Adventure Hub, activity links, summary of locally saved stamps/plans, surprise activity | Eleven HTTP 200 responses, PHP lint passed; **ten browser functional checks passed, zero failed** |
 
-The V4 browser test page was deployed separately at `/hollowdeep-preview-v4-qa/index.html`. The owner supplied a screenshot showing 7 passed and 0 failed. HTTP 200 is a delivery check, not proof of JavaScript behavior.
+The V4 browser test page was deployed separately at `/hollowdeep-preview-v4-qa/index.html`; the owner supplied a screenshot showing 7 passed and 0 failed. The V5 browser QA page at `/hollowdeep-preview-v5-qa/index.html` was also opened in-browser, and the owner supplied a screenshot showing **10 passed, 0 failed**. These tests cover the supplied QA checks, not exhaustive visual usability or a live game integration. HTTP 200 alone is a delivery check, not proof of JavaScript behavior.
 
 ## V5 entry points
 
@@ -38,7 +38,7 @@ The local quest planner uses browser localStorage. The Tavern Passport and Daily
 ## Validation before considering promotion
 
 1. Run `php -l` on every PHP file and verify that pages, scripts, and stylesheets respond successfully.
-2. Use the real browser to check the V5 Adventure Hub counts, the Daily status, activity navigation, and mobile layout. The host did not have Node.js installed during these previews.
+2. The V5 browser QA checks passed (10/10); still perform a manual mobile layout and touch/keyboard usability review. The host did not have Node.js installed during these previews.
 3. Exercise keyboard and touch navigation and make sure buttons do not navigate unexpectedly.
 4. Ensure that activities do not claim to change the game character or server.
 5. Compare source checksums of the old preview before and after installing the new one.
@@ -46,7 +46,7 @@ The local quest planner uses browser localStorage. The Tavern Passport and Daily
 
 ## Work remaining
 
-- Verify V5 JavaScript in a browser and complete a mobile UX review.
+- Complete manual mobile usability and accessibility review, then stage V6 usability polish separately.
 - Organize and publish the PHP source files separately from this guide if they are exported from the server and reviewed for secrets. The code snippets used to install previews are not automatically synchronized to this GitHub repository.
 - Prepare a Discord changelog/announcement once the next release is validated. A local changelog file does not itself publish to Discord.
 - Keep V22 combat-target work on hold until the website milestone is finished.
