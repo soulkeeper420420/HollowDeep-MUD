@@ -353,6 +353,96 @@ int hd_global_chat(creature *player, cmd *command)
     }
     return 0;
 }
+/* Mint a unique 128-bit serial for a physical Clan Deed at the native shop.
+ * Stock templates have the inert key[2] marker; never change that field.
+ * Persist the random serial in the object's native use_output[80] field.
+ */
+int hd_guild_mint_deed(object *item)
+{
+    int fd, i;
+    unsigned char bytes[16];
+    char token[40];
+    if (!item || strcmp(item->name, "Clan Deed") ||
+        strcmp(item->key[2], HD_CHARTER_MARKER) ||
+        item->value != HD_CHARTER_PRICE) return 0;
+    fd = open("/dev/urandom", O_RDONLY | O_NOFOLLOW);
+    if (fd < 0) return 0;
+    i = (int)read(fd, bytes, sizeof(bytes));
+    close(fd);
+    if (i != (int)sizeof(bytes)) return 0;
+    strcpy(token, HD_CHARTER_PREFIX);
+    for (i = 0; i < 16; i++)
+        snprintf(token + 4 + 2*i, sizeof(token) - 4 - 2*i, "%02x", bytes[i]);
+    snprintf(item->use_output, sizeof(item->use_output), "%s", token);
+    return 1;
+}
+static object *hd_unused_deed(creature *player, const struct hd_guild_state *s)
+{
+    otag *tag;
+    object *item;
+    for (tag = player->first_obj; tag; tag = tag->next_tag) {
+        item = tag->obj;
+        if (!item || strcmp(item->name, "Clan Deed") ||
+            strcmp(item->key[2], HD_CHARTER_MARKER) ||
+            item->value != HD_CHARTER_PRICE ||
+            strnlen(item->use_output, sizeof(item->use_output)) >= sizeof(item->use_output) ||
+            !hd_valid_token(item->use_output) ||
+            hd_redeemed(s, item->use_output)) continue;
+        return item;
+    }
+    return NULL;
+}
+/* A saved but already-redeemed deed may survive a crash after the guild ledger
+ * commit and before inventory-save. Recover idempotently on next clan command.
+ */
+static void hd_reconcile_spent(creature *player, const struct hd_guild_state *s)
+{
+    otag *tag, *next;
+    object *item;
+    int changed = 0;
+    for (tag = player->first_obj; tag; tag = next) {
+        next = tag->next_tag;
+        item = tag->obj;
+        if (!item || strcmp(item->name, "Clan Deed") ||
+            strcmp(item->key[2], HD_CHARTER_MARKER) ||
+            strnlen(item->use_output, sizeof(item->use_output)) >= sizeof(item->use_output) ||
+            !hd_valid_token(item->use_output) ||
+            !hd_redeemed(s, item->use_output)) continue;
+        del_obj_crt(item, player);
+        free_obj(item);
+        changed = 1;
+    }
+    if (changed) {
+        F_SET(player, PSAVES);
+        save_ply(player);
+        F_CLR(player, PSAVES);
+        print(player->fd, "Previously redeemed Clan Deed reconciled.\n");
+    }
+}
+int hd_guild_can_enter(creature *player, int room_number)
+{
+    struct hd_guild_state *s;
+    int ix, gid, hall, ok = 0, role;
+    if (room_number < 6003 || room_number > 6011) return 1;
+    if (!player) return 0;
+    role = hd_staff_role(player);
+    if (hd_staff_rank(role) >= hd_staff_rank(HD_ROLE_MOD)) return 1;
+    s = calloc(1, sizeof(*s));
+    if (!s) return 0;
+    if (load_guilds(s)) {
+        ix = member_index(s, player->name);
+        if (ix >= 0) {
+            gid = guild_index(s, s->members[ix].guild);
+            hall = room_number < 6006 ? 6003 :
+                   room_number < 6009 ? 6006 : 6009;
+            if (gid >= 0) ok = s->guilds[gid].hall == hall;
+        }
+    }
+    free(s);
+    if (!ok) print(player->fd, "That guild hall is restricted to its members.\n");
+    return ok;
+}
+
 static void clan_help(creature *player)
 {
     print(player->fd, "CLANS: clan list | info <name> | roster | invites\n");
