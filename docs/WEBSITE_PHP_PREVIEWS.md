@@ -53,3 +53,17 @@ The local quest planner uses browser localStorage. The Tavern Passport and Daily
 - Organize and publish the PHP source files separately from this guide if they are exported from the server and reviewed for secrets. The code snippets used to install previews are not automatically synchronized to this GitHub repository.
 - Prepare a Discord changelog/announcement once V6 is validated for public promotion. A local changelog file does not itself publish to Discord.
 - Keep V22 combat-target work on hold until the website milestone is finished.
+
+## November 9, 2026 — Official homepage launch preflight
+
+The owner ran a **read-only** preflight on the Linode web host:
+
+- Current public document root: `/var/www/hollowdeep/public`.
+- Current root `index.php`: 89 bytes, root-owned, mode 0644, SHA-256 `89f6478d608b3977d60d003fe11cb4aab2195450411c994d82f044c198587ded`.
+- No `index.html` at the public root was reported.
+- `nginx -t`: successful.
+- Disk: 79 GB volume, ~68 GB available, 9% used.
+- The official root URL and V6 preview homepage both returned HTTP 200.
+- V6 read-only audit: 9 pages and 16 internal links/assets passed, 0 failures. This is not a visual/mobile usability certification.
+
+**Promotion policy:** No release approval has been given. Keep all existing admin routes, engine, player saves, and database untouched. Prepare a private, checksum-verified rollback backup and staging candidate before modifying the live 89-byte root homepage. Remove preview-only `noindex` and preview messaging **only in a final approved release copy**, not by changing existing previews. Do not change Nginx configuration or restart services during backup preparation. Test the actual launch/rollback route before replacing the root file; a redirect from the homepage to a stable release subdirectory is safer than overwriting unknown root files.
