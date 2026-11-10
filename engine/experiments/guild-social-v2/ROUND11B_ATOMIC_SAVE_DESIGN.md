@@ -35,3 +35,9 @@
 - Require separate operator approval, backup and rollback rehearsal before *any* production promotion. Test-only gold minting stays staging-only.
 
 See [the Round 11B compressor contract audit](round11b_compressor_contract_audit.sh) to collect the missing source-level details without executing the game.
+
+## Compressor contract confirmed in owner's Round 11B audit
+
+The original `compress.c` uses 12-bit LZW codes in a 4096-entry dictionary. `writec()` unconditionally writes through `*outbuf` and increments `outbuf` and `sizeof_outbuf`; `flushout()` does likewise. Neither function accepts a destination capacity or reports overflow. `compress(in,out,size)` emits up to one 12-bit code per uncompressed input byte; its output can grow to roughly **1.5 times input size**, so the native `files2.c` allocation `b_buf=malloc(n)` where `n` is uncompressed length is unsafe for difficult-to-compress data. The decoder `uncompress()` shares those same unbounded writes and writes to a fixed 100,000-byte buffer. `write_crt_to_mem()` likewise writes a raw `creature` and recursively serialized inventory into an unbounded caller buffer, returning a length only after writing. Both reader and writer need independently enforced size limits.
+
+The audit did not include **`files3.c:1-69`** (the `write_obj_to_mem` implementation) or the rest of `read_crt_from_mem`, which are required to design a capacity-checked serializer/deserializer safely. Do not claim that the compressor or serializer is safe by simply doubling an allocation. Obtain the exact recursive-object writer and loader source, then implement bounded writing plus a properly sized, checked compressor/decoder in a private copy and fault-inject both save and load. The production deployment gate remains closed.
