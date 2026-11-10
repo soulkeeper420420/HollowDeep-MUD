@@ -13,7 +13,7 @@ Base public origin: `https://www.hollowdeepmud.com`
 | V3 | `/hollowdeep-preview-v3/` | Adventurer's Tavern, Dungeon Delve, quiz, dice, searchable Codex | Six PHP pages and three assets HTTP 200, PHP lint passed |
 | V4 | `/hollowdeep-preview-v4/` | Daily Chronicle, Rune Memory, Tavern Passport stamps, mobile quick navigation | Ten HTTP 200 responses, PHP lint passed; **seven browser functional tests passed, zero failed** |
 | V5 | `/hollowdeep-preview-v5/` | Adventure Hub, activity links, summary of locally saved stamps/plans, surprise activity | Eleven HTTP 200 responses, PHP lint passed; **ten browser functional checks passed, zero failed** |
-| V6 | `/hollowdeep-preview-v6/` | Start Here onboarding, simplified mobile navigation, clear preview notice | **Eleven HTTP 200 responses and PHP lint passed**; manual mobile/browser review pending |
+| V6 | `/hollowdeep-preview-v6/` | Start Here onboarding, simplified mobile navigation, clear preview notice | **Eleven HTTP 200 responses and PHP lint passed; nine pages and sixteen internal targets passed read-only link audit, zero failures**; manual mobile/browser review pending |
 
 The V4 browser test page was deployed separately at `/hollowdeep-preview-v4-qa/index.html`; the owner supplied a screenshot showing 7 passed and 0 failed. The V5 browser QA page at `/hollowdeep-preview-v5-qa/index.html` was also opened in-browser, and the owner supplied a screenshot showing **10 passed, 0 failed**. These tests cover the supplied QA checks, not exhaustive visual usability or a live game integration. HTTP 200 alone is a delivery check, not proof of JavaScript behavior.
 
@@ -49,7 +49,7 @@ The local quest planner uses browser localStorage. The Tavern Passport and Daily
 
 ## Work remaining
 
-- Complete the V6 manual mobile usability and accessibility review, check rendered site links and asset responses, and correct any findings in a separately staged change.
+- Complete the V6 manual mobile usability and accessibility review; the read-only HTTP/link audit already passed 9 pages and 16 link/asset targets, with 0 failures. Correct any visual, touch, or accessibility findings in a separately staged change.
 - Organize and publish the PHP source files separately from this guide if they are exported from the server and reviewed for secrets. The code snippets used to install previews are not automatically synchronized to this GitHub repository.
 - Prepare a Discord changelog/announcement once V6 is validated for public promotion. A local changelog file does not itself publish to Discord.
 - Keep V22 combat-target work on hold until the website milestone is finished.
