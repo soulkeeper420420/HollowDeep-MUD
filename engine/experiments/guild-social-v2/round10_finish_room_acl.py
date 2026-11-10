@@ -38,7 +38,7 @@ match = matches[0]
 # room-number update so we do not accidentally patch a later function.
 body = code[match.end():match.end() + 8192]
 assignments = list(re.finditer(
-    r"(?m)^[ \\t]*ply_ptr->parent_rom[ \\t]*=[ \\t]*rom_ptr[ \\t]*;",
+    r"(?m)^[ \t]*ply_ptr->parent_rom[ \t]*=[ \t]*rom_ptr[ \t]*;",
     body,
 ))
 if len(assignments) != 1:
@@ -50,7 +50,7 @@ if len(assignments) != 1:
 assignment = assignments[0]
 after_assignment = body[assignment.end():assignment.end() + 300]
 if not re.search(
-    r"ply_ptr->rom_num[ \\t]*=[ \\t]*rom_ptr->rom_num[ \\t]*;",
+    r"ply_ptr->rom_num[ \t]*=[ \t]*rom_ptr->rom_num[ \t]*;",
     after_assignment,
 ):
     raise SystemExit("STOP: Native player room-number update not found after parent assignment")
