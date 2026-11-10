@@ -34,3 +34,24 @@ Do not copy directly into the live source tree. Use the guided checksum-verified
 ## Public reference
 
 [Atlas MUD](https://www.atlasmud.com/) documents public guild, shop, home, staff and builder concepts. These are inspiration, not verified or licensed reusable implementation files.
+
+## Compiler compatibility fix (Round 4)
+
+The owner's native `mstruct.h` does not expose a usable `plystruct` typedef to this extension module. The corrected social module uses two minimal read/output adapters implemented in the **staging copy** of `io.c`, which already knows the native `Ply` representation:
+
+```c
+creature *hd_social_online_player(int fd)
+{
+    if (fd < 0 || fd >= Tablesize || !Ply[fd].ply ||
+        Ply[fd].ply->fd != fd) return NULL;
+    return Ply[fd].ply;
+}
+
+void hd_social_color(int fd, int color)
+{
+    if (!hd_social_online_player(fd)) return;
+    ANSI(fd, color);
+}
+```
+
+The source defines external declarations for these functions; the installer must add the adapters to the **copied staging `io.c`** before compiling. The stage-specific `HD_GUILD_STAGING_FREE_CREATE` flag remains unsafe for production.
