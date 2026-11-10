@@ -54,12 +54,21 @@ s = s.replace(old_crypto, """    /* Linux kernel randomness also works in our di
 if "PSAVES" in s or 'open("/dev/urandom"' in s:
     raise SystemExit("STOP: Unsupported staging save flag / random dependency remains")
 
-# Keep one private source backup. Do not overwrite a previous one.
+# Earlier versions of this helper called write_text() on a file handle.
+# That failed before changing the source, but left an EMPTY backup file.
+# Recover only that exact safe condition; never replace any real backup.
 backup = ROOT / "hollowdeep_social.c.before-round10-save-fix"
-if backup.exists() or backup.is_symlink():
-    raise SystemExit("STOP: Private source backup already exists; abort to avoid overwrite")
+if backup.is_symlink():
+    raise SystemExit("STOP: Backup path is a symlink")
+if backup.exists():
+    st = backup.stat()
+    if not backup.is_file() or st.st_uid != os.geteuid() or st.st_size != 0:
+        raise SystemExit("STOP: Existing nonempty/unsafe backup; do not overwrite")
+    backup.unlink()
 with backup.open("x") as out:
-    out.write_text(p.read_text())
+    out.write(p.read_text())
+    out.flush()
+    os.fsync(out.fileno())
 os.chmod(backup, 0o600)
 fd, temp_name = tempfile.mkstemp(prefix=".round10-social-", dir=ROOT)
 try:
