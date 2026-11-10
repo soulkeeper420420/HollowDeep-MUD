@@ -12,7 +12,7 @@ LIVE="/srv/hollowdeep/world/src_3.00"
 LIVE_ROOMS="/srv/hollowdeep/world/rooms"
 BASE="/root/hollowdeep-dev/gm-v5/runtime-isolation/fasttrack-v19-stage-i6d5S65m/rootfs"
 EXPECTED="0cbaae7ddd4621933ed60e7edceeb0d08fe6e197b856c1ba8ce1a55abccdec29"
-PIN="d771e51ec1b1776ac605707fa77fb23481c4edda"
+PIN="213eb1a107ef7db25d27554c2904ccd3958583cf"
 RAW="https://raw.githubusercontent.com/soulkeeper420420/HollowDeep-MUD/$PIN/engine/experiments/guild-social-v2"
 
 hash_live() {
