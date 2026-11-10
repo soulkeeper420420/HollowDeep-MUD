@@ -9,6 +9,7 @@
  * and atomic inventory+registry handling are implemented and tested.
  */
 #include "mstruct.h"
+#include "mextern.h"
 #include "hollowdeep_staff.h"
 #include "hollowdeep_social.h"
 #include <stdio.h>
