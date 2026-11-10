@@ -153,3 +153,11 @@ The owner ran the combined experimental 32-bit build in a disposable rootfs with
 The test used **deed-free guild creation**, enabled strictly with `HD_GUILD_STAGING_FREE_CREATE=1`; **this build must never be deployed to production**. The player's report verified production source, executable, world, database, website and original test players unchanged. The tests did not prove native deed purchase/consumption, guild house creation or access restrictions, optional muted-message behavior, high load resilience, or complete guild storage corruption recovery.
 
 Next combined milestone: design and stage a native `RSHOPP` Guild Registry room and its `room_num+1` deed-stock room with a unique non-resellable deed object, plus multiple preallocated Starter Hall room templates. Prove all chosen IDs are free; use the native `write_rom` serializer. Replace test-only founding with physical deed ownership and an audited safe transaction design; verify refund/recovery behavior before any production release.
+
+## Round 6 — private deed-gated compile and housing plan (reported November 9, 2026)
+
+The owner verified 18/18 Round 5 isolated guild gameplay checks again, copied source to a new private Round 6 workspace, removed the `HD_GUILD_STAGING_FREE_CREATE` flag, and compiled the 32-bit deed-gated executable successfully. This **does not implement deed checking**: `clan create` currently fails closed without the staging flag. The merchant/item and physical rooms remain pending. Production source, executable, players, rooms, database, website and service state were reported untouched.
+
+Round 6 proposed rooms 22000–22011, with registry shop at 22000 and stockroom at 22001 (stock is read by `RSHOPP` via room ID plus one). **These room numbers are planning placeholders only.** A critical incompatibility surfaced in the audit: the current `hbuild` command accepts room IDs **2–8999**; the 22000-series falls outside that builder range. Select and revalidate a genuinely unused in-range set or explicitly extend and test all relevant engine range checks before creating any room files. Do not consider the listed IDs reserved.
+
+The public website can launch separately from this game feature. Any community/marketing page must describe clan deeds, guild housing, and in-game guild integration as **coming soon**, not live.
