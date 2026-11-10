@@ -190,7 +190,7 @@ int main(int argc, char **argv)
         return 2;
     }
     /* Hard-bound this generator to the known private Round 8 workspace. */
-    if (strncmp(argv[1], "/root/hollowdeep-dev/guild-social-batch1/round8-", 51) != 0 ||
+    if (strncmp(argv[1], "/root/hollowdeep-dev/guild-social-batch1/round8-", 48) != 0 ||
         strlen(argv[1]) < 17 ||
         strcmp(argv[1] + strlen(argv[1]) - 17, "/test-world/rooms") != 0) {
         fprintf(stderr, "Refusing non-staging output path.\n");
