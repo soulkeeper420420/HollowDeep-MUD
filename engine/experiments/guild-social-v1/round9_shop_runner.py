@@ -156,17 +156,25 @@ def command(connection, text):
 
 def reconnect(name, password):
     connection = connect()
-    prompt = receive(connection, 6)
+    prompt = receive(connection, 8)
     if "please enter name" not in prompt.lower():
-        raise RuntimeError("Reconnect name prompt missing")
+        prompt += receive(connection, 4)
+    if "please enter name" not in prompt.lower():
+        raise RuntimeError("Reconnect name prompt not recognized: " + repr(prompt[-350:]))
     send(connection, name)
-    prompt = receive(connection, 5)
+    prompt = receive(connection, 8)
     if "password" not in prompt.lower():
-        raise RuntimeError("Reconnect password prompt missing")
+        prompt += receive(connection, 4)
+    if "password" not in prompt.lower():
+        raise RuntimeError("Reconnect response after name (password prompt missing): "
+                           + repr(prompt[-450:]))
     send(connection, password)
-    response = receive(connection, 8)
+    response = receive(connection, 10)
     if not in_game(response):
-        raise RuntimeError("Disposable player reconnect failed")
+        response += receive(connection, 4)
+    if not in_game(response):
+        raise RuntimeError("Login response after password not recognized: "
+                           + repr(response[-450:]))
     return connection
 
 def tested():
@@ -251,6 +259,11 @@ def tested():
     saved = command(player, "save")
     check("Test character saved after purchase",
           "saved" in saved.lower(), saved)
+    saved_file = ROOT / "player" / name
+    check("Disposable native character file exists after save",
+          saved_file.is_file() and saved_file.stat().st_size > 0)
+    if saved_file.is_file():
+        print("Native player file size:", saved_file.stat().st_size, flush=True)
     for client in CLIENTS:
         try: client.close()
         except OSError: pass
