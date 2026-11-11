@@ -247,8 +247,17 @@ static int save_guilds(const struct hd_guild_state *s)
     if (ok) ok = rename(temp, HD_GUILD_FILE) == 0;
     if (!ok) unlink(temp);
     if (ok) {
+        /*
+         * rename() may have committed the new ledger even if the parent
+         * directory cannot be synchronized. Never report durable success
+         * on that path. -1 means UNKNOWN, not "not committed": callers
+         * must keep the physical deed, avoid a success acknowledgment,
+         * and reconcile the serial from the ledger before another grant.
+         */
         dirfd = open(HOLLOWDEEP_DATA_DIR, O_RDONLY | O_DIRECTORY);
-        if (dirfd >= 0) { fsync(dirfd); close(dirfd); }
+        if (dirfd < 0) return -1;
+        if (fsync(dirfd) < 0) { close(dirfd); return -1; }
+        if (close(dirfd) < 0) return -1;
     }
     return ok;
 }
@@ -540,8 +549,17 @@ int hd_player_clan(creature *player, cmd *command)
              * A crash after commit can leave an already-spent deed in the
              * native player file, but cannot redeem that serial again.
              */
-            if (!save_guilds(s)) {
-                print(player->fd, "Guild storage failed; Clan Deed not consumed.\n");
+            result = save_guilds(s);
+            if (result == 0) {
+                print(player->fd, "Guild storage failed before commit; Clan Deed not consumed.\n");
+            } else if (result < 0) {
+                /*
+                 * Ledger rename succeeded but directory durability is
+                 * unknown. Do not consume the deed or acknowledge founding.
+                 * On next clan command hd_reconcile_spent() checks the
+                 * ledger's redeemed serial and removes a spent deed once.
+                 */
+                print(player->fd, "Guild ledger durability uncertain; Clan Deed retained pending reconciliation. Contact staff.\n");
             } else {
                 del_obj_crt(charter, player);
                 free_obj(charter);
@@ -639,8 +657,12 @@ int hd_player_clan(creature *player, cmd *command)
     }
     if (dirty) {
         result = save_guilds(s);
-        print(player->fd, result ? "Guild records updated.\n" :
-              "Guild storage failed; change was not committed.\n");
+        if (result > 0)
+            print(player->fd, "Guild records updated.\n");
+        else if (result < 0)
+            print(player->fd, "Guild ledger durability uncertain; verify records before further changes. Contact staff.\n");
+        else
+            print(player->fd, "Guild storage failed before commit; change was not committed.\n");
     }
 done:
     free(s);
