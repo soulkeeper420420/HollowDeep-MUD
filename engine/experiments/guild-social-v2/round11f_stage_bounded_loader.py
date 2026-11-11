@@ -232,7 +232,7 @@ creature **ply_ptr;
         goto done;
     loaded = (creature *)malloc(sizeof(creature));
     if (!loaded) goto done;
-    consumed = read_crt_from_mem(raw,loaded,0);
+    consumed = read_crt_from_mem(raw,loaded);
     if (consumed != raw_size) goto done;
     *ply_ptr = loaded;
     loaded = 0;
