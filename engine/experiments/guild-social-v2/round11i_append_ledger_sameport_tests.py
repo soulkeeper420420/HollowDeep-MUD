@@ -167,5 +167,5 @@ s=s.replace("=== ROUND 11H BOUNDED NATIVE LOAD SUMMARY ===",
 runner.write_text(s)
 print("Private Round11I runner: LEDGER FAIL-CLOSED / RESTORE / SAME-PORT RESTART")
 print("Native game engine and character data: UNMODIFIED")
-print("Expected checks: 54 original + 13 new = 67")
+print("Expected checks: 54 original + 19 new = 73")
 print("Production source/rooms/service: NOT ACCESSED")
