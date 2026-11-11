@@ -20,7 +20,9 @@ test "$(hash_tree "$SRC")" = "$EXPECTED"
 test -z "$(find "$SRC" "$ROOMS" -type l -print -quit)"
 ROOMS_BEFORE=$(hash_tree "$ROOMS")
 SERVICE_BEFORE=$(systemctl show hollowdeep.service -p MainPID -p ActiveEnterTimestampMonotonic)
-python3 - "$SRC" "$ROOMS" <<'PY'
+REPORT=$(mktemp /root/hollowdeep-11v-exit-contract-XXXXXXXX.log)
+echo "Private source inspection report: $REPORT"
+python3 - "$SRC" "$ROOMS" > "$REPORT" <<'PY'
 from pathlib import Path
 import hashlib, re, struct, sys
 src=Path(sys.argv[1]); rooms=Path(sys.argv[2])
@@ -63,6 +65,42 @@ for name,size,sha in refs[:20]:
     print(f"Caledonia text candidate: {name} bytes={size} sha256={sha}")
 print("Caledonia room text candidates:",len(refs))
 print("IMPORTANT: text and 5 exits alone do not prove an actual linked approach")
+PY
+echo '=== SHORT NATIVE EXIT CONTRACT SUMMARY ==='
+python3 - "$REPORT" <<'PY'
+from pathlib import Path
+import re,sys
+p=Path(sys.argv[1])
+lines=p.read_text(errors="replace").splitlines()
+print("Source report lines:",len(lines))
+for x in lines:
+    if x.startswith(("r00002 SHA-256:","r00002 bytes:","r00002 count",
+                     "r00002 mentions Caledonia Road:","Caledonia text candidate:",
+                     "Caledonia room text candidates:")):
+        print(x[:200])
+print("=== NATIVE EXIT STRUCT MEMBERS ===")
+inside=False
+shown=0
+for x in lines:
+    if x.startswith("--- mstruct.h: typedef"):
+        inside="exit_" in x
+        continue
+    if x.startswith("--- mstruct.h:") or x.startswith("--- files1.c:"):
+        inside=False
+    if inside and x.startswith("mstruct.h:"):
+        value=x.split(": ",1)[-1].strip()
+        if value and not value.startswith(("/*","*","//")):
+            print(value[:180])
+            shown+=1
+            if shown>=29:break
+print("=== SERIALIZED NATIVE EXIT OPERATIONS ===")
+ops=0
+for x in lines:
+    if x.startswith("files1.c:") and re.search(r"\b(?:read|write|malloc|free|cnt|first_ext|xprev|xptr)\b",x):
+        print(x[:190])
+        ops+=1
+        if ops>=16:break
+print("Full source excerpt retained in:",p)
 PY
 test "$(hash_tree "$SRC")" = "$EXPECTED"
 test "$(hash_tree "$ROOMS")" = "$ROOMS_BEFORE"
