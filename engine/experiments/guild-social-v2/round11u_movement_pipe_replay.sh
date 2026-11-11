@@ -152,6 +152,38 @@ fi
 test "$(grep -c '^PASS:' "$FRESH/replay.log")" -eq 23
 grep -Fq 'Complete isolated source, binary and room rollback verified' "$FRESH/replay.log"
 echo '=== ROUND 11U 23/23 MOVEMENT + FULL ROLLBACK: PASS ==='
-echo "Private report: $FRESH/replay.log"
-echo 'Next gate: 18 hook-free directory-fsync fault checks'
+echo "Private movement report: $FRESH/replay.log"
+
+# Reuse the previously pinned but not-yet-executed Round11U directory-fsync
+# suite, which sets up a deed with the private fixture and switches to this
+# exact hook-free release candidate before injecting any EIO.
+test -s "$PREV/round11s_fsync_private.sh"
+test -s "$PREV/round11s_fsync_replay.py"
+test -s "$PREV/round11s_fsync_inject.c"
+test -s "$PREV/round11p_populated_replay.py"
+test -s "$PREV/round11p_crash_replay.py"
+ACTUAL_PIN=$(sha256sum "$CAND/src/frp.new" | awk '{print $1}')
+grep -Fq "$ACTUAL_PIN" "$PREV/round11p_populated_replay.py"
+grep -Fq "$ACTUAL_PIN" "$PREV/round11p_crash_replay.py"
+grep -Fq 'ROUND11U_CANDIDATE' "$PREV/round11s_fsync_replay.py"
+echo '=== ROUND 11U PINNED 18-CHECK DIRECTORY-FSYNC EIO REPLAY ==='
+set +e
+ROUND11U_CANDIDATE="$CAND/src/frp.new" ROUND11U_PIN="$ACTUAL_PIN" \
+ bash "$PREV/round11s_fsync_private.sh" >"$FRESH/18.log" 2>&1
+fsync_status=$?
+set -e
+grep -E '^(PASS:|Passed:|Failed:|=== ROUND|Production source|Power-loss)' "$FRESH/18.log" | tail -n 32 || true
+if test "$fsync_status" -ne 0 ||
+   ! grep -Fxq 'Passed: 18' "$FRESH/18.log" ||
+   ! grep -Fxq 'Failed: 0' "$FRESH/18.log"; then
+ echo "STOP: private Round11U hook-free fsync replay failed, status $fsync_status" >&2
+ tail -n 50 "$FRESH/18.log" >&2
+ echo "Private fsync report: $FRESH/18.log" >&2
+ exit 1
+fi
+echo '=== ROUND11U 18/18 EXACT-CANDIDATE FSYNC RECOVERY: PASS ==='
+echo '=== ROUND11U EXACT-CANDIDATE REPLAY: 142/142 VERIFIED SUITE CHECKS ==='
+echo 'Prior private 90/90 and 11/11 logs verified, fresh 23/23 and 18/18 checks passed.'
+echo "Private reports: $PREV/90.log, $PREV/11.log, $FRESH/replay.log, $FRESH/18.log"
+echo 'Remaining: actual Town Square exit integration + post-activation transaction-preserving rollback'
 echo 'Production release: NO-GO'
