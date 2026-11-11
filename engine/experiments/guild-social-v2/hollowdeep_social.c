@@ -402,6 +402,34 @@ static object *hd_unused_deed(creature *player, const struct hd_guild_state *s)
     }
     return NULL;
 }
+/*
+ * Serialize a native player with readied equipment included in the saved
+ * inventory, matching command8.c:savegame. Never free live equipped objects
+ * from this shallow creature copy; remove only the temporary inventory tags.
+ */
+static int hd_guild_save_equipped(creature *player)
+{
+    creature *copy;
+    object *added[MAXWEAR];
+    int i, n = 0, result;
+    if (!player || !player->name[0]) return -1;
+    copy = (creature *)malloc(sizeof(creature));
+    if (!copy) return -1;
+    *copy = *player;
+    for (i = 0; i < MAXWEAR; i++) {
+        if (copy->ready[i]) {
+            added[n++] = copy->ready[i];
+            add_obj_crt(copy->ready[i], copy);
+            copy->ready[i] = 0;
+        }
+    }
+    result = save_ply(copy->name, copy);
+    for (i = 0; i < n; i++)
+        del_obj_crt(added[i], copy);
+    free(copy);
+    return result;
+}
+
 /* A saved but already-redeemed deed may survive a crash after the guild ledger
  * commit and before inventory-save. Recover idempotently on next clan command.
  */
@@ -424,7 +452,7 @@ static void hd_reconcile_spent(creature *player, const struct hd_guild_state *s)
     }
     if (changed) {
         /* Native save_ply requires both the character name and pointer. */
-        if (save_ply(player->name, player) < 0)
+        if (hd_guild_save_equipped(player) < 0)
             print(player->fd, "Spent deed reconciled, but player save failed. Contact staff.\n");
         print(player->fd, "Previously redeemed Clan Deed reconciled.\n");
     }
@@ -564,7 +592,7 @@ int hd_player_clan(creature *player, cmd *command)
                 del_obj_crt(charter, player);
                 free_obj(charter);
                 /* Guild ledger is already committed; preserve spent-serial safety even if player save fails. */
-                if (save_ply(player->name, player) < 0)
+                if (hd_guild_save_equipped(player) < 0)
                     print(player->fd, "Guild registered; character save failed. Report to staff.\n");
                 print(player->fd, "Guild records updated. Clan Deed redeemed. Hall entrance: %d\n", hall);
             }
