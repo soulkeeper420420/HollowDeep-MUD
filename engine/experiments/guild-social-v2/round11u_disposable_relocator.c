@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "mstruct.h"
 
 extern int load_ply(char *, creature **);
@@ -25,6 +26,13 @@ int main(int argc, char **argv)
     char *end = NULL;
     long room_id;
     int i;
+    /* Defense in depth: fail closed if copied to a non-test runtime. */
+    if (!getenv("ROUND11U_DISPOSABLE_RELOCATION") ||
+        strcmp(getenv("ROUND11U_DISPOSABLE_RELOCATION"), "PRIVATE_ONLY") ||
+        access("/hollowdeep-data/round11u-private-sentinel", R_OK) != 0) {
+        fprintf(stderr, "STOP: disposable-only relocation guard missing\n");
+        return 2;
+    }
     if (argc != 3) {
         fprintf(stderr, "Usage: round11u-relocate HdTESTNAME TOWN_ROOM\n");
         return 2;
