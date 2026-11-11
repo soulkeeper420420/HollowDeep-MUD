@@ -1,0 +1,33 @@
+# HollowDeep Round 11U — exact-candidate validation and Town Square integration
+
+**Deployment decision: NO-GO. No production activation, source change, room edit, player-save mutation, or service restart is authorized.**
+
+## Confirmed prerequisites
+
+- Round 11S private equipment-aware/durability candidate: **73/73 regression passes** in `round11s-durability-NXKx5FiI`; exact binary SHA-256 `8dbd6cd1d03b763ff0f454bba11861dd9470052716e2624838f5fec919c7f446`.
+- Round 11S isolated actual one-shot ledger `rename` and parent-directory `fsync` EIO injection: **18/18 passes** in `round11s-fsync-D3AMBIdj`. It verified uncertainty reporting, deed retention, one redeemed serial, crash/restart reconciliation and duplicate prevention. This does **not** establish host-power-loss durability.
+- The operator's Round 11T terminal screenshot shows a full hook-free 32-bit rebuild and native login smoke **PASS**, with original production source, rooms, service and old candidate unchanged. Round11T's **complete binary SHA-256 remains stored in the Linode-only** `round11t-hookfree-*/candidate.sha256` file. Do not derive the missing hex bytes from the truncated screenshot or reuse the superseded 11P candidate hash.
+
+## Prepared exact-candidate regression package (not yet executed)
+
+- `round11u_exact_candidate_replay.sh` discovers the successful Round11T private candidate. If more than one successful build exists, it requires explicit `ROUND11U_STAGE` instead of silently choosing. It reads the **one-entry exact-path** `candidate.sha256`, hashes the actual candidate and its installed runtime binary, verifies a 32-bit ELF, checks known test-only strings and Makefile flags, verifies the old predecessor SHA and production source, and freezes before/after checksums for the candidate, current private fixture, source, rooms and service identity.
+- `round11u_prepare_replay.py` copies the existing 90/11/23 native test tools to a fresh private tool directory and replaces **only exact occurrences of the old fixed candidate SHA** with the verified manifest SHA. The source test fixtures retain their original separate test-only build; native injection, rollback, and movement tests execute against the **new hook-free candidate** after the snapshot. No source-pinning check is removed.
+- The actual directory-`fsync` runner uses the old 73/73 isolated fixture-enabled binary solely to create an unspent disposable deed and a saved player. It waits for disconnect EOF, closes the fixture game and swaps in the SHA-verified hook-free candidate **before any fault injection**. It then replays the 18 EIO+reconciliation assertions against that exact candidate.
+- Expected total if and only if all suites finish successfully: **90 populated + 11 abrupt recovery + 23 alternate movement/rollback + 18 post-rename directory durability = 142 checks**. Round11U has **not** yet produced 142/142 test evidence. The harness will stop on the first failure. Linode-native output and its new hash must be reviewed before results can be certified.
+
+## Town Square world-entrance gate
+
+The previous Round11R Codex session proposed keeping Town Square's five existing exits and adding a named `district` exit to room **6000**, plus a reciprocal `town` exit to the original Town Square. Unlike earlier disposable replay aliases, **do not overwrite live or staged room 1/2**. Room ID, original exit array capacity, serializer API, existing exit names and room-file checksum must be established from the real world first. The read-only `round11u_town_square_probe.sh` searches production room bytes for Town Square name candidates, prints SHA-256 for matching room files and the native room/exit load/save C API, and rechecks source, rooms and live service identity after inspection. A verified **private-only** binary room edit must be built from those facts, tested by native entry and return, and recorded as a reversible source+room delta. Text search alone is not authority to write a room.
+
+## Transaction-preserving predecessor rollback gate
+
+A controlled rehearsal must cover transactions created **after** candidate activation, not merely a populated ledger surviving an unrelated predecessor boot:
+
+1. Establish a full manifest/backup of private predecessor source, binary, rooms, disposable player saves and pre-transaction ledger. Record types, modes, owners and hashes.
+2. Activate the exact Round11T candidate only inside a disposable runtime; found at least two guilds, redeem independent deed serials, save an equipped item and a character **inside room 6000–6011**. Ensure saved character writes completed (socket EOF and nonempty stable files) before stopping a process.
+3. Archive the *committed* post-activation ledger independently before restoring predecessor binaries or removing guild rooms; preserve the original ledger file on disk if the predecessor ignores it. Do **not** roll ledger transactions back to pre-activation bytes or recycle already redeemed deed serials.
+4. Relocate district occupants in disposable saved-character files using a verified native load/serialize helper to an existing **verified predecessor-accessible** Town Square room. Do not edit compressed saves by raw offsets. Archive and hash original saved files before relocation, preserve all inventory/equipment, and block if any move/save fails.
+5. Restore complete predecessor source, executable and rooms (including all original exits), while preserving the committed ledger archive and intentional relocation saves. Login, score and inventory checks must pass. Guild features are temporarily unavailable.
+6. Reactivate the **identical pinned candidate** and its district rooms in the same isolated root. Verify the archived ledger matches restored ledger, guild memberships/leader roles/hall ACL remain valid, no double redemption, no missing items, and saved characters can return via the `district` exit. Verify the source, room, account and ledger final hashes outside those explicitly permitted modifications.
+
+**Blockers not resolved by prior Round11Q:** connection from the *actual* Town Square, new post-activation guild rollback data, power-loss durability. Also directory-open/close post-rename errors have not been individually injected. No deployment script with live activation should be executed or published as approved until the GO/NO-GO is revisited after these checks.
