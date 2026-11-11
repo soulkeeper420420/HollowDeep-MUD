@@ -199,8 +199,8 @@ def tested():
     server_start()
     print("=== CORRUPT ACCOUNT LOAD MUST FAIL CLOSED ===", flush=True)
     for label, candidate, payload in (
-            ("bad 12-bit LZW header", "Hdfbadone", b"\xff\xff"),
-            ("oversize compressed save", "Hdfbadtwo", b"\x00" * 50000)):
+            ("bad 12-bit LZW header", "Hdzirvexa", b"\xff\xff"),
+            ("oversize compressed save", "Hdzirvexb", b"\x00" * 50000)):
         path = ROOT / "player" / candidate
         if path.exists() or path.is_symlink():
             raise RuntimeError("Synthetic corrupt-account path already exists")
