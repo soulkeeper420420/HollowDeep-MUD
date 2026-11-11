@@ -19,3 +19,7 @@ A strict private stage patcher `round11s_patch_ledger_durability.py` uses three 
 5. Rehearse post-activation ledger archive, saved district-occupant relocation, rollback and reactivation using the exact new candidate and populated world. Do not discard ledger or revive a previously redeemed deed.
 
 Codex's unfinished Round 11R changes may exist only in its previous uncommitted workspace. Do not presume they are on the GitHub branch. **No production restart or deployment is authorized.**
+
+## First private replay attempt and launcher repair
+
+The first executed Round11S private stage was `/root/hollowdeep-dev/guild-social-batch1/round11s-durability-0bYa1VZC`. The exact three-anchor source patch applied, its 32-bit binary built with SHA-256 `46e02ee8a7274d6083d64fe7e2db24c582a32c98c2654d3aeced756219558db9`, and the production / Round11K baseline checksums remained unchanged. However, the test summary showed **Passed: 0, Failed: 0**, so no assertions ran and this build has **not** passed the regression. The likely launcher error is that the disposable rootfs top directory was created `root:root` mode `0700`, preventing the unprivileged `65534` game process from traversing it. The private launcher now `chown -R 65534:65534` **only the new disposable rootfs** before test execution, with a symlink check and better failure log tails. The exact cause must be confirmed if the rerun still fails; the native runner has not yet been rerun with this repair.
