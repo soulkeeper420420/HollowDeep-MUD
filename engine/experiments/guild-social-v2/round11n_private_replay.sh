@@ -6,8 +6,12 @@ prior=$base/round11-equip-aHkpdO8H
 live=/srv/hollowdeep/world/src_3.00
 here=$(dirname "$(realpath "$0")")
 patch=round11n_patch.py
+expected=84
 if [[ ${1:-} == --native-writer-faults ]]; then
   patch=round11o_writer_faults.py
+elif [[ ${1:-} == --exact-candidate ]]; then
+  patch=round11p_populated_replay.py
+  expected=90
 elif [[ $# != 0 ]]; then
   exit 2
 fi
@@ -53,5 +57,5 @@ install -o 65534 -g 65534 -m 755 "$stage/src/frp.new" "$stage/rootfs/bin/hollowd
 timeout --kill-after=3s 480s unshare --mount --net --pid --fork \
   python3 "$stage/runner.py" "$stage/rootfs" >"$stage/results.log" 2>&1
 grep -E '^(Passed|Failed):' "$stage/results.log"
-grep -Fxq 'Passed: 84' "$stage/results.log"
+grep -Fxq "Passed: $expected" "$stage/results.log"
 grep -Fxq 'Failed: 0' "$stage/results.log"
