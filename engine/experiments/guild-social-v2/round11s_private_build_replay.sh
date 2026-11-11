@@ -43,6 +43,12 @@ for entry in "$FROM"/rootfs/*; do
  cp -a "$entry" "$stage/rootfs/"
 done
 install -d -m 700 -o 65534 -g 65534 "$stage/rootfs/player" "$stage/rootfs/hollowdeep-data"
+# The previous launcher left the chroot root directory owned by root at 0700.
+# The game drops privileges to uid 65534; it must be able to traverse its root.
+# Re-own ONLY the new disposable rootfs (never live files or source baselines).
+test -z "$(find "$stage/rootfs" -type l -print -quit)"
+chown -R 65534:65534 "$stage/rootfs"
+test "$(stat -c '%u' "$stage/rootfs")" = 65534
 cp -p "$FROM/round11k_runner.py" "$stage/runner.py"
 python3 - "$stage/runner.py" <<'PY'
 from pathlib import Path
@@ -78,14 +84,19 @@ timeout --kill-after=3s 480s unshare --mount --net --pid --fork \
  python3 "$stage/runner.py" "$stage/rootfs" > "$stage/results.log" 2>&1
 status=$?
 set -e
-grep -E '^(Passed|Failed):|^=== ROUND' "$stage/results.log" || tail -n 50 "$stage/results.log"
+grep -E '^(Passed|Failed):|^=== ROUND' "$stage/results.log" || true
 guard
 echo "Production and Round11K baseline checksum: UNCHANGED"
 echo "Private report: $stage/results.log"
 echo "Private binary SHA-256: $(sha256sum "$stage/src/frp.new" | cut -d' ' -f1)"
-if [ "$status" -ne 0 ]; then exit "$status"; fi
-grep -Fxq 'Passed: 73' "$stage/results.log"
-grep -Fxq 'Failed: 0' "$stage/results.log"
+if [ "$status" -ne 0 ] ||
+   ! grep -Fxq 'Passed: 73' "$stage/results.log" ||
+   ! grep -Fxq 'Failed: 0' "$stage/results.log"; then
+ echo "=== NATIVE TEST DIAGNOSTICS (PRIVATE STAGE ONLY) ==="
+ tail -n 75 "$stage/results.log"
+ echo "=== ROUND 11S: REGRESSION INCOMPLETE OR FAILED ==="
+ exit 1
+fi
 echo "=== ROUND 11S PRIVATE REPLAY: 73/73 PASS ==="
 echo "WARNING: directory fsync injection, new release candidate, and Round11R entrance/rollback not yet certified."
 echo "LIVE DEPLOYMENT: NONE"
