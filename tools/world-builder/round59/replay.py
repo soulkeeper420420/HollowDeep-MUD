@@ -92,7 +92,7 @@ def install(url, plan, root, label, fixture, redirects=None):
     with zipfile.ZipFile(io.BytesIO(bundle)) as archive:
         assert archive.testzip() is None
         manifest = json.loads(archive.read("manifest.json"))
-        expected = {"manifest.json", *(f"r{rid:05d}.native-candidate" for rid in (14, 15, 16))}
+        expected = {"manifest.json", *(f"r{room['room_id']:05d}.native-candidate" for room in plan["rooms"])}
         assert len(archive.namelist()) == len(expected) and set(archive.namelist()) == expected
         for entry in plan["rooms"]:
             rid = entry["room_id"]
@@ -156,6 +156,12 @@ def gameplay(root, port, populated):
                   "Redirected west exit reaches room 16 from room 14")
             check("round 59 forge" in command("east"),
                   "Redirected east exit returns to room 14 from room 16")
+            check("round 59 gallery" in command("north"), "Forge reaches the gallery")
+            check("black market alley" in command("up"), "Gallery reaches native room 8")
+            check("brownhaven way" in command("northeast"),
+                  "Preserved northeast exit reaches room 23 from room 8")
+            check("black market alley" in command("southwest"),
+                  "Preserved southwest exit returns to room 8 from room 23")
             return
         check("boss practice golem" in look and "practice blade" in look,
               "Both exported placements appear")
@@ -209,6 +215,9 @@ try:
     install(url, plan, stage / "populated/rootfs", "populated", fixture)
     cleared = copy.deepcopy(plan)
     cleared["rooms"][0].update(monsters=[], objects=[])
+    for rid in (8, 23):
+        cleared = json.loads(request(url + "/api/add-room", {"plan": cleared, "room_id": rid}))
+    cleared = json.loads(request(url + "/api/link", {"plan": cleared, "a": 15, "b": 8, "direction": "up"}))
     redirects = {14: ("west", 16), 16: ("east", 14)}
     for room in cleared["rooms"]:
         if room["room_id"] in redirects:
