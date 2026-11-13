@@ -115,6 +115,14 @@ def gameplay(root, port, populated):
             print(f"> {text}\n{response[:900]}", flush=True)
             return response.lower()
 
+        def defeat_golem():
+            for _ in range(20):
+                hit = command("attack boss")
+                if "you killed the boss practice golem" in hit:
+                    return hit
+                time.sleep(3)
+            raise AssertionError("No explicit native kill message")
+
         arrival = command("north")
         assert "round 59 forge" in arrival
         look = command("look")
@@ -129,13 +137,7 @@ def gameplay(root, port, populated):
         pickup = command("get all")
         check("you get a practice blade" in pickup and "practice blade" in command("inventory"),
               "Native pickup transfers exported object into inventory")
-        for _ in range(20):
-            hit = command("attack boss")
-            if "you killed the boss practice golem" in hit:
-                break
-            time.sleep(3)
-        else:
-            raise AssertionError("No explicit native kill message")
+        defeat_golem()
         check(True, "Explicit monster defeat")
         look = command("look")
         check("round 59 forge" in look and "practice golem" not in look, "Defeated spawn is absent in the same room")
@@ -145,6 +147,16 @@ def gameplay(root, port, populated):
         check("round 59 forge" in revisit, "New reciprocal south exit returns to room 14")
         check("boss practice golem" in revisit or "boss practice golem" in command("look"),
               "Native monster respawns after the interval and room revisit")
+        check("round 59 gallery" in command("east"), "Original east exit still reaches room 15")
+        destination = command("east")
+        check("goldenrod avenue" in destination and "boss practice golem" in destination,
+              "Original route reaches the embedded creature in room 16")
+        defeat = defeat_golem()
+        check("practice blade" in defeat and "carrying" in defeat,
+              "Defeated embedded creature drops its serialized carried blade")
+        check(any("you get" in line and "practice blade" in line
+                  for line in command("get all").splitlines()),
+              "Player picks up the preserved carried blade")
     finally:
         for client in scope["clients"]:
             client.close()

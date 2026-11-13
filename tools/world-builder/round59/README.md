@@ -19,3 +19,5 @@ Both archives preserved the original exits and the fixture creature's carried in
 | Removal export | `b48956b929a9881398b78b04a4380f307797ccd734fed324d5ccee57335e0f1cc` |
 
 ZIP timestamps can change the bundle hashes on reruns. Each run checks the returned archive and every extracted room against the export manifest. Raw private logs, templates, room records, saves and ZIPs remain on the development host. Production checksums and service identity matched before and after.
+
+The follow-up replay also traversed the original east exits from room 14 through room 15 into room 16. The native server loaded the embedded golem, reported its carried blade on defeat, and let the player pick it up. An initial assertion failed because the pickup output listed coins before the blade. A fresh run with an order-independent pickup check passed the full replay, including respawn and the removal world.
