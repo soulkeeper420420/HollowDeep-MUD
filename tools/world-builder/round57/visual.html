@@ -49,6 +49,9 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <button class="primary" id="create">Create Area</button>
 <label for="draftName">Draft name</label>
 <input id="draftName" maxlength="80" autocomplete="off">
+<button id="exportDraft">Export draft JSON</button>
+<label for="importDraft">Import draft JSON</label>
+<input id="importDraft" type="file" accept=".json,application/json">
 <button id="saveDraft">Save Draft</button>
 <label for="savedDraft">Saved drafts on this browser</label>
 <select id="savedDraft"></select>
@@ -230,10 +233,12 @@ $("saveDraft").onclick=()=>run(async()=>{
  current();
  const name=$("draftName").value.trim();
  if(!name)throw Error("Enter a draft name");
+ const draft=structuredClone({plan,selected});
+ await api("/api/validate",draft.plan);
  const key=namedDraftPrefix+name;
  if(localStorage.getItem(key)!==null &&
     !window.confirm("Replace the saved draft named "+name+"?"))return;
- localStorage.setItem(key,JSON.stringify({plan,selected}));
+ localStorage.setItem(key,JSON.stringify(draft));
  refreshDrafts(key);
  status("Draft saved in this browser");
 });
@@ -250,6 +255,37 @@ $("openDraft").onclick=()=>run(async()=>{
  $("draftName").value=key===draftKey?"":key.slice(namedDraftPrefix.length);
  $("download").replaceChildren();
  render();status("Draft reopened");
+});
+$("exportDraft").onclick=()=>run(async()=>{
+ current();
+ const name=$("draftName").value.trim();
+ if(!name)throw Error("Enter a draft name");
+ const draft=structuredClone({format:"hollowdeep-world-builder",version:1,name,plan,selected});
+ await api("/api/validate",draft.plan);
+ const url=URL.createObjectURL(new Blob([JSON.stringify(draft,null,2)],{type:"application/json"}));
+ const link=document.createElement("a");
+ link.href=url;link.download="hollowdeep-draft.json";
+ link.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+ status("Draft JSON exported");
+});
+$("importDraft").onchange=()=>run(async()=>{
+ const input=$("importDraft");
+ const file=input.files[0];
+ input.value="";
+ if(!file)return;
+ if(file.size>1048576)throw Error("Draft JSON exceeds 1 MiB");
+ const draft=JSON.parse(await file.text());
+ if(draft?.format!=="hollowdeep-world-builder" || draft.version!==1 ||
+    typeof draft.name!=="string" || !draft.name.trim() || draft.name.length>80)
+  throw Error("Unsupported draft JSON");
+ await api("/api/validate",draft.plan);
+ plan=draft.plan;
+ selected=plan.rooms.some(room=>room.room_id===draft.selected)
+  ?draft.selected:plan.rooms[0].room_id;
+ $("draftName").value=draft.name.trim();
+ $("download").replaceChildren();
+ render();status("Draft imported. Save Draft to keep it in this browser.");
 });
 try{refreshDrafts()}catch(e){
  for(const id of ["savedDraft","openDraft","saveDraft"])$(id).disabled=true;

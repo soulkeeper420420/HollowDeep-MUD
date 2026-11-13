@@ -9,7 +9,7 @@ async function main() {
     executablePath: process.env.HD_CHROMIUM || "/usr/bin/chromium"
   });
   try {
-    const page = await browser.newPage({ viewport: { width: 412, height: 850 } });
+    let page = await browser.newPage({ viewport: { width: 412, height: 850 } });
     page.setDefaultTimeout(15000);
     const errors = [];
     page.on("pageerror", error => errors.push(error));
@@ -83,6 +83,36 @@ async function main() {
     assert.equal(await field("longDescription").inputValue(), "A quiet anvil marks the isolated forge.");
     assert.match(await field("monsters").innerText(), /ID 1/);
     assert.match(await field("objects").innerText(), /ID 1/);
+    const beforeTransfer = JSON.parse(await field("json").inputValue());
+    const [draftDownload] = await Promise.all([page.waitForEvent("download"), click("exportDraft")]);
+    const filename = path.join(output, "transfer.json");
+    await draftDownload.saveAs(filename);
+    const originalPage = page;
+    page = await browser.newPage();
+    page.setDefaultTimeout(15000);
+    page.on("pageerror", error => errors.push(error));
+    await page.goto(url);
+    await status("Catalogs loaded");
+    assert.equal(await field("savedDraft").locator("option").count(), 1);
+    await field("importDraft").setInputFiles(filename);
+    await status("Draft imported");
+    assert.deepEqual(JSON.parse(await field("json").inputValue()), beforeTransfer);
+    assert.equal(await field("draftName").inputValue(), "Forge export");
+    assert.equal(await field("selected").innerText(), "Room 14");
+    assert.equal(await field("savedDraft").locator("option").count(), 1);
+    const invalid = JSON.parse(await fs.readFile(filename, "utf8"));
+    invalid.plan.rooms[0].exits[0].destination = 32767;
+    await field("importDraft").setInputFiles({
+      name: "invalid.json", mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(invalid))
+    });
+    await status("ERROR:");
+    assert.deepEqual(JSON.parse(await field("json").inputValue()), beforeTransfer);
+    assert.equal(await field("savedDraft").locator("option").count(), 1);
+    assert.equal(await originalPage.locator("#savedDraft option").count(), 4);
+    await click("saveDraft");
+    await status("Draft saved in this browser");
+    console.log("PASS: Draft JSON transfers to a fresh browser; invalid imports preserve the current and saved drafts");
     await click("validatePlan");
     await status("PASS: 2 rooms validated");
     await click("export");

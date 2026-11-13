@@ -67,3 +67,4 @@ timeout --kill-after=3s 550s unshare --mount --net --pid --fork \
 grep -Fxq 'ROUND 59: PASS' "$stage/results.log"
 grep -Fxq 'ROUND 60: PASS' "$stage/results.log"
 grep -Fxq 'ROUND 61: PASS' "$stage/results.log"
+grep -Fxq 'ROUND 62: PASS' "$stage/results.log"
