@@ -41,12 +41,43 @@ async function main() {
       await status("Placement validated");
       await field(type).filter({ hasText: "ID 1 · count 1 · respawn 60" }).waitFor();
     }
+    const legacy = await field("json").inputValue();
+    await page.evaluate(plan => localStorage.setItem(
+      "hollowdeep.world-builder.draft", JSON.stringify({ plan, selected: 15 })
+    ), JSON.parse(legacy));
+    await field("draftName").fill("Forge export");
     await click("saveDraft");
     await status("Draft saved in this browser");
+    await field("name").fill("Alternate Forge");
+    await click("save");
+    await status("Room changes validated");
+    await page.getByRole("button", { name: /^15 · / }).click();
+    await field("draftName").fill("Alternate route");
+    await click("saveDraft");
+    await status("Draft saved in this browser");
+    await field("draftName").fill("Forge export");
+    page.once("dialog", dialog => dialog.dismiss());
+    await click("saveDraft");
     await page.reload();
     await status("Catalogs loaded");
+    await field("savedDraft").selectOption({ label: "Round 60 draft" });
     await click("openDraft");
     await status("Draft reopened");
+    assert.equal(await field("selected").innerText(), "Room 15");
+    assert.equal(await field("draftName").inputValue(), "");
+    assert.equal(await field("json").inputValue(), legacy);
+    console.log("PASS: Round 60 draft reopens with its original plan and room");
+    await field("savedDraft").selectOption({ label: "Alternate route" });
+    await click("openDraft");
+    await status("Draft reopened");
+    assert.equal(await field("selected").innerText(), "Room 15");
+    await page.getByRole("button", { name: /^14 · / }).click();
+    assert.equal(await field("name").inputValue(), "Alternate Forge");
+    await field("savedDraft").selectOption({ label: "Forge export" });
+    await click("openDraft");
+    await page.waitForFunction(() => document.getElementById("name").value === "Round 59 Forge");
+    assert.equal(await field("selected").innerText(), "Room 14");
+    console.log("PASS: Named drafts remain independent after reload");
     assert.equal(await field("name").inputValue(), "Round 59 Forge");
     assert.equal(await field("shortDescription").inputValue(), "The forge bell rings softly.");
     assert.equal(await field("longDescription").inputValue(), "A quiet anvil marks the isolated forge.");

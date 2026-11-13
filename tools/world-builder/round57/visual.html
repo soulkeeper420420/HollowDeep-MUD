@@ -37,7 +37,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <body>
 <header>
 <h1>HollowDeep World Builder</h1>
-<small>Round 60 · Private development · Native export only · No live deployment</small>
+<small>Round 61 · Private development · Native export only · No live deployment</small>
 </header>
 <main>
 <section>
@@ -47,10 +47,12 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <input id="startB" type="number" value="15" aria-label="Second room">
 </div>
 <button class="primary" id="create">Create Area</button>
-<div class="row">
+<label for="draftName">Draft name</label>
+<input id="draftName" maxlength="80" autocomplete="off">
 <button id="saveDraft">Save Draft</button>
+<label for="savedDraft">Saved drafts on this browser</label>
+<select id="savedDraft"></select>
 <button id="openDraft">Open Draft</button>
-</div>
 <div id="rooms"></div>
 <h3>Add Existing Native Room</h3>
 <input id="addId" type="number" value="16">
@@ -125,6 +127,18 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 const $=id=>document.getElementById(id);
 let plan=null,selected=null,catalogs={monsters:[],objects:[]};
 const draftKey="hollowdeep.world-builder.draft";
+const namedDraftPrefix=draftKey+".named.";
+const legacyDraftLabel="Round 60 draft";
+
+function refreshDrafts(preferred=""){
+ const picker=$("savedDraft");
+ picker.replaceChildren(new Option("Choose a draft",""));
+ if(localStorage.getItem(draftKey)!==null)
+  picker.add(new Option(legacyDraftLabel,draftKey));
+ const keys=Object.keys(localStorage).filter(key=>key.startsWith(namedDraftPrefix)).sort();
+ for(const key of keys)picker.add(new Option(key.slice(namedDraftPrefix.length),key));
+ picker.value=preferred;
+}
 const esc=s=>String(s??"");
 const integer=v=>{
  const n=Number(v);
@@ -214,20 +228,32 @@ $("create").onclick=()=>run(async()=>{
 });
 $("saveDraft").onclick=()=>run(async()=>{
  current();
- localStorage.setItem(draftKey,JSON.stringify({plan,selected}));
+ const name=$("draftName").value.trim();
+ if(!name)throw Error("Enter a draft name");
+ const key=namedDraftPrefix+name;
+ if(localStorage.getItem(key)!==null &&
+    !window.confirm("Replace the saved draft named "+name+"?"))return;
+ localStorage.setItem(key,JSON.stringify({plan,selected}));
+ refreshDrafts(key);
  status("Draft saved in this browser");
 });
 $("openDraft").onclick=()=>run(async()=>{
- const saved=localStorage.getItem(draftKey);
- if(!saved)throw Error("No draft saved in this browser");
+ const key=$("savedDraft").value;
+ if(!key)throw Error("Choose a saved draft");
+ const saved=localStorage.getItem(key);
+ if(!saved)throw Error("Draft is no longer available in this browser");
  const draft=JSON.parse(saved);
  await api("/api/validate",draft.plan);
  plan=draft.plan;
  selected=plan.rooms.some(room=>room.room_id===draft.selected)
   ?draft.selected:plan.rooms[0].room_id;
+ $("draftName").value=key===draftKey?"":key.slice(namedDraftPrefix.length);
  $("download").replaceChildren();
  render();status("Draft reopened");
 });
+try{refreshDrafts()}catch(e){
+ for(const id of ["savedDraft","openDraft","saveDraft"])$(id).disabled=true;
+}
 $("add").onclick=()=>run(async()=>{
  plan=await api("/api/add-room",{plan,room_id:integer($("addId").value)});
  selected=integer($("addId").value);
