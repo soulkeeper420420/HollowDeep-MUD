@@ -83,7 +83,7 @@ def add_inventory_fixture():
     return parsed
 
 
-def install(url, plan, root, label, fixture):
+def install(url, plan, root, label, fixture, redirects=None):
     result = json.loads(request(url + "/api/export", plan))
     bundle = request(url + result["download"])
     digest = hashlib.sha256(bundle).hexdigest()
@@ -103,6 +103,11 @@ def install(url, plan, root, label, fixture):
             original, _ = app.area.r50.baseline(rid)
             old, _ = app.area.r51.original_exits(original)
             new, _ = app.area.r51.original_exits(data)
+            if redirects and rid in redirects:
+                direction, destination = redirects[rid]
+                old = [record[:20] + struct.pack("<h", destination) + record[22:]
+                       if app.area.r51.fields(record)["direction"] == direction else record
+                       for record in old]
             assert all(record in new for record in old)
             if rid == 16:
                 assert app.area.parse(data)["creatures"] == fixture["creatures"]
@@ -110,7 +115,7 @@ def install(url, plan, root, label, fixture):
             target.write_bytes(data)
             shutil.copystat(root / "rooms/r00001", target)
             os.chown(target, 65534, 65534)
-    check(True, f"{label} preserves original exit records and the existing creature with carried inventory")
+    check(True, f"{label} preserves unrelated exit bytes and the existing creature with carried inventory")
 
 
 def gameplay(root, port, populated):
@@ -147,6 +152,10 @@ def gameplay(root, port, populated):
         if not populated:
             check("practice golem" not in look and "practice blade" not in look,
                   "Fresh native world omits both removed placements")
+            check("round 59 redirect landing" in command("west"),
+                  "Redirected west exit reaches room 16 from room 14")
+            check("round 59 forge" in command("east"),
+                  "Redirected east exit returns to room 14 from room 16")
             return
         check("boss practice golem" in look and "practice blade" in look,
               "Both exported placements appear")
@@ -200,7 +209,14 @@ try:
     install(url, plan, stage / "populated/rootfs", "populated", fixture)
     cleared = copy.deepcopy(plan)
     cleared["rooms"][0].update(monsters=[], objects=[])
-    install(url, cleared, stage / "cleared/rootfs", "cleared", fixture)
+    redirects = {14: ("west", 16), 16: ("east", 14)}
+    for room in cleared["rooms"]:
+        if room["room_id"] in redirects:
+            direction, destination = redirects[room["room_id"]]
+            next(entry for entry in room["exits"] if entry["direction"] == direction)["destination"] = destination
+        if room["room_id"] == 16:
+            room["name"] = "Round 59 Redirect Landing"
+    install(url, cleared, stage / "cleared/rootfs", "redirected", fixture, redirects)
 finally:
     server.shutdown()
     server.server_close()

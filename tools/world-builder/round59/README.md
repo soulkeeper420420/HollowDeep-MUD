@@ -27,3 +27,5 @@ The exit validation follow-up preserves unchanged named exits, including existin
 The native named-exit regression also passed on Linode. It changed the description of room 8 and exported it with room 14 using the native serializer. The ZIP and room checksums matched, and the complete exit block, including `northeast` to room 23, survived byte for byte.
 
 The reciprocal redirect regression passed in the same disposable builder copy. It redirected room 14's west exit to room 16 and room 16's east exit to room 14. The native export changed only the two destination fields and preserved all other exit bytes.
+
+The next full native replay loaded that redirected pair into the fresh removal world. A disposable character walked west from room 14 to room 16 and east back to room 14. The replay also verified that the removal world lacked both exported placements in room 14 and that the populated world's original navigation, combat, carried inventory, and timed respawn still passed. Production hashes and service identity matched.
