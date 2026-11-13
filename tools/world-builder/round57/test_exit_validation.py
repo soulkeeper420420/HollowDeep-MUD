@@ -1,6 +1,10 @@
 """Exercise native exit validation without changing any saved plans."""
 import copy
+import hashlib
+import json
+import tempfile
 from unittest.mock import patch
+import zipfile
 
 import app
 
@@ -40,6 +44,26 @@ def test():
         edited["rooms"][0]["exits"][1]["destination"] = 16
         reject(edited, "must target a room in this area")
         print("PASS: Named exit protection and reciprocal redirect validation")
+
+    native = app.new_plan(8, 14)
+    native["rooms"][0]["short_description"] = "Round 59 named exit regression."
+    baseline, _ = area.r50.baseline(8)
+    original, _ = area.r51.original_exits(baseline)
+    assert any(area.r51.fields(record) == {"direction": "northeast", "destination": 23}
+               for record in original)
+    with tempfile.TemporaryDirectory(prefix="named-exit-export-") as directory:
+        with patch.object(area, "EXPORTS", area.Path(directory)):
+            result = area.generate(native)
+        bundle = area.Path(directory) / (result["export_id"] + ".zip")
+        assert hashlib.sha256(bundle.read_bytes()).hexdigest() == result["bundle_sha256"]
+        with zipfile.ZipFile(bundle) as archive:
+            assert archive.testzip() is None
+            manifest = json.loads(archive.read("manifest.json"))
+            candidate = archive.read("r00008.native-candidate")
+            assert hashlib.sha256(candidate).hexdigest() == manifest["rooms"]["8"]["candidate_sha256"]
+            assert area.r51.original_exits(candidate)[0] == original
+            assert b"Round 59 named exit regression." in candidate
+    print("PASS: Native room 8 northeast exit to room 23 survives description edit and ZIP export byte for byte")
 
 
 if __name__ == "__main__":
