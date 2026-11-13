@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HollowDeep Visual World Builder</title>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:#0d1420;color:#e5e7eb;font:14px system-ui}
+header{padding:18px 24px;background:#172234;border-bottom:1px solid #354357}
+h1{margin:0;color:#fbbf24;font-size:24px}
+small{color:#a8b5c7}
+main{display:grid;grid-template-columns:230px minmax(0,1fr) 310px;gap:16px;padding:16px}
+section{background:#172234;border:1px solid #354357;border-radius:10px;padding:16px;min-width:0}
+h2{font-size:17px;margin:0 0 12px;color:#fbbf24}
+h3{font-size:14px;margin:18px 0 8px}
+input,select,textarea,button{font:inherit;background:#101a2a;color:#fff;border:1px solid #475569;border-radius:6px;padding:9px;max-width:100%}
+input,select,textarea{width:100%}
+textarea{min-height:130px;resize:vertical}
+button{cursor:pointer;background:#334155}
+button:hover{background:#475569}
+button.primary{background:#876315;color:white}
+button:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;align-items:center;margin:8px 0}
+.row>*{min-width:0}
+.room{display:block;width:100%;text-align:left;margin:6px 0}
+.room.active{border-color:#fbbf24;background:#43351d}
+label{display:block;margin:12px 0 5px;color:#cbd5e1}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
+#status{padding:12px;background:#101a2a;border-radius:6px}
+#download a{color:#fbbf24}
+.item{padding:8px;border-bottom:1px solid #354357}
+@media(max-width:950px){main{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>HollowDeep World Builder</h1>
+<small>Round 56 · Private development · Native export only · No live deployment</small>
+</header>
+<main>
+<section>
+<h2>Area Rooms</h2>
+<div class="row">
+<input id="startA" type="number" value="14" aria-label="First room">
+<input id="startB" type="number" value="15" aria-label="Second room">
+</div>
+<button class="primary" id="create">Create Area</button>
+<div id="rooms"></div>
+<h3>Add Existing Native Room</h3>
+<input id="addId" type="number" value="16">
+<button id="add">Add Room</button>
+<h3>Connect Rooms</h3>
+<label>From</label><select id="from"></select>
+<label>To</label><select id="to"></select>
+<label>Direction</label>
+<select id="direction">
+<option>north</option><option>south</option>
+<option>east</option><option>west</option>
+<option>up</option><option>down</option>
+</select>
+<button id="link">Create Reciprocal Exit</button>
+</section>
+
+<section>
+<h2>Room Editor</h2>
+<div id="selected">Select a room</div>
+<label>Room Name</label>
+<input id="name">
+<label>Room Description</label>
+<textarea id="description"></textarea>
+<button id="save">Apply Room Changes</button>
+<h3>Exits</h3>
+<div id="exits"></div>
+<h3>Current Monsters</h3>
+<div id="monsters"></div>
+<h3>Current Objects</h3>
+<div id="objects"></div>
+<h3>Native Area Export</h3>
+<button class="primary" id="export">Validate & Export ZIP</button>
+<div id="download"></div>
+<h3>Advanced JSON</h3>
+<details><summary>Inspect / edit area plan</summary>
+<textarea id="json" style="min-height:260px"></textarea>
+<button id="applyJson">Apply JSON</button>
+</details>
+</section>
+
+<section>
+<h2>Entity Placement</h2>
+<label>Type</label>
+<select id="type"><option value="monsters">Monster</option><option value="objects">Object</option></select>
+<label>Search Catalog</label>
+<input id="search" placeholder="Search by name or ID">
+<label>Template</label>
+<select id="template"></select>
+<label>Count</label>
+<input id="count" type="number" min="1" max="50" value="1">
+<label>Respawn Interval</label>
+<input id="respawn" type="number" min="0" value="0">
+<button id="place">Add / Update Placement</button>
+<button id="remove">Remove Selected Placement</button>
+<h3>Validation</h3>
+<pre id="status">Loading catalogs...</pre>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+let plan=null,selected=null,catalogs={monsters:[],objects:[]};
+const esc=s=>String(s??"");
+const integer=v=>{
+ const n=Number(v);
+ if(!Number.isSafeInteger(n))throw Error("Invalid integer");
+ return n;
+};
+async function api(path,payload){
+ const options=payload===undefined?{}:{
+  method:"POST",headers:{"Content-Type":"application/json"},
+  body:JSON.stringify(payload)
+ };
+ const r=await fetch(path,options);
+ const data=await r.json();
+ if(!r.ok)throw Error(data.error||"Request failed");
+ return data;
+}
+function status(s){$("status").textContent=esc(s)}
+async function run(fn){try{await fn()}catch(e){status("ERROR: "+e.message)}}
+function current(){
+ if(!plan)throw Error("Create an area first");
+ const room=plan.rooms.find(r=>r.room_id===selected);
+ if(!room)throw Error("Select a room");
+ return room;
+}
+function render(){
+ $("rooms").replaceChildren();
+ $("from").replaceChildren();
+ $("to").replaceChildren();
+ if(!plan)return;
+ for(const room of plan.rooms){
+  const b=document.createElement("button");
+  b.className="room"+(room.room_id===selected?" active":"");
+  b.textContent=room.room_id+" · "+room.name;
+  b.onclick=()=>{selected=room.room_id;render()};
+  $("rooms").append(b);
+  for(const id of ["from","to"]){
+   const o=document.createElement("option");
+   o.value=room.room_id;o.textContent=room.room_id+" · "+room.name;
+   $(id).append(o);
+  }
+ }
+ $("from").value=String(selected??plan.rooms[0].room_id);
+ $("to").value=String(plan.rooms.find(r=>r.room_id!==selected)?.room_id??selected);
+ const room=plan.rooms.find(r=>r.room_id===selected);
+ if(!room)return;
+ $("selected").textContent="Room "+room.room_id;
+ $("name").value=room.name??"";
+ $("description").value=room.description??"";
+ $("exits").replaceChildren();
+ for(const e of room.exits??[]){
+  const p=document.createElement("div");
+  p.className="item";
+  p.textContent=e.direction+" → "+e.destination;
+  $("exits").append(p);
+ }
+ for(const key of ["monsters","objects"]){
+  $(key).replaceChildren();
+  for(const e of room[key]??[]){
+   const p=document.createElement("div");
+   p.className="item";
+   p.textContent="ID "+e.id+" · count "+e.count+" · respawn "+e.respawn;
+   $(key).append(p);
+  }
+ }
+ $("json").value=JSON.stringify(plan,null,2);
+}
+function catalogOptions(){
+ const key=$("type").value;
+ const query=$("search").value.trim().toLowerCase();
+ const entries=catalogs[key]||[];
+ $("template").replaceChildren();
+ for(const item of entries.filter(x=>
+  JSON.stringify(x).toLowerCase().includes(query)).slice(0,150)){
+  const id=item.id??item.identifier;
+  const option=document.createElement("option");
+  option.value=id;
+  option.textContent=id+" · "+(item.name??item.title??"Template");
+  $("template").append(option);
+ }
+}
+$("create").onclick=()=>run(async()=>{
+ plan=await api("/api/new?a="+integer($("startA").value)+
+  "&b="+integer($("startB").value));
+ selected=plan.rooms[0].room_id;
+ render();status("Area created");
+});
+$("add").onclick=()=>run(async()=>{
+ plan=await api("/api/add-room",{plan,room_id:integer($("addId").value)});
+ selected=integer($("addId").value);
+ render();status("Native-backed room added");
+});
+$("link").onclick=()=>run(async()=>{
+ plan=await api("/api/link",{plan,a:integer($("from").value),
+  b:integer($("to").value),direction:$("direction").value});
+ render();status("Reciprocal connection created");
+});
+$("save").onclick=()=>run(async()=>{
+ const room=current();
+ room.name=$("name").value;
+ room.description=$("description").value;
+ render();status("Changes applied locally; export validates native records");
+});
+$("place").onclick=()=>run(async()=>{
+ const room=current(),key=$("type").value;
+ const id=integer($("template").value);
+ const count=integer($("count").value);
+ const respawn=integer($("respawn").value);
+ if(count<1||count>50||respawn<0)throw Error("Invalid placement values");
+ room[key]??=[];
+ const old=room[key].find(x=>x.id===id);
+ if(old){old.count=count;old.respawn=respawn}
+ else room[key].push({id,count,respawn});
+ render();status("Placement updated; export will validate");
+});
+$("remove").onclick=()=>run(async()=>{
+ const room=current(),key=$("type").value;
+ const id=integer($("template").value);
+ room[key]=(room[key]??[]).filter(x=>x.id!==id);
+ render();status("Placement removed locally");
+});
+$("export").onclick=()=>run(async()=>{
+ const result=await api("/api/export",plan);
+ const a=document.createElement("a");
+ a.href=result.download;
+ a.textContent="Download validated native ZIP";
+ $("download").replaceChildren(a);
+ status(JSON.stringify(result,null,2));
+});
+$("applyJson").onclick=()=>run(async()=>{
+ const next=JSON.parse($("json").value);
+ if(!next||!Array.isArray(next.rooms))throw Error("Invalid plan");
+ plan=next;
+ selected=plan.rooms[0]?.room_id??null;
+ render();status("JSON applied locally");
+});
+$("type").onchange=catalogOptions;
+$("search").oninput=catalogOptions;
+Promise.all([
+ api("/api/monsters"),api("/api/objects")
+]).then(([m,o])=>{
+ catalogs.monsters=Array.isArray(m)?m:(m.monsters??m.templates??[]);
+ catalogs.objects=Array.isArray(o)?o:(o.objects??o.templates??[]);
+ catalogOptions();
+ status("Catalogs loaded · "+catalogs.monsters.length+
+  " monsters · "+catalogs.objects.length+" objects");
+}).catch(e=>status("Catalog loading error: "+e.message));
+</script>
+</body>
+</html>
