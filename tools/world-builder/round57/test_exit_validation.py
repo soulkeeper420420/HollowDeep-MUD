@@ -2,6 +2,8 @@
 import copy
 import hashlib
 import json
+from pathlib import Path
+import struct
 import tempfile
 from unittest.mock import patch
 import zipfile
@@ -64,6 +66,27 @@ def test():
             assert area.r51.original_exits(candidate)[0] == original
             assert b"Round 59 named exit regression." in candidate
     print("PASS: Native room 8 northeast exit to room 23 survives description edit and ZIP export byte for byte")
+
+    redirected = app.new_plan(14, 16)
+    changes = {14: ("west", 16), 16: ("east", 14)}
+    for room in redirected["rooms"]:
+        direction, target = changes[room["room_id"]]
+        next(exit_ for exit_ in room["exits"] if exit_["direction"] == direction)["destination"] = target
+    with tempfile.TemporaryDirectory(prefix="redirected-exit-export-") as directory:
+        with patch.object(area, "EXPORTS", Path(directory)):
+            result = area.generate(redirected)
+        with zipfile.ZipFile(Path(directory) / (result["export_id"] + ".zip")) as archive:
+            assert archive.testzip() is None
+            for rid, (direction, target) in changes.items():
+                source, _ = area.r50.baseline(rid)
+                originals, _ = area.r51.original_exits(source)
+                expected = [record[:20] + struct.pack("<h", target) + record[22:]
+                            if area.r51.fields(record)["direction"] == direction else record
+                            for record in originals]
+                candidate = archive.read(f"r{rid:05d}.native-candidate")
+                assert expected != originals
+                assert area.r51.original_exits(candidate)[0] == expected
+    print("PASS: Native reciprocal redirect changes only destination bytes for rooms 14 and 16")
 
 
 if __name__ == "__main__":
