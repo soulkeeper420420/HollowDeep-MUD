@@ -108,11 +108,7 @@ def clean_plan(plan):
             direction = exit_entry["direction"]
             destination = exit_entry["destination"]
 
-            require(
-                isinstance(direction, str)
-                and direction in PAIRS,
-                "Only six standard directions are supported"
-            )
+            require(isinstance(direction, str), "Invalid exit direction")
             require(direction not in seen, "Duplicate exit direction")
             require(
                 type(destination) is int
@@ -128,10 +124,8 @@ def clean_plan(plan):
                 None
             )
 
-            if (
-                original_entry is None
-                or original_entry["destination"] != destination
-            ):
+            if original_entry != exit_entry:
+                require(direction in PAIRS, "New or redirected exits need a standard direction")
                 require(
                     str(destination) in INDEX,
                     "New or redirected exit destination "
@@ -156,19 +150,17 @@ def clean_plan(plan):
 
         cleaned[rid] = {"room_id": rid, "name": name, "exits": normalized}
 
-    # Every newly created exit between rooms in this plan
+    # Every new or redirected exit between rooms in this plan
     # must have a matching reverse exit.
     for rid, room in cleaned.items():
-        old_names = {
-            e["direction"] for e in native_exits(rid)
-        }
+        original = native_exits(rid)
         for e in room["exits"]:
-            if e["direction"] in old_names:
+            if e in original:
                 continue
             dest = e["destination"]
             require(
                 dest in cleaned,
-                "New exits must target a room in this area"
+                "New or redirected exits must target a room in this area"
             )
             reverse = PAIRS[e["direction"]]
             require(

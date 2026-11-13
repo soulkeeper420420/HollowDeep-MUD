@@ -37,6 +37,11 @@ stage=$(mktemp -d "$base/round59-XXXXXXXX")
 echo "Private stage: $stage"
 mkdir "$stage/builder"
 cp -a "$builder"/*.py "$builder"/*.json "$builder/templates" "$stage/builder/"
+repo_builder="$(dirname "$(realpath "$0")")/../round57"
+cp "$repo_builder/"{area_export.py,test_exit_validation.py} "$stage/builder/"
+cc -m32 -Wall -Wextra -shared -fPIC \
+  "$(dirname "$(realpath "$0")")/../../../engine/experiments/guild-social-v2/round11q_rng.c" \
+  -ldl -o "$stage/replay-rng.so"
 cp -p "$prior/rootfs/objmon/"{m00,o00} "$stage/builder/templates/"
 for label in populated cleared; do
   root="$stage/$label/rootfs"
@@ -47,11 +52,13 @@ for label in populated cleared; do
   done
   install -d -m 700 -o 65534 -g 65534 "$root/player" "$root/hollowdeep-data"
   chown 65534:65534 "$root"
+  install -m 755 "$stage/replay-rng.so" "$root/bin/replay-rng.so"
 done
 (
   cd "$stage/builder"
   export PYTHONDONTWRITEBYTECODE=1
   python3 app.py --test
+  python3 test_exit_validation.py
   python3 round55_http.py --test
 ) | tee "$stage/regression.log"
 timeout --kill-after=3s 340s unshare --mount --net --pid --fork \
