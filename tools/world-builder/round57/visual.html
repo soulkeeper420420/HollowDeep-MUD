@@ -37,7 +37,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <body>
 <header>
 <h1>HollowDeep World Builder</h1>
-<small>Round 56 · Private development · Native export only · No live deployment</small>
+<small>Round 60 · Private development · Native export only · No live deployment</small>
 </header>
 <main>
 <section>
@@ -47,6 +47,10 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <input id="startB" type="number" value="15" aria-label="Second room">
 </div>
 <button class="primary" id="create">Create Area</button>
+<div class="row">
+<button id="saveDraft">Save Draft</button>
+<button id="openDraft">Open Draft</button>
+</div>
 <div id="rooms"></div>
 <h3>Add Existing Native Room</h3>
 <input id="addId" type="number" value="16">
@@ -68,8 +72,10 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <div id="selected">Select a room</div>
 <label>Room Name</label>
 <input id="name">
-<label>Room Description</label>
-<textarea id="description"></textarea>
+<label for="shortDescription">Short Description</label>
+<textarea id="shortDescription"></textarea>
+<label for="longDescription">Long Description</label>
+<textarea id="longDescription"></textarea>
 <button id="save">Apply Room Changes</button>
 <h3>Exits</h3>
 <div id="exits"></div>
@@ -118,6 +124,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 "use strict";
 const $=id=>document.getElementById(id);
 let plan=null,selected=null,catalogs={monsters:[],objects:[]};
+const draftKey="hollowdeep.world-builder.draft";
 const esc=s=>String(s??"");
 const integer=v=>{
  const n=Number(v);
@@ -165,7 +172,8 @@ function render(){
  if(!room)return;
  $("selected").textContent="Room "+room.room_id;
  $("name").value=room.name??"";
- $("description").value=room.description??"";
+ $("shortDescription").value=room.short_description??"";
+ $("longDescription").value=room.long_description??"";
  $("exits").replaceChildren();
  for(const e of room.exits??[]){
   const p=document.createElement("div");
@@ -204,6 +212,22 @@ $("create").onclick=()=>run(async()=>{
  selected=plan.rooms[0].room_id;
  render();status("Area created");
 });
+$("saveDraft").onclick=()=>run(async()=>{
+ current();
+ localStorage.setItem(draftKey,JSON.stringify({plan,selected}));
+ status("Draft saved in this browser");
+});
+$("openDraft").onclick=()=>run(async()=>{
+ const saved=localStorage.getItem(draftKey);
+ if(!saved)throw Error("No draft saved in this browser");
+ const draft=JSON.parse(saved);
+ await api("/api/validate",draft.plan);
+ plan=draft.plan;
+ selected=plan.rooms.some(room=>room.room_id===draft.selected)
+  ?draft.selected:plan.rooms[0].room_id;
+ $("download").replaceChildren();
+ render();status("Draft reopened");
+});
 $("add").onclick=()=>run(async()=>{
  plan=await api("/api/add-room",{plan,room_id:integer($("addId").value)});
  selected=integer($("addId").value);
@@ -213,24 +237,6 @@ $("link").onclick=()=>run(async()=>{
  plan=await api("/api/link",{plan,a:integer($("from").value),
   b:integer($("to").value),direction:$("direction").value});
  render();status("Reciprocal connection created");
-});
-$("save").onclick=()=>run(async()=>{
- const room=current();
- room.name=$("name").value;
- room.description=$("description").value;
- render();status("Changes applied locally; export validates native records");
-});
-$("place").onclick=()=>run(async()=>{
- const room=current(),key=$("type").value;
- const id=integer($("template").value);
- const count=integer($("count").value);
- const respawn=integer($("respawn").value);
- if(count<1||count>50||respawn<1||respawn>86400)throw Error("Invalid placement values");
- room[key]??=[];
- const old=room[key].find(x=>x.id===id);
- if(old){old.count=count;old.respawn=respawn}
- else room[key].push({id,count,respawn});
- render();status("Placement updated; export will validate");
 });
 $("remove").onclick=()=>run(async()=>{
  const room=current(),key=$("type").value;
@@ -334,14 +340,17 @@ $("validatePlan").onclick=()=>run(async()=>{
 });
 
 // Validate edits before committing them to the local plan.
-const originalSave=$("save").onclick;
 $("save").onclick=()=>run(async()=>{
  const candidate=structuredClone(plan);
  const room=candidate.rooms.find(r=>r.room_id===selected);
  if(!room)throw Error("Select a room");
 
  room.name=$("name").value;
- room.description=$("description").value;
+ for(const [field,id] of [["short_description","shortDescription"],
+                          ["long_description","longDescription"]]){
+  const value=$(id).value;
+  if(value!=="" || Object.hasOwn(room,field))room[field]=value;
+ }
  await api("/api/validate",candidate);
 
  plan=candidate;
@@ -355,6 +364,7 @@ $("place").onclick=()=>run(async()=>{
  if(!room)throw Error("Select a room");
 
  const key=$("type").value;
+ if(!$("template").value)throw Error("Select a template");
  const id=integer($("template").value);
  const count=integer($("count").value);
  const respawn=integer($("respawn").value);

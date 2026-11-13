@@ -10,6 +10,7 @@ import secrets
 import shutil
 import string
 import struct
+import subprocess
 import sys
 import threading
 import time
@@ -83,9 +84,12 @@ def add_inventory_fixture():
     return parsed
 
 
-def install(url, plan, root, label, fixture, redirects=None):
-    result = json.loads(request(url + "/api/export", plan))
-    bundle = request(url + result["download"])
+def install(url, plan, root, label, fixture, redirects=None, download=None):
+    if download is None:
+        result = json.loads(request(url + "/api/export", plan))
+        bundle = request(url + result["download"])
+    else:
+        result, bundle = download
     digest = hashlib.sha256(bundle).hexdigest()
     check(digest == result["bundle_sha256"], f"{label} ZIP checksum {digest}")
     (stage / f"{label}.zip").write_bytes(bundle)
@@ -115,10 +119,11 @@ def install(url, plan, root, label, fixture, redirects=None):
             target.write_bytes(data)
             shutil.copystat(root / "rooms/r00001", target)
             os.chown(target, 65534, 65534)
-    check(True, f"{label} preserves unrelated exit bytes and the existing creature with carried inventory")
+    detail = " and the existing creature with carried inventory" if fixture is not None else ""
+    check(True, f"{label} preserves unrelated exit bytes{detail}")
 
 
-def gameplay(root, port, populated):
+def gameplay(root, port, populated, browser_export=False):
     scope.update(root=root, PORT=port, process=None, clients=[])
     scope["start_server"]()
     try:
@@ -172,35 +177,63 @@ def gameplay(root, port, populated):
         check(True, "Explicit monster defeat")
         look = command("look")
         check("round 59 forge" in look and "practice golem" not in look, "Defeated spawn is absent in the same room")
+        if not browser_export:
+            check("round 59 gallery" in command("east"), "Original east exit still reaches room 15")
+            destination = command("east")
+            check("goldenrod avenue" in destination and "boss practice golem" in destination,
+                  "Original route reaches the embedded creature in room 16")
+            check("boss practice golem" in command("look"),
+                  "Embedded golem is visible immediately before combat")
+            defeat = defeat_golem()
+            check("practice blade" in defeat and "carrying" in defeat,
+                  "Defeated embedded creature drops its serialized carried blade")
+            check(any("you get" in line and "practice blade" in line
+                      for line in command("get all").splitlines()),
+                  "Player picks up the preserved carried blade")
+            check("round 59 gallery" in command("west"), "Original west exit returns to room 15")
+            check("round 59 forge" in command("west"), "Original west exit returns to room 14")
         check("round 59 gallery" in command("north"), "New reciprocal north exit reaches room 15")
         time.sleep(65)
         revisit = command("south")
         check("round 59 forge" in revisit, "New reciprocal south exit returns to room 14")
         check("boss practice golem" in revisit or "boss practice golem" in command("look"),
               "Native monster respawns after the interval and room revisit")
-        check("round 59 gallery" in command("east"), "Original east exit still reaches room 15")
-        destination = command("east")
-        check("goldenrod avenue" in destination and "boss practice golem" in destination,
-              "Original route reaches the embedded creature in room 16")
-        defeat = defeat_golem()
-        check("practice blade" in defeat and "carrying" in defeat,
-              "Defeated embedded creature drops its serialized carried blade")
-        check(any("you get" in line and "practice blade" in line
-                  for line in command("get all").splitlines()),
-              "Player picks up the preserved carried blade")
+        if browser_export:
+            look = command("look")
+            check("a quiet anvil marks the isolated forge." in look,
+                  "Browser-edited long description displays in the native room")
+            return
+
     finally:
         for client in scope["clients"]:
             client.close()
         scope["stop_server"]()
 
 
+class BrowserHandler(round57_http.Handler):
+    def do_GET(self):
+        if self.path != "/":
+            return super().do_GET()
+        body = (Path(__file__).resolve().parent / "../round57/visual.html").read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+
 scope["private_loopback"]()
 app.area.EXPORTS.mkdir(mode=0o700, exist_ok=True)
-server = ThreadingHTTPServer(("127.0.0.1", 0), round57_http.Handler)
+server = ThreadingHTTPServer(("127.0.0.1", 0), BrowserHandler)
 thread = threading.Thread(target=server.serve_forever, daemon=True)
 thread.start()
 try:
     url = f"http://127.0.0.1:{server.server_port}"
+    subprocess.run(["node", str(Path(__file__).with_name("browser.cjs")), url, str(stage)],
+                   check=True, timeout=120)
+    exported = json.loads((stage / "browser.json").read_text())
+    install(url, exported["plan"], stage / "browser/rootfs", "browser-verified", None,
+            download=(exported["result"], (stage / "browser.zip").read_bytes()))
     fixture = add_inventory_fixture()
     plan = json.loads(request(url + "/api/new?a=14&b=15"))
     plan = json.loads(request(url + "/api/add-room", {"plan": plan, "room_id": 16}))
@@ -231,6 +264,9 @@ finally:
     server.server_close()
     thread.join()
 
+gameplay(stage / "browser/rootfs", 4043, True, browser_export=True)
+print("PASS: Browser-downloaded ZIP passed native gameplay", flush=True)
 gameplay(stage / "populated/rootfs", 4041, True)
 gameplay(stage / "cleared/rootfs", 4042, False)
 print("ROUND 59: PASS", flush=True)
+print("ROUND 60: PASS", flush=True)

@@ -43,7 +43,7 @@ cc -m32 -Wall -Wextra -shared -fPIC \
   "$(dirname "$(realpath "$0")")/../../../engine/experiments/guild-social-v2/round11q_rng.c" \
   -ldl -o "$stage/replay-rng.so"
 cp -p "$prior/rootfs/objmon/"{m00,o00} "$stage/builder/templates/"
-for label in populated cleared; do
+for label in populated cleared browser; do
   root="$stage/$label/rootfs"
   mkdir -p "$root"
   for asset in "$prior"/rootfs/*; do
@@ -61,7 +61,8 @@ done
   python3 test_exit_validation.py
   python3 round55_http.py --test
 ) | tee "$stage/regression.log"
-timeout --kill-after=3s 340s unshare --mount --net --pid --fork \
+timeout --kill-after=3s 550s unshare --mount --net --pid --fork \
   env PYTHONDONTWRITEBYTECODE=1 python3 "$(dirname "$(realpath "$0")")/replay.py" "$stage" "$runner" \
   | tee "$stage/results.log"
 grep -Fxq 'ROUND 59: PASS' "$stage/results.log"
+grep -Fxq 'ROUND 60: PASS' "$stage/results.log"
