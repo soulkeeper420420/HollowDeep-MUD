@@ -297,6 +297,51 @@ async function main() {
  }
  console.log("ROUND 67: connection inspection, guarded navigation, reciprocal repair and draft preservation PASS");
 }
+// Round 68: audit the current graph and inspect invalid drafts without applying them.
+{
+ const baseline=JSON.parse(await field("json").inputValue());
+ const saved=await page.evaluate(()=>Object.fromEntries(Object.entries(localStorage)
+  .filter(([key])=>key.startsWith("hollowdeep.world-builder.draft"))));
+ await page.locator("#areaAudit summary").click();
+ assert.match(await field("auditSummary").innerText(),/^0 issues.*outside-area exits/);
+ const preview=structuredClone(baseline);
+ preview.rooms[0].exits.push({direction:"east",destination:13},
+  {direction:"west",destination:13},{direction:"down",destination:99999});
+ preview.rooms.push({room_id:16, name:"Disconnected",exits:[]});
+ // Room 15 normally points east to room 16, so remove that route in this preview.
+ preview.rooms[1].exits=preview.rooms[1].exits.filter(e=>e.destination!==16);
+ await field("json").locator("..").evaluate(el=>{el.open=true});
+ await field("auditPending").check();
+ await field("json").fill(JSON.stringify(preview));
+ const issues=field("auditIssues");
+ assert.match(await issues.innerText(),/Conflicting east destinations/);
+ assert.match(await issues.innerText(),/Duplicate west exit/);
+ assert.match(await issues.innerText(),/Invalid exit direction or destination/);
+ assert.match(await issues.innerText(),/Room 16 · Unreachable from room 14/);
+ assert.equal(await issues.getByRole("button",{name:"Add return"}).count(),0);
+ const disconnected=structuredClone(baseline);
+ disconnected.rooms[1].exits=disconnected.rooms[1].exits.filter(e=>e.direction!=="west");
+ await field("json").fill(JSON.stringify(disconnected));
+ await click("applyJson");
+ await status("JSON applied locally");
+ await field("auditPending").uncheck();
+ assert.match(await issues.innerText(),/east → 15 has no west return/);
+ await page.locator("#rooms button").nth(1).click();
+ await field("name").fill("Audit pending edit");
+ page.once("dialog",dialog=>dialog.dismiss());
+ await issues.getByRole("button",{name:"Go to room 14",exact:true}).click();
+ assert.equal(await field("selected").innerText(),"Room 15");
+ assert.equal(await field("name").inputValue(),"Audit pending edit");
+ page.once("dialog",dialog=>dialog.accept());
+ await issues.getByRole("button",{name:"Go to room 14",exact:true}).click();
+ assert.equal(await field("selected").innerText(),"Room 14");
+ await issues.getByRole("button",{name:"Add return",exact:true}).click();
+ await status("Reciprocal connection created");
+ assert.match(await field("auditSummary").innerText(),/^0 issues/);
+ assert.deepEqual(await page.evaluate(()=>Object.fromEntries(Object.entries(localStorage)
+  .filter(([key])=>key.startsWith("hollowdeep.world-builder.draft")))),saved);
+ console.log("ROUND 68: connectivity audit, safe jumps, draft preservation and explicit repair PASS");
+}
 // Round 63: validated editing and recovery regression.
 {
  const original=JSON.parse(await field("json").inputValue());

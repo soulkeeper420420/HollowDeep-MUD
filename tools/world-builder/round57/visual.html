@@ -104,6 +104,11 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 </div>
 <h3>Room Connections</h3>
 <div id="exits"></div>
+<details id="areaAudit"><summary>Area connectivity audit</summary>
+ <p id="auditSummary" role="status">Load an area to audit connections.</p>
+ <label><input id="auditPending" type="checkbox"> Inspect unapplied Advanced JSON</label>
+ <ul id="auditIssues"></ul>
+</details>
 <h3>Current Monsters</h3>
 <div id="monsters"></div>
 <h3>Current Objects</h3>
@@ -255,12 +260,7 @@ function renderConnections(room){
   title.textContent=exit.direction+" → "+exit.destination+(destination?" · "+destination.name:"");
   if(destination){
    title.type="button";
-   title.onclick=()=>{
-    if(destination.room_id!==selected&&round64ConfirmNavigation()){
-     selected=destination.room_id;
-     render();
-    }
-   };
+   title.onclick=()=>jumpToRoom(destination.room_id);
   }
   const detail=document.createElement("div");
   detail.textContent=destination
@@ -274,16 +274,97 @@ function renderConnections(room){
    const repair=document.createElement("button");
    repair.type="button";
    repair.textContent="Add "+reverse+" return";
-   repair.onclick=()=>{
-    $("from").value=String(room.room_id);
-    $("to").value=String(destination.room_id);
-    $("direction").value=exit.direction;
-    $("link").click();
-   };
+   repair.onclick=()=>addReturn(room.room_id,destination.room_id,exit.direction);
    row.append(repair);
   }
   $("exits").append(row);
  }
+}
+function jumpToRoom(id){
+ if(id!==selected&&round64ConfirmNavigation()){selected=id;render()}
+}
+function addReturn(from,to,direction){
+ $("from").value=String(from);
+ $("to").value=String(to);
+ $("direction").value=direction;
+ $("link").click();
+}
+function auditConnections(candidate){
+ if(!Array.isArray(candidate?.rooms)||!candidate.rooms.length)throw Error("Expected a room list");
+ const rooms=new Map(), issues=[], routes=new Map();
+ let outside=0, named=0;
+ const issue=(id,message,repair)=>issues.push({id,message,repair});
+ for(const room of candidate.rooms){
+  const id=room?.room_id;
+  if(!Number.isSafeInteger(id)||id<1||id>32767){issue(null,"Invalid room ID");continue}
+  if(rooms.has(id)){issue(id,"Duplicate room ID");continue}
+  rooms.set(id,room);
+ }
+ for(const [id,room] of rooms){
+  if(!Array.isArray(room.exits)){issue(id,"Invalid exit list");continue}
+  const departures=new Map();
+  for(const exit of room.exits){
+   if(typeof exit?.direction!=="string"||!exit.direction.trim()||
+      !Number.isSafeInteger(exit.destination)||exit.destination < -32768 || exit.destination > 32767){
+    issue(id,"Invalid exit direction or destination");continue;
+   }
+   const {direction,destination}=exit;
+   if(departures.has(direction)){
+    issue(id,departures.get(direction)===destination?"Duplicate "+direction+" exit":"Conflicting "+direction+" destinations");
+    continue;
+   }
+   departures.set(direction,destination);
+   const reverse=Object.hasOwn(oppositeExit,direction)?oppositeExit[direction]:null;
+   if(!reverse)named++;
+   if(!rooms.has(destination)){outside++;continue}
+   if(destination===id){issue(id,direction+" leads back to this room");continue}
+   const next=rooms.get(destination).exits;
+   const arrivals=Array.isArray(next)?next:[];
+   if(!arrivals.some(e=>e?.destination===id&&(!reverse||e.direction===reverse))){
+    const repair=["north","south","east","west","up","down"].includes(direction)&&
+      !arrivals.some(e=>e?.direction===reverse)?[id,destination,direction]:null;
+    issue(id,direction+" → "+destination+" has "+(reverse?"no "+reverse+" return":"no return exit"),repair);
+   }
+  }
+  routes.set(id,departures);
+ }
+ const first=rooms.keys().next().value;
+ const reached=new Set(), queue=first===undefined?[]:[first];
+ for(const id of queue){
+  if(reached.has(id))continue;
+  reached.add(id);
+  for(const dest of routes.get(id)?.values()??[])if(rooms.has(dest)&&!reached.has(dest))queue.push(dest);
+ }
+ for(const id of rooms.keys())if(!reached.has(id))issue(id,"Unreachable from room "+first);
+ return {issues,outside,named,first};
+}
+function refreshAudit(){
+ const list=$("auditIssues");
+ list.replaceChildren();
+ if(!plan){$("auditSummary").textContent="Load an area to audit connections.";return}
+ try{
+  const pending=$("auditPending").checked;
+  const {issues,outside,named,first}=auditConnections(pending?JSON.parse($("json").value):plan);
+  $("auditSummary").textContent=issues.length+" issues · entry "+(first??"unavailable")+
+   " · "+outside+" outside-area exits (unchecked) · "+named+" named exits";
+  for(const {id,message,repair} of issues){
+   const row=document.createElement("li");
+   row.textContent=(id===null?"":"Room "+id+" · ")+message+" ";
+   if(id!==null&&plan.rooms.some(room=>room.room_id===id)){
+    const jump=document.createElement("button");
+    jump.textContent="Go to room "+id;
+    jump.onclick=()=>jumpToRoom(id);
+    row.append(jump);
+   }
+   if(repair&&!pending){
+    const fix=document.createElement("button");
+    fix.textContent="Add return";
+    fix.onclick=()=>addReturn(...repair);
+    row.append(fix);
+   }
+   list.append(row);
+  }
+ }catch(error){$("auditSummary").textContent="Audit unavailable: "+error.message}
 }
 function catalogOptions(){
  const key=$("type").value;
@@ -841,7 +922,9 @@ function round66Refresh(){
   "No area loaded";
 }
 const round66PreviousRender=render;
-render=function(){round66PreviousRender();round66Refresh()};
+render=function(){round66PreviousRender();round66Refresh();refreshAudit()};
+$("auditPending").onchange=refreshAudit;
+$("json").addEventListener("input",()=>{if($("auditPending").checked)refreshAudit()});
 $("round66Find").addEventListener("input",round66Refresh);
 $("round66Clear").onclick=()=>{
  $("round66Find").value="";
