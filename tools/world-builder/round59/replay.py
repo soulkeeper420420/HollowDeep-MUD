@@ -135,13 +135,13 @@ def gameplay(root, port, populated, browser_export=False):
             print(f"> {text}\n{response[:900]}", flush=True)
             return response.lower()
 
-        def defeat_golem():
+        def defeat_golem(target="boss"):
             roll = root / "hollowdeep-data/round11q-rng"
             roll.write_text("199")
             roll.chmod(0o644)
             try:
                 for _ in range(20):
-                    hit = command("attack boss")
+                    hit = command("attack " + target)
                     if "you killed the boss practice golem" in hit:
                         return hit
                     time.sleep(3)
@@ -152,7 +152,11 @@ def gameplay(root, port, populated, browser_export=False):
         arrival = command("north")
         assert "round 59 forge" in arrival
         look = command("look")
-        check("round 59 forge" in look and "the forge bell rings softly." in look,
+        expected_description = (
+            "round 63 unsaved recovery"
+            if browser_export else "the forge bell rings softly."
+        )
+        check("round 59 forge" in look and expected_description in look,
               "Builder description displays in the native room")
         if not populated:
             check("practice golem" not in look and "practice blade" not in look,
@@ -184,7 +188,7 @@ def gameplay(root, port, populated, browser_export=False):
                   "Original route reaches the embedded creature in room 16")
             check("boss practice golem" in command("look"),
                   "Embedded golem is visible immediately before combat")
-            defeat = defeat_golem()
+            defeat = defeat_golem("boss practice golem")
             check("practice blade" in defeat and "carrying" in defeat,
                   "Defeated embedded creature drops its serialized carried blade")
             check(any("you get" in line and "practice blade" in line
@@ -202,6 +206,8 @@ def gameplay(root, port, populated, browser_export=False):
             look = command("look")
             check("a quiet anvil marks the isolated forge." in look,
                   "Browser-edited long description displays in the native room")
+            check("round 63 unsaved recovery" in look,
+                  "Recovered browser description displays in the native room")
             return
 
     finally:

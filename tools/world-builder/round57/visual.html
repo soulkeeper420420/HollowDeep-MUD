@@ -125,6 +125,13 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 </section>
 </main>
 
+
+<div id="round63Controls" style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
+ <button type="button" id="round63Undo" disabled>Undo</button>
+ <button type="button" id="round63Redo" disabled>Redo</button>
+ <button type="button" id="round63Discard">Discard Recovery</button>
+</div>
+
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
@@ -301,10 +308,15 @@ $("link").onclick=()=>run(async()=>{
  render();status("Reciprocal connection created");
 });
 $("remove").onclick=()=>run(async()=>{
- const room=current(),key=$("type").value;
+ current();
+ const key=$("type").value;
  const id=integer($("template").value);
+ const candidate=structuredClone(plan);
+ const room=candidate.rooms.find(r=>r.room_id===selected);
  room[key]=(room[key]??[]).filter(x=>x.id!==id);
- render();status("Placement removed locally");
+ await api("/api/validate",candidate);
+ plan=candidate;
+ render();status("Placement removed and validated");
 });
 $("export").onclick=()=>run(async()=>{
  const result=await api("/api/export",plan);
@@ -317,6 +329,7 @@ $("export").onclick=()=>run(async()=>{
 $("applyJson").onclick=()=>run(async()=>{
  const next=JSON.parse($("json").value);
  if(!next||!Array.isArray(next.rooms))throw Error("Invalid plan");
+ await api("/api/validate",next);
  plan=next;
  selected=plan.rooms[0]?.room_id??null;
  render();status("JSON applied locally");
@@ -460,6 +473,135 @@ $("place").onclick=()=>run(async()=>{
 });
 
 $("remove").onclick=$("removeExisting").onclick;
+
+
+// Round 63: validated-plan history and local recovery.
+const round63Key="hollowdeep.world-builder.recovery.v1";
+const round63Limit=50;
+let round63History=[];
+let round63Position=-1;
+let round63Restoring=false;
+
+function round63Snapshot(){
+ if(!plan)return null;
+ return structuredClone({plan,selected});
+}
+function round63UpdateButtons(){
+ $("round63Undo").disabled=round63Position<=0;
+ $("round63Redo").disabled=
+  round63Position<0 || round63Position>=round63History.length-1;
+}
+function round63Pending(){
+ const fields={};
+ for(const id of ["name","shortDescription","longDescription"]){
+  const el=$(id);
+  if(el)fields[id]=el.value;
+ }
+ return fields;
+}
+function round63SaveRecovery(){
+ if(!plan)return;
+ const state=round63Snapshot();
+ localStorage.setItem(round63Key,JSON.stringify({
+  version:1,state,pending:round63Pending(),pendingRoom:selected
+ }));
+}
+function round63Record(){
+ if(round63Restoring||!plan)return;
+ const snapshot=round63Snapshot();
+ const previous=round63History[round63Position];
+ if(previous && JSON.stringify(previous.plan)===JSON.stringify(snapshot.plan)){
+  round63SaveRecovery();
+  return;
+ }
+ round63History=round63History.slice(0,round63Position+1);
+ round63History.push(snapshot);
+ if(round63History.length>round63Limit)round63History.shift();
+ round63Position=round63History.length-1;
+ round63UpdateButtons();
+ round63SaveRecovery();
+}
+const round63PriorRender=render;
+render=function(){
+ round63PriorRender();
+ round63Record();
+};
+
+async function round63Travel(delta){
+ const index=round63Position+delta;
+ if(index<0||index>=round63History.length)return;
+ const snapshot=structuredClone(round63History[index]);
+ await api("/api/validate",snapshot.plan);
+ round63Restoring=true;
+ try{
+  plan=snapshot.plan;
+  selected=plan.rooms.some(r=>r.room_id===snapshot.selected)
+   ?snapshot.selected:plan.rooms[0].room_id;
+  round63Position=index;
+  render();
+ }finally{
+  round63Restoring=false;
+ }
+ round63UpdateButtons();
+ round63SaveRecovery();
+ status(delta<0?"Undo complete":"Redo complete");
+}
+$("round63Undo").onclick=()=>run(()=>round63Travel(-1));
+$("round63Redo").onclick=()=>run(()=>round63Travel(1));
+
+for(const id of ["name","shortDescription","longDescription"]){
+ $(id).addEventListener("input",()=>{
+  try{round63SaveRecovery()}
+  catch(e){status("Recovery storage unavailable: "+e.message)}
+ });
+}
+$("round63Discard").onclick=()=>{
+ try{
+  localStorage.removeItem(round63Key);
+  status("Recovery discarded; named drafts preserved");
+ }catch(e){status("ERROR: "+e.message)}
+};
+
+// Recovery is validated before loading. Invalid recovery never
+// replaces the active plan or any named draft.
+(async()=>{
+ try{
+  const raw=localStorage.getItem(round63Key);
+  if(!raw)return;
+  const recovery=JSON.parse(raw);
+  if(recovery?.version!==1 ||
+     !recovery.state?.plan ||
+     !Array.isArray(recovery.state.plan.rooms))
+   throw Error("Unsupported recovery data");
+
+  await api("/api/validate",recovery.state.plan);
+  const state=structuredClone(recovery.state);
+  round63Restoring=true;
+  try{
+   plan=state.plan;
+   selected=plan.rooms.some(r=>r.room_id===state.selected)
+    ?state.selected:plan.rooms[0].room_id;
+   render();
+  }finally{
+   round63Restoring=false;
+  }
+  round63History=[round63Snapshot()];
+  round63Position=0;
+  round63UpdateButtons();
+
+  if(recovery.pending &&
+     recovery.pendingRoom===selected &&
+     typeof recovery.pending==="object"){
+   for(const id of ["name","shortDescription","longDescription"]){
+    const value=recovery.pending[id];
+    if(typeof value==="string")$(id).value=value;
+   }
+  }
+  status("Recovered browser edits; validate room changes before export");
+ }catch(e){
+  status("Recovery not loaded: "+e.message);
+ }
+})();
 
 </script>
 </body>
