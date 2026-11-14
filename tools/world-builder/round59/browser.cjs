@@ -221,6 +221,45 @@ async function main() {
  assert.equal(await field("round65Pending").getAttribute("data-pending"),"false");
  console.log("ROUND 65: stale saves, guarded navigation, import and JSON editing PASS");
 }
+// Round 66: filtered room navigator with safe jumps and native-plan invariance.
+{
+ const baseline=JSON.parse(await field("json").inputValue());
+ const a=baseline.rooms[0],b=baseline.rooms[1];
+ assert.equal(await page.locator("#rooms .room:visible").count(),2);
+ assert.match(await page.locator("#rooms .room").first().innerText(),
+              /Exits \d+ · Monsters 1 · Objects 1/);
+ await field("round66Find").fill("gAlLeRy");
+ assert.equal(await page.locator("#rooms .room:visible").count(),1);
+ assert.equal(await field("round66Jump").locator("option").count(),1);
+ assert.equal(await field("round66Jump").inputValue(),String(b.room_id));
+ assert.match(await field("round66Summary").innerText(),/1 of 2 rooms shown/);
+ await click("round66Go");
+ assert.equal(await field("selected").innerText(),"Room "+b.room_id);
+ assert.deepEqual(JSON.parse(await field("json").inputValue()),baseline);
+ await field("round66Find").fill("999999");
+ assert.equal(await page.locator("#rooms .room:visible").count(),0);
+ assert.equal(await field("round66Go").isDisabled(),true);
+ await click("round66Clear");
+ assert.equal(await page.locator("#rooms .room:visible").count(),2);
+ await field("selected").click();
+ await page.keyboard.press("Control+k");
+ assert.equal(await field("round66Find").evaluate(el=>
+  document.activeElement===el),true);
+ await field("round66Find").fill(String(a.room_id));
+ await field("name").fill("Round 66 unapplied navigation marker");
+ page.once("dialog",dialog=>dialog.dismiss());
+ await click("round66Go");
+ assert.equal(await field("selected").innerText(),"Room "+b.room_id);
+ assert.equal(await field("name").inputValue(),
+              "Round 66 unapplied navigation marker");
+ page.once("dialog",dialog=>dialog.accept());
+ await click("round66Go");
+ assert.equal(await field("selected").innerText(),"Room "+a.room_id);
+ assert.deepEqual(JSON.parse(await field("json").inputValue()),baseline);
+ await click("round66Clear");
+ assert.equal(await page.locator("#rooms .room:visible").count(),2);
+ console.log("ROUND 66: room filtering, counts, quick jumps and edit protection PASS");
+}
 // Round 63: validated editing and recovery regression.
 {
  const original=JSON.parse(await field("json").inputValue());

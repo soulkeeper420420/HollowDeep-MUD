@@ -26,6 +26,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .row>*{min-width:0}
 .room{display:block;width:100%;text-align:left;margin:6px 0}
 .room.active{border-color:#fbbf24;background:#43351d}
+.room[hidden]{display:none}
+.round66Meta{display:block;margin-top:3px;font-size:11px;color:#a8b5c7}
+#round66Summary{margin:8px 0;color:#cbd5e1;font-size:12px}
 label{display:block;margin:12px 0 5px;color:#cbd5e1}
 pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 #status{padding:12px;background:#101a2a;border-radius:6px}
@@ -56,6 +59,15 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <label for="savedDraft">Saved drafts on this browser</label>
 <select id="savedDraft"></select>
 <button id="openDraft">Open Draft</button>
+<label for="round66Find">Find rooms by ID or name (Ctrl+K)</label>
+<input id="round66Find" type="search" autocomplete="off"
+       placeholder="Filter area rooms" aria-label="Find area rooms">
+<div class="row">
+ <select id="round66Jump" aria-label="Matching area room"></select>
+ <button id="round66Go" type="button">Go to room</button>
+ <button id="round66Clear" type="button">Clear</button>
+</div>
+<div id="round66Summary" role="status" aria-live="polite">No area loaded</div>
 <div id="rooms"></div>
 <h3>Add Existing Native Room</h3>
 <input id="addId" type="number" value="16">
@@ -744,6 +756,66 @@ document.addEventListener("change",event=>{
   status("Import cancelled; unapplied edits preserved");
  }
 },true);
+// Round 66: local room navigation only. Never mutate the validated plan.
+function round66Refresh(){
+ const all=plan?.rooms??[];
+ const query=$("round66Find").value.trim().toLocaleLowerCase();
+ const buttons=Array.from($("rooms").querySelectorAll("button.room"));
+ const matches=[];
+ const total=key=>room=> (room[key]??[]).reduce(
+  (sum,item)=>sum+(Number(item.count)||0),0);
+ for(const [index,room] of all.entries()){
+  const button=buttons[index];
+  if(!button)continue;
+  button.dataset.roomId=String(room.room_id);
+  if(!button.querySelector(".round66Meta")){
+   const meta=document.createElement("span");
+   meta.className="round66Meta";
+   meta.textContent="Exits "+(room.exits??[]).length+
+    " · Monsters "+total("monsters")(room)+
+    " · Objects "+total("objects")(room);
+   button.append(meta);
+  }
+  const match=!query || String(room.room_id).includes(query) ||
+   String(room.name??"").toLocaleLowerCase().includes(query);
+  button.hidden=!match;
+  if(match)matches.push(room);
+ }
+ const picker=$("round66Jump");
+ const previous=picker.value;
+ picker.replaceChildren();
+ for(const room of matches){
+  picker.add(new Option(room.room_id+" · "+room.name,String(room.room_id)));
+ }
+ if(matches.some(room=>String(room.room_id)===previous))picker.value=previous;
+ else if(matches.some(room=>room.room_id===selected))picker.value=String(selected);
+ picker.disabled=matches.length===0;
+ $("round66Go").disabled=matches.length===0;
+ $("round66Summary").textContent=plan?
+  matches.length+" of "+all.length+" rooms shown · selected room "+selected:
+  "No area loaded";
+}
+const round66PreviousRender=render;
+render=function(){round66PreviousRender();round66Refresh()};
+$("round66Find").addEventListener("input",round66Refresh);
+$("round66Clear").onclick=()=>{
+ $("round66Find").value="";
+ round66Refresh();
+};
+$("round66Go").onclick=()=>{
+ const id=$("round66Jump").value;
+ const target=Array.from($("rooms").querySelectorAll("button.room"))
+  .find(button=>button.dataset.roomId===id && !button.hidden);
+ // Reuse the existing room-button click handler, including Round 64/65 guards.
+ if(target)target.click();
+};
+document.addEventListener("keydown",event=>{
+ if(!plan||event.altKey||event.shiftKey||
+    !(event.ctrlKey||event.metaKey)||event.key.toLowerCase()!=="k")return;
+ event.preventDefault();
+ $("round66Find").focus();
+ $("round66Find").select();
+});
 // Recovery is validated before loading. Invalid recovery never
 // replaces the active plan or any named draft.
 (async()=>{
