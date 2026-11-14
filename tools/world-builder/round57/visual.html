@@ -74,6 +74,13 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <h3>Add Existing Native Room</h3>
 <input id="addId" type="number" value="16">
 <button id="add">Add Room</button>
+<details><summary>Create a new room</summary>
+ <label for="newRoomId">Unused room ID (8900–8999)</label>
+ <input id="newRoomId" type="number" min="8900" max="8999" value="8900">
+ <label for="newRoomName">Room name</label>
+ <input id="newRoomName" maxlength="79">
+ <button id="addNewRoom">Create room in draft</button>
+</details>
 <h3>Connect Rooms</h3>
 <label>From</label><select id="from"></select>
 <label>To</label><select id="to"></select>
@@ -84,6 +91,14 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <option>up</option><option>down</option>
 </select>
 <button id="link">Create Reciprocal Exit</button>
+<details><summary>Create custom named exits</summary>
+ <p>Uses the From and To rooms above. Give each side a name, such as “archway” and “courtyard”.</p>
+ <label for="exitLabel">Exit from the first room</label>
+ <input id="exitLabel" maxlength="19">
+ <label for="returnLabel">Return exit</label>
+ <input id="returnLabel" maxlength="19">
+ <button id="addNamedLink">Create named exit pair</button>
+</details>
 </section>
 
 <section>
@@ -257,7 +272,7 @@ function renderConnections(room){
  if(!exits.length)$("exits").textContent="No exits";
  for(const exit of exits){
   const destination=plan.rooms.find(candidate=>candidate.room_id===exit.destination);
-  const reverse=Object.hasOwn(oppositeExit,exit.direction)?oppositeExit[exit.direction]:null;
+  const reverse=exit.return_direction??(Object.hasOwn(oppositeExit,exit.direction)?oppositeExit[exit.direction]:null);
   const returns=(destination?.exits??[]).filter(link=>link.destination===room.room_id);
   const reciprocal=reverse?returns.some(link=>link.direction===reverse):returns.length>0;
   const row=document.createElement("div");
@@ -320,8 +335,8 @@ function auditConnections(candidate){
     continue;
    }
    departures.set(direction,destination);
-   const reverse=Object.hasOwn(oppositeExit,direction)?oppositeExit[direction]:null;
-   if(!reverse)named++;
+   const reverse=exit.return_direction??(Object.hasOwn(oppositeExit,direction)?oppositeExit[direction]:null);
+   if(exit.return_direction||!reverse)named++;
    if(!rooms.has(destination)){outside++;continue}
    if(destination===id){issue(id,direction+" leads back to this room");continue}
    const next=rooms.get(destination).exits;
@@ -630,6 +645,35 @@ $("place").onclick=()=>run(async()=>{
 
 $("remove").onclick=$("removeExisting").onclick;
 
+$("addNewRoom").onclick=()=>run(async()=>{
+ if(!plan)throw Error("Create or open an area first");
+ const candidate=structuredClone(plan);
+ const id=integer($("newRoomId").value);
+ candidate.rooms.push({room_id:id,new_room:true,name:$("newRoomName").value.trim(),
+                       exits:[],monsters:[],objects:[]});
+ await api("/api/validate",candidate);
+ plan=candidate;
+ selected=id;
+ render();
+ status("New room added to draft");
+});
+
+$("addNamedLink").onclick=()=>run(async()=>{
+ if(!plan)throw Error("Create or open an area first");
+ const candidate=structuredClone(plan);
+ const a=candidate.rooms.find(room=>room.room_id===integer($("from").value));
+ const b=candidate.rooms.find(room=>room.room_id===integer($("to").value));
+ if(!a||!b||a===b)throw Error("Choose two different rooms");
+ const direction=$("exitLabel").value.trim();
+ const reverse=$("returnLabel").value.trim();
+ a.exits.push({direction,destination:b.room_id,return_direction:reverse});
+ b.exits.push({direction:reverse,destination:a.room_id,return_direction:direction});
+ await api("/api/validate",candidate);
+ plan=candidate;
+ render();
+ status("Named exit pair validated");
+});
+
 $("placeCustom").onclick=()=>run(async()=>{
  const candidate=structuredClone(plan);
  const room=candidate?.rooms.find(r=>r.room_id===selected);
@@ -878,7 +922,7 @@ round64UpdateDirty=function(){
  round65UpdatePending();
 };
 const round65ReplaceActions=new Set([
- "create","openDraft","add","link","place","placeCustom","remove","removeExisting",
+ "create","openDraft","add","addNewRoom","link","addNamedLink","place","placeCustom","remove","removeExisting",
  "round63Undo","round63Redo"
 ]);
 const round65StaleActions=new Set([

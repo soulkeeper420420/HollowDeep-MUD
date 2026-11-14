@@ -169,8 +169,8 @@ def clean(plan):
     custom, _ = custom_banks(plan)
     for entry in plan["rooms"]:
         if "monsters" in entry:
-            rid = area.valid_id(entry["room_id"])
-            baseline = new_plan_monsters(rid)
+            rid = entry["room_id"]
+            baseline = [] if entry.get("new_room") else new_plan_monsters(rid)
             if entry["monsters"] != baseline:
                 rooms[rid]["monsters"] = placements(entry["monsters"], TEMPLATES.keys() | custom.get("monsters", set()))
     for entry in plan["rooms"]:
@@ -185,10 +185,12 @@ def clean(plan):
             rooms[entry["room_id"]][key] = encoded + bytes(1) if encoded else b""
     for entry in plan["rooms"]:
         if "objects" in entry:
-            rid = area.valid_id(entry["room_id"])
-            data, _ = area.r50.baseline(rid)
-            baseline = [{"id": identifier, "respawn": seconds, "count": len(slots)}
-                        for (identifier, seconds), slots in existing(data, OBJECT_TABLE).items()]
+            rid = entry["room_id"]
+            baseline = []
+            if not entry.get("new_room"):
+                data, _ = area.r50.baseline(rid)
+                baseline = [{"id": identifier, "respawn": seconds, "count": len(slots)}
+                            for (identifier, seconds), slots in existing(data, OBJECT_TABLE).items()]
             if entry["objects"] != baseline:
                 rooms[rid]["objects"] = placements(entry["objects"], OBJECT_TEMPLATES.keys() | custom.get("objects", set()))
     return rooms

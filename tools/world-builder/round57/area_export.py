@@ -64,6 +64,18 @@ def valid_id(value):
     require(str(value) in INDEX, "Room not export-eligible")
     return value
 
+
+def plan_room_id(entry):
+    rid = entry.get("room_id")
+    if "new_room" not in entry:
+        return valid_id(rid)
+    require(entry["new_room"] is True and type(rid) is int and 8900 <= rid < 9000,
+            "New rooms require an ID from 8900 through 8999")
+    target = Path("/srv/hollowdeep/world/rooms") / f"r{rid:05d}"
+    require(str(rid) not in INDEX and not target.exists() and not target.is_symlink(),
+            "New room ID is already occupied")
+    return rid
+
 def native_exits(rid):
     data, _ = r50.baseline(rid)
     records, _ = r51.original_exits(data)
@@ -76,10 +88,14 @@ def clean_plan(plan):
     require(2 <= len(rooms) <= 50, "Area must have 2–50 rooms")
 
     cleaned = {}
+    available = set()
     for entry in rooms:
         require(isinstance(entry, dict), "Invalid room")
-        rid = valid_id(entry.get("room_id"))
-        require(rid not in cleaned, "Duplicate room ID")
+        rid = plan_room_id(entry)
+        require(rid not in available, "Duplicate room ID")
+        available.add(rid)
+    for entry in rooms:
+        rid = entry["room_id"]
 
         name = entry.get("name")
         require(isinstance(name, str), "Invalid room name")
@@ -89,7 +105,7 @@ def clean_plan(plan):
         require(isinstance(exits, list), "Invalid exit list")
         require(len(exits) <= 20, "Too many exits")
 
-        original = native_exits(rid)
+        original = [] if entry.get("new_room") else native_exits(rid)
         original_names = {x["direction"] for x in original}
         require(
             len(original_names) == len(original),
@@ -102,7 +118,8 @@ def clean_plan(plan):
         for exit_entry in exits:
             require(isinstance(exit_entry, dict), "Invalid exit")
             require(
-                set(exit_entry) == {"direction", "destination"},
+                set(exit_entry) in ({"direction", "destination"},
+                                    {"direction", "destination", "return_direction"}),
                 "Unsupported exit properties"
             )
             direction = exit_entry["direction"]
@@ -125,19 +142,25 @@ def clean_plan(plan):
             )
 
             if original_entry != exit_entry:
-                require(direction in PAIRS, "New or redirected exits need a standard direction")
+                if "return_direction" in exit_entry:
+                    reverse = exit_entry["return_direction"]
+                    require(original_entry is None and direction not in PAIRS and
+                            isinstance(reverse, str) and reverse not in PAIRS and
+                            re.fullmatch(r"[a-z][a-z0-9 ]{0,18}", direction) and
+                            re.fullmatch(r"[a-z][a-z0-9 ]{0,18}", reverse) and
+                            direction == direction.rstrip() and reverse == reverse.rstrip(),
+                            "Custom exit labels must be new, lowercase and at most 19 ASCII characters")
+                else:
+                    require(direction in PAIRS, "New or redirected exits need a standard direction")
                 require(
-                    str(destination) in INDEX,
+                    destination in available or str(destination) in INDEX,
                     "New or redirected exit destination "
                     "is not export-eligible"
                 )
 
             seen.add(direction)
 
-            normalized.append({
-                "direction": direction,
-                "destination": destination
-            })
+            normalized.append(dict(exit_entry))
 
         # Existing exits with nonstandard names must be preserved
         # unchanged. They cannot be represented as new standard exits.
@@ -149,23 +172,36 @@ def clean_plan(plan):
                 )
 
         cleaned[rid] = {"room_id": rid, "name": name, "exits": normalized}
+        if entry.get("new_room"):
+            cleaned[rid]["new_room"] = True
 
     # Every new or redirected exit between rooms in this plan
     # must have a matching reverse exit.
     for rid, room in cleaned.items():
-        original = native_exits(rid)
+        original = [] if room.get("new_room") else native_exits(rid)
         for e in room["exits"]:
             if e in original:
                 continue
             dest = e["destination"]
+            require(dest != rid, "Cannot connect a room to itself")
             require(
                 dest in cleaned,
                 "New or redirected exits must target a room in this area"
             )
-            reverse = PAIRS[e["direction"]]
+            if "return_direction" in e:
+                direction = e["direction"]
+                reverse = e["return_direction"]
+                require(not any(other != e and
+                                (other["direction"].startswith(direction) or
+                                 direction.startswith(other["direction"]))
+                                for other in room["exits"]),
+                        "Custom exit label overlaps another exit")
+                match = {"direction": reverse, "destination": rid, "return_direction": direction}
+            else:
+                reverse = PAIRS[e["direction"]]
+                match = {"direction": reverse, "destination": rid}
             require(
-                {"direction": reverse, "destination": rid}
-                in cleaned[dest]["exits"],
+                match in cleaned[dest]["exits"],
                 f"Missing reciprocal {reverse} exit in room {dest}"
             )
 
@@ -183,7 +219,11 @@ def make_exit(direction, destination):
     )
 
 def build_room(rid, room):
-    original, _ = r50.baseline(rid)
+    if room.get("new_room"):
+        # Native room header followed by exit, creature, object and description counts.
+        original = struct.pack("<h", rid) + bytes(478 + 6 * 4)
+    else:
+        original, _ = r50.baseline(rid)
     before = parse(original)
     records, end = r51.original_exits(original)
     old = {r51.fields(record)["direction"]: record
@@ -268,7 +308,7 @@ def generate(plan, persist=True, extra_assets=None):
         filename = f"r{rid:05d}.native-candidate"
         outputs[filename] = candidate
         reports[str(rid)] = {
-            "source_sha256": INDEX[str(rid)],
+            "source_sha256": INDEX.get(str(rid)),
             "candidate_sha256": sha(candidate),
             "checks": checks
         }
@@ -342,8 +382,7 @@ def new_plan(a, b):
 
 def link(plan, a, b, direction):
     require(direction in PAIRS, "Invalid direction")
-    a = valid_id(a)
-    b = valid_id(b)
+    require(type(a) is int and type(b) is int, "Room ID must be an integer")
     require(a != b, "Cannot link a room to itself")
 
     rooms = {
