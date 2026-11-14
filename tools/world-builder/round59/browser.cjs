@@ -122,6 +122,58 @@ async function main() {
     await click("saveDraft");
     await status("Draft saved in this browser");
     console.log("PASS: Draft JSON transfers to a fresh browser; invalid imports preserve the current and saved drafts");
+// Round 64: keyboard shortcuts and unsaved-change protection.
+{
+ const room14=page.locator("#rooms button").first();
+ const room15=page.locator("#rooms button").nth(1);
+ await room14.click();
+
+ const originalName=await field("name").inputValue();
+ assert.equal(await field("round64Dirty").getAttribute("data-dirty"),"false");
+
+ await field("name").fill("Round 64 keyboard save");
+ assert.equal(await field("round64Dirty").getAttribute("data-dirty"),"true");
+
+ await field("name").press("Control+s");
+ await status("Room changes validated");
+ assert.equal(await field("round64Dirty").getAttribute("data-dirty"),"false");
+ assert.equal(await field("name").inputValue(),"Round 64 keyboard save");
+
+ // Native undo/redo shortcuts operate outside editable controls.
+ await field("selected").click();
+ await page.keyboard.press("Control+z");
+ await status("Undo complete");
+ assert.equal(await field("name").inputValue(),originalName);
+
+ await page.keyboard.press("Control+Shift+z");
+ await status("Redo complete");
+ assert.equal(await field("name").inputValue(),"Round 64 keyboard save");
+
+ // Cancel navigation while a room contains unsaved text.
+ await field("shortDescription").fill("Round 64 unsaved marker");
+ page.once("dialog",dialog=>dialog.dismiss());
+ await room15.click();
+ assert.equal(await field("selected").innerText(),"Room 14");
+ assert.equal(await field("shortDescription").inputValue(),
+              "Round 64 unsaved marker");
+
+ // Confirm navigation and ensure the other room is unchanged.
+ page.once("dialog",dialog=>dialog.accept());
+ await room15.click();
+ assert.equal(await field("selected").innerText(),"Room 15");
+ assert.equal(await field("round64Dirty").getAttribute("data-dirty"),"false");
+
+ // Restore the original validated plan for downstream native tests.
+ await field("json").evaluate(el=>{
+  const details=el.closest("details");
+  if(details)details.open=true;
+ });
+ await field("json").fill(JSON.stringify(beforeTransfer));
+ await click("applyJson");
+ await status("JSON applied locally");
+
+ console.log("ROUND 64: shortcuts and dirty navigation PASS");
+}
 // Round 63: validated editing and recovery regression.
 {
  const original=JSON.parse(await field("json").inputValue());
@@ -147,6 +199,9 @@ async function main() {
  // Unsaved text must survive refresh in the correct room.
  await field("shortDescription").fill("Round 63 unsaved recovery");
  await page.reload();
+ await field("round64Recovery").waitFor({state:"visible"});
+ await click("round64Accept");
+ await status("Recovered browser edits");
    await page.waitForFunction(() => {
     const room=document.getElementById("selected");
     const description=document.getElementById("shortDescription");
@@ -181,11 +236,15 @@ async function main() {
  await page.locator("#rooms button").first().click();
  await field("shortDescription").fill("Round 63 room isolation marker");
 
- await page.locator("#rooms button").nth(1).click();
+ page.once("dialog",dialog=>dialog.accept());
+  await page.locator("#rooms button").nth(1).click();
  assert.equal(await field("shortDescription").inputValue(),
               room15.short_description??"");
 
  await page.reload();
+ await field("round64Recovery").waitFor({state:"visible"});
+ await click("round64Accept");
+ await status("Recovered browser edits");
  await page.waitForFunction(() => {
   const room=document.getElementById("selected");
   const description=document.getElementById("shortDescription");
@@ -205,6 +264,41 @@ async function main() {
               room14.short_description??"");
 
  console.log("ROUND 63: cross-room recovery isolation PASS");
+
+  // Round 64: recovery rejection must preserve named drafts.
+  {
+   const namedBefore=await page.evaluate(()=>
+    Object.keys(localStorage).filter(k=>
+     k.startsWith("hollowdeep.world-builder.draft.named.")
+    ).sort()
+   );
+
+   await field("shortDescription").fill("Round 64 reject marker");
+   await page.reload();
+   await field("round64Recovery").waitFor({state:"visible"});
+   await click("round64Reject");
+   await status("Recovery discarded");
+
+   assert.equal(await field("round64Recovery").isVisible(),false);
+   assert.equal(await page.evaluate(()=>
+    localStorage.getItem("hollowdeep.world-builder.recovery.v1")
+   ),null);
+
+   const namedAfter=await page.evaluate(()=>
+    Object.keys(localStorage).filter(k=>
+     k.startsWith("hollowdeep.world-builder.draft.named.")
+    ).sort()
+   );
+   assert.deepEqual(namedAfter,namedBefore);
+
+   console.log("ROUND 64: recovery rejection preserves named drafts PASS");
+
+   await field("savedDraft").selectOption({label:"Forge export"});
+   await click("openDraft");
+   await status("Draft reopened");
+   await page.locator("#rooms button").first().click();
+  }
+
 
  // Reopen Advanced JSON after the recovery refresh.
  await field("json").evaluate(el=>{

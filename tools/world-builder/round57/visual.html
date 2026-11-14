@@ -82,6 +82,9 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <label for="longDescription">Long Description</label>
 <textarea id="longDescription"></textarea>
 <button id="save">Apply Room Changes</button>
+<div id="round64Dirty" role="status" aria-live="polite">
+ Room changes saved
+</div>
 <h3>Exits</h3>
 <div id="exits"></div>
 <h3>Current Monsters</h3>
@@ -130,6 +133,12 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
  <button type="button" id="round63Undo" disabled>Undo</button>
  <button type="button" id="round63Redo" disabled>Redo</button>
  <button type="button" id="round63Discard">Discard Recovery</button>
+<div id="round64Recovery" hidden role="region"
+     aria-label="Recovered browser edits">
+ <p id="round64RecoverySummary"></p>
+ <button type="button" id="round64Accept">Restore edits</button>
+ <button type="button" id="round64Reject">Discard recovered edits</button>
+</div>
 </div>
 
 <script>
@@ -549,19 +558,111 @@ async function round63Travel(delta){
 $("round63Undo").onclick=()=>run(()=>round63Travel(-1));
 $("round63Redo").onclick=()=>run(()=>round63Travel(1));
 
+// Round 64: dirty-state tracking and keyboard shortcuts.
+function round64Dirty(){
+ if(!plan)return false;
+ const room=plan.rooms.find(r=>r.room_id===selected);
+ if(!room)return false;
+ return $("name").value!==(room.name??"") ||
+  $("shortDescription").value!==(room.short_description??"") ||
+  $("longDescription").value!==(room.long_description??"");
+}
+function round64UpdateDirty(){
+ const dirty=round64Dirty();
+ $("round64Dirty").textContent=dirty
+  ?"Unsaved room changes — Apply Room Changes to validate"
+  :"Room changes saved";
+ $("round64Dirty").dataset.dirty=String(dirty);
+}
+function round64ConfirmNavigation(){
+ return !round64Dirty() ||
+  window.confirm("Discard unsaved room field edits?");
+}
 for(const id of ["name","shortDescription","longDescription"]){
  $(id).addEventListener("input",()=>{
+  round64UpdateDirty();
   try{round63SaveRecovery()}
   catch(e){status("Recovery storage unavailable: "+e.message)}
  });
 }
-$("round63Discard").onclick=()=>{
+const round64Render=render;
+render=function(){
+ round64Render();
+ round64UpdateDirty();
+};
+const round64RoomRender=round63PriorRender;
+// Room selection happens in the original render's button callback.
+// Capture clicks before that callback so unsaved edits cannot disappear.
+$("rooms").addEventListener("click",event=>{
+ const button=event.target.closest("button");
+ if(button && !round64ConfirmNavigation()){
+  event.stopPropagation();
+  event.preventDefault();
+ }
+},true);
+document.addEventListener("keydown",event=>{
+ const modifier=event.ctrlKey||event.metaKey;
+ if(!modifier||event.altKey)return;
+ const key=event.key.toLowerCase();
+ const editable=event.target.closest(
+  "input,textarea,select,[contenteditable]"
+ );
+ if(key==="s"){
+  if(!plan)return;
+  event.preventDefault();
+  $("save").click();
+ }else if(!editable && (key==="z"||key==="y")){
+  event.preventDefault();
+  const redo=key==="y"||event.shiftKey;
+  (redo?$("round63Redo"):$("round63Undo")).click();
+ }
+});
+let round64PendingRecovery=null;
+function round64CloseRecovery(){
+ round64PendingRecovery=null;
+ $("round64Recovery").hidden=true;
+}
+$("round64Reject").onclick=()=>{
  try{
   localStorage.removeItem(round63Key);
+  round64CloseRecovery();
   status("Recovery discarded; named drafts preserved");
  }catch(e){status("ERROR: "+e.message)}
 };
-
+$("round63Discard").onclick=()=>{
+ if(!window.confirm("Discard browser recovery? Named drafts will remain."))return;
+ $("round64Reject").click();
+};
+$("round64Accept").onclick=()=>run(async()=>{
+ const recovery=round64PendingRecovery;
+ if(!recovery)throw Error("No recovery to restore");
+ await api("/api/validate",recovery.state.plan);
+ if(!round64ConfirmNavigation())return;
+ const state=structuredClone(recovery.state);
+ round63Restoring=true;
+ try{
+  plan=state.plan;
+  selected=plan.rooms.some(r=>r.room_id===state.selected)
+   ?state.selected:plan.rooms[0].room_id;
+  render();
+ }finally{
+  round63Restoring=false;
+ }
+ round63History=[round63Snapshot()];
+ round63Position=0;
+ round63UpdateButtons();
+ if(recovery.pending &&
+    recovery.pendingRoom===selected &&
+    typeof recovery.pending==="object"){
+  for(const id of ["name","shortDescription","longDescription"]){
+   const value=recovery.pending[id];
+   if(typeof value==="string")$(id).value=value;
+  }
+ }
+ round64UpdateDirty();
+ round64CloseRecovery();
+ status("Recovered browser edits; validate room changes before export");
+});
 // Recovery is validated before loading. Invalid recovery never
 // replaces the active plan or any named draft.
 (async()=>{
@@ -575,29 +676,13 @@ $("round63Discard").onclick=()=>{
    throw Error("Unsupported recovery data");
 
   await api("/api/validate",recovery.state.plan);
-  const state=structuredClone(recovery.state);
-  round63Restoring=true;
-  try{
-   plan=state.plan;
-   selected=plan.rooms.some(r=>r.room_id===state.selected)
-    ?state.selected:plan.rooms[0].room_id;
-   render();
-  }finally{
-   round63Restoring=false;
-  }
-  round63History=[round63Snapshot()];
-  round63Position=0;
-  round63UpdateButtons();
-
-  if(recovery.pending &&
-     recovery.pendingRoom===selected &&
-     typeof recovery.pending==="object"){
-   for(const id of ["name","shortDescription","longDescription"]){
-    const value=recovery.pending[id];
-    if(typeof value==="string")$(id).value=value;
-   }
-  }
-  status("Recovered browser edits; validate room changes before export");
+  round64PendingRecovery=structuredClone(recovery);
+  const room=recovery.state.selected;
+  $("round64RecoverySummary").textContent=
+   "Validated recovery available for room "+room+
+   ". Review before restoring; named drafts are unaffected.";
+  $("round64Recovery").hidden=false;
+  status("Recovery available for review");
  }catch(e){
   status("Recovery not loaded: "+e.message);
  }
