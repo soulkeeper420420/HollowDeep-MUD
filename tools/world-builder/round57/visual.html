@@ -136,6 +136,12 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <label>Respawn Interval</label>
 <input id="respawn" type="number" min="1" max="86400" value="60">
 <button id="place">Add / Update Placement</button>
+<details><summary>Create a custom monster or item</summary>
+ <p>Choose a base template above. The custom copy uses a new display name and keeps the base stats and command keywords.</p>
+ <label for="customName">Custom display name</label>
+ <input id="customName" maxlength="79">
+ <button id="placeCustom">Create and place custom copy</button>
+</details>
 <button id="remove">Remove Selected Placement</button>
 <h3>Edit Existing Placement</h3>
 <label>Existing Placement</label>
@@ -369,7 +375,7 @@ function refreshAudit(){
 function catalogOptions(){
  const key=$("type").value;
  const query=$("search").value.trim().toLowerCase();
- const entries=catalogs[key]||[];
+ const entries=[...(plan?.custom_templates?.[key]??[]),...(catalogs[key]??[])];
  $("template").replaceChildren();
  for(const item of entries.filter(x=>
   JSON.stringify(x).toLowerCase().includes(query)).slice(0,150)){
@@ -624,6 +630,32 @@ $("place").onclick=()=>run(async()=>{
 
 $("remove").onclick=$("removeExisting").onclick;
 
+$("placeCustom").onclick=()=>run(async()=>{
+ const candidate=structuredClone(plan);
+ const room=candidate?.rooms.find(r=>r.room_id===selected);
+ if(!room)throw Error("Select a room");
+ const kind=$("type").value;
+ const base=integer($("template").value);
+ if(!catalogs[kind].some(entry=>entry.id===base))throw Error("Select an original template");
+ const name=$("customName").value.trim();
+ if(!name)throw Error("Enter a display name");
+ candidate.custom_templates??={};
+ const definitions=candidate.custom_templates[kind]??=[];
+ const used=new Set([...catalogs[kind],...definitions].map(entry=>entry.id));
+ for(const existing of candidate.rooms)
+  for(const placement of existing[kind]??[])used.add(placement.id);
+ let id=999;
+ while(id>0&&used.has(id))id--;
+ if(!id)throw Error("No free custom template IDs");
+ definitions.push({id,base_id:base,name});
+ (room[kind]??=[]).push({id,count:integer($("count").value),respawn:integer($("respawn").value)});
+ await api("/api/validate",candidate);
+ plan=candidate;
+ $("customName").value="";
+ render();
+ status("Custom placement validated");
+});
+
 
 // Round 63: validated-plan history and local recovery.
 const round63Key="hollowdeep.world-builder.recovery.v1";
@@ -846,7 +878,7 @@ round64UpdateDirty=function(){
  round65UpdatePending();
 };
 const round65ReplaceActions=new Set([
- "create","openDraft","add","link","place","remove","removeExisting",
+ "create","openDraft","add","link","place","placeCustom","remove","removeExisting",
  "round63Undo","round63Redo"
 ]);
 const round65StaleActions=new Set([
@@ -922,7 +954,12 @@ function round66Refresh(){
   "No area loaded";
 }
 const round66PreviousRender=render;
-render=function(){round66PreviousRender();round66Refresh();refreshAudit()};
+render=function(){round66PreviousRender();round66Refresh();refreshAudit();
+ const selectedTemplate=$("template").value;
+ catalogOptions();
+ if(Array.from($("template").options).some(option=>option.value===selectedTemplate))
+  $("template").value=selectedTemplate;
+};
 $("auditPending").onchange=refreshAudit;
 $("json").addEventListener("input",()=>{if($("auditPending").checked)refreshAudit()});
 $("round66Find").addEventListener("input",round66Refresh);

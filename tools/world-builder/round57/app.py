@@ -64,6 +64,64 @@ OBJECT_TEMPLATES = object_catalog()
 
 clean_original, build_original = area.clean_plan, area.build_room
 new_original = area.new_plan
+generate_original = area.generate
+
+
+def custom_banks(plan):
+    custom = plan.get("custom_templates", {})
+    kinds = {"monsters": (TEMPLATES, "m", ABI["creature"], ABI["per_file"], ABI["maximum"]),
+             "objects": (OBJECT_TEMPLATES, "o", object_size, per_file, maximum)}
+    area.require(isinstance(custom, dict) and custom.keys() <= kinds.keys(),
+                 "Invalid custom template types")
+    assets = {}
+    ids = {}
+    for kind, definitions in custom.items():
+        catalog, prefix, size, records, limit = kinds[kind]
+        area.require(isinstance(definitions, list) and len(definitions) <= 50,
+                     "Use at most 50 custom templates per type")
+        ids[kind] = set()
+        banks = {}
+
+        def bank(number):
+            if number not in banks:
+                path = ROOT / "templates" / f"{prefix}{number:02d}"
+                data = path.read_bytes() if path.exists() else b""
+                area.require(len(data) <= records * size and len(data) % size == 0,
+                             "Invalid native template bank")
+                banks[number] = bytearray(data.ljust(records * size, b"\0"))
+            return banks[number]
+
+        changed = set()
+        for entry in definitions:
+            area.require(isinstance(entry, dict) and set(entry) == {"id", "base_id", "name"},
+                         "Invalid custom template definition")
+            identifier, base, name = (entry[key] for key in ("id", "base_id", "name"))
+            area.require(type(identifier) is int and 0 < identifier < limit and
+                         identifier not in catalog and identifier not in ids[kind],
+                         "Custom template ID collides with another record")
+            area.require(type(base) is int and base in catalog, "Unknown base template")
+            area.require(isinstance(name, str) and name == name.strip() and name.isprintable(),
+                         "Invalid custom template name")
+            encoded = area.r51.encode_name(name, 80)
+            target_group, target_slot = divmod(identifier, records)
+            source_group, source_slot = divmod(base, records)
+            target = bank(target_group)
+            start = target_slot * size
+            area.require(not any(target[start:start + size]), "Custom template ID occupies a native record")
+            source = bank(source_group)
+            start_source = source_slot * size
+            record = bytearray(source[start_source:start_source + size])
+            record[:len(encoded)] = encoded
+            target[start:start + size] = record
+            ids[kind].add(identifier)
+            changed.add(target_group)
+        for group in changed:
+            assets[f"objmon/{prefix}{group:02d}"] = bytes(banks[group])
+    return ids, assets
+
+
+def generate(plan, persist=True):
+    return generate_original(plan, persist=persist, extra_assets=lambda value: custom_banks(value)[1])
 
 
 def existing(data, table=ABI["table"]):
@@ -108,12 +166,13 @@ def placements(value, templates=TEMPLATES):
 
 def clean(plan):
     rooms = clean_original(plan)
+    custom, _ = custom_banks(plan)
     for entry in plan["rooms"]:
         if "monsters" in entry:
             rid = area.valid_id(entry["room_id"])
             baseline = new_plan_monsters(rid)
             if entry["monsters"] != baseline:
-                rooms[rid]["monsters"] = placements(entry["monsters"])
+                rooms[rid]["monsters"] = placements(entry["monsters"], TEMPLATES.keys() | custom.get("monsters", set()))
     for entry in plan["rooms"]:
         for key in ("short_description", "long_description"):
             if key not in entry:
@@ -131,7 +190,7 @@ def clean(plan):
             baseline = [{"id": identifier, "respawn": seconds, "count": len(slots)}
                         for (identifier, seconds), slots in existing(data, OBJECT_TABLE).items()]
             if entry["objects"] != baseline:
-                rooms[rid]["objects"] = placements(entry["objects"], OBJECT_TEMPLATES)
+                rooms[rid]["objects"] = placements(entry["objects"], OBJECT_TEMPLATES.keys() | custom.get("objects", set()))
     return rooms
 
 
@@ -185,6 +244,7 @@ def apply_slots(original, checks, room, field, start):
 area.clean_plan = clean
 area.build_room = build
 area.new_plan = new_plan
+area.generate = generate
 area.PAGE = area.PAGE.replace("Round 53", "Round 54").replace(
     "<p>Area plan (JSON)</p>", """<fieldset><legend>Room edits and permanent placements</legend>
 <label>Room <input id="spawn-room" type="number" value="14"></label>

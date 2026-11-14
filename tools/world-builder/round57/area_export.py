@@ -258,7 +258,7 @@ def build_room(rid, room):
 
     return candidate, checks
 
-def generate(plan, persist=True):
+def generate(plan, persist=True, extra_assets=None):
     rooms = clean_plan(plan)
     outputs = {}
     reports = {}
@@ -280,6 +280,11 @@ def generate(plan, persist=True):
         "production_deployment": False,
         "gameplay_validation": False
     }
+    if extra_assets:
+        assets = extra_assets(plan)
+        outputs.update(assets)
+        if assets:
+            manifest["template_banks"] = {name: sha(data) for name, data in assets.items()}
 
     with io.BytesIO() as stream:
         with zipfile.ZipFile(
