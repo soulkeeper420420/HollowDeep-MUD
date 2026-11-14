@@ -85,6 +85,9 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <div id="round64Dirty" role="status" aria-live="polite">
  Room changes saved
 </div>
+<div id="round65Pending" role="status" aria-live="polite">
+ No pending plan edits
+</div>
 <h3>Exits</h3>
 <div id="exits"></div>
 <h3>Current Monsters</h3>
@@ -663,6 +666,84 @@ $("round64Accept").onclick=()=>run(async()=>{
  round64CloseRecovery();
  status("Recovered browser edits; validate room changes before export");
 });
+// Round 65: protect edits during every plan-replacing operation.
+// The room fields and Advanced JSON are staged independently of `plan`.
+function round65JsonDirty(){
+ if(!plan)return false;
+ try{
+  return JSON.stringify(JSON.parse($("json").value))!==JSON.stringify(plan);
+ }catch(_){return true}
+}
+function round65UpdatePending(){
+ const room=round64Dirty(),json=round65JsonDirty();
+ $("round65Pending").textContent=room&&json
+  ?"Unapplied room and Advanced JSON edits"
+  :room?"Unapplied room edits"
+  :json?"Unapplied Advanced JSON edits"
+  :"No pending plan edits";
+ $("round65Pending").dataset.pending=String(room||json);
+}
+const round65PriorRender=render;
+render=function(){round65PriorRender();round65UpdatePending()};
+for(const id of ["name","shortDescription","longDescription","json"]){
+ $(id).addEventListener("input",round65UpdatePending);
+}
+function round65Stop(event,message){
+ event.preventDefault();
+ event.stopImmediatePropagation();
+ status(message);
+}
+function round65NeedsConfirmation(){
+ return round64Dirty()||round65JsonDirty();
+}
+// Keep the existing room-selection and recovery confirmations aware of JSON.
+round64ConfirmNavigation=function(){
+ return !round65NeedsConfirmation() ||
+  window.confirm("Discard unapplied room or Advanced JSON edits?");
+};
+// Recovery fills room inputs programmatically, without input events.
+const round65PreviousDirtyUpdate=round64UpdateDirty;
+round64UpdateDirty=function(){
+ round65PreviousDirtyUpdate();
+ round65UpdatePending();
+};
+const round65ReplaceActions=new Set([
+ "create","openDraft","add","link","place","remove","removeExisting",
+ "round63Undo","round63Redo"
+]);
+const round65StaleActions=new Set([
+ "saveDraft","exportDraft","export","validatePlan"
+]);
+document.addEventListener("click",event=>{
+ const button=event.target.closest("button");
+ if(!button||!plan)return;
+ const id=button.id;
+ const room=round64Dirty(),json=round65JsonDirty();
+ if(!room&&!json)return;
+ if(round65StaleActions.has(id)){
+  round65Stop(event,"ERROR: Apply pending room or Advanced JSON edits before saving, validating, or exporting");
+  return;
+ }
+ if(id==="save"&&json){
+  round65Stop(event,"ERROR: Apply or revert Advanced JSON edits before applying room changes");
+  return;
+ }
+ if(id==="applyJson"&&!room)return;
+ if(!round65ReplaceActions.has(id)&&id!=="applyJson")return;
+ if(!window.confirm("Discard unapplied room or Advanced JSON edits and continue?")){
+  round65Stop(event,"Action cancelled; unapplied edits preserved");
+ }
+},true);
+// File input changes are not click actions; guard them separately.
+document.addEventListener("change",event=>{
+ if(event.target.id!=="importDraft"||!round65NeedsConfirmation())return;
+ if(!window.confirm("Discard unapplied edits and import this draft?")){
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  event.target.value="";
+  status("Import cancelled; unapplied edits preserved");
+ }
+},true);
 // Recovery is validated before loading. Invalid recovery never
 // replaces the active plan or any named draft.
 (async()=>{

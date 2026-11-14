@@ -174,6 +174,53 @@ async function main() {
 
  console.log("ROUND 64: shortcuts and dirty navigation PASS");
 }
+// Round 65: previously silent destructive actions now require confirmation.
+{
+ await page.locator("#rooms button").first().click();
+ const baseline=JSON.parse(await field("json").inputValue());
+ await field("name").fill("Round 65 unapplied room name");
+ assert.equal(await field("round65Pending").getAttribute("data-pending"),"true");
+ await click("saveDraft");
+ await status("ERROR: Apply pending room or Advanced JSON edits");
+ await click("export");
+ await status("ERROR: Apply pending room or Advanced JSON edits");
+ assert.equal(await field("name").inputValue(),"Round 65 unapplied room name");
+ assert.deepEqual(JSON.parse(await field("json").inputValue()),baseline);
+ // Cancel an action that would replace the current unsaved room.
+ page.once("dialog",dialog=>dialog.dismiss());
+ await click("openDraft");
+ await status("Action cancelled");
+ assert.equal(await field("name").inputValue(),"Round 65 unapplied room name");
+ // Import must be independently guarded (change event instead of click).
+ page.once("dialog",dialog=>dialog.dismiss());
+ await field("importDraft").setInputFiles(filename);
+ await status("Import cancelled");
+ assert.equal(await field("name").inputValue(),"Round 65 unapplied room name");
+ // Accept replacing the pending edit with a validated saved draft.
+ page.once("dialog",dialog=>dialog.accept());
+ await click("openDraft");
+ await status("Draft reopened");
+ assert.deepEqual(JSON.parse(await field("json").inputValue()),beforeTransfer);
+ assert.equal(await field("round65Pending").getAttribute("data-pending"),"false");
+ // Advanced JSON text must also block stale draft/export operations.
+ await field("json").evaluate(el=>{el.closest("details").open=true});
+ const advanced=structuredClone(beforeTransfer);
+ advanced.rooms[0].name="Round 65 unapplied JSON name";
+ await field("json").fill(JSON.stringify(advanced));
+ assert.equal(await field("round65Pending").getAttribute("data-pending"),"true");
+ page.once("dialog",dialog=>dialog.dismiss());
+ await page.locator("#rooms button").nth(1).click();
+ assert.equal(await field("selected").innerText(),"Room 14");
+ assert.deepEqual(JSON.parse(await field("json").inputValue()),advanced);
+ await click("saveDraft");
+ await status("ERROR: Apply pending room or Advanced JSON edits");
+ await click("save");
+ await status("ERROR: Apply or revert Advanced JSON edits");
+ assert.equal(await field("name").inputValue(),"Round 59 Forge");
+ await field("json").fill(JSON.stringify(beforeTransfer));
+ assert.equal(await field("round65Pending").getAttribute("data-pending"),"false");
+ console.log("ROUND 65: stale saves, guarded navigation, import and JSON editing PASS");
+}
 // Round 63: validated editing and recovery regression.
 {
  const original=JSON.parse(await field("json").inputValue());
