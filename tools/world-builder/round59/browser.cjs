@@ -260,6 +260,43 @@ async function main() {
  assert.equal(await page.locator("#rooms .room:visible").count(),2);
  console.log("ROUND 66: room filtering, counts, quick jumps and edit protection PASS");
 }
+// Round 67: inspect and repair a missing reverse without changing a native exit.
+{
+ const baseline=JSON.parse(await field("json").inputValue());
+ const draftStorage=await page.evaluate(()=>({...localStorage}));
+ const room=baseline.rooms[0], target=baseline.rooms[1];
+ const connections=field("exits");
+ assert.match(await connections.innerText(),/Outside editable area · Return unverified/);
+ const east=connections.locator(".connection").filter({hasText:"east → "+target.room_id});
+ assert.match(await east.innerText(),/Editable area · Reciprocal/);
+ await field("name").fill("Unapplied connection edit");
+ page.once("dialog",dialog=>dialog.dismiss());
+ await east.getByRole("button",{name:/^east →/}).click();
+ assert.equal(await field("selected").innerText(),"Room "+room.room_id);
+ assert.equal(await field("name").inputValue(),"Unapplied connection edit");
+ page.once("dialog",dialog=>dialog.accept());
+ await east.getByRole("button",{name:/^east →/}).click();
+ assert.equal(await field("selected").innerText(),"Room "+target.room_id);
+ const oneWay=structuredClone(baseline);
+ oneWay.rooms[1].exits=oneWay.rooms[1].exits.filter(exit=>exit.direction!=="west");
+ await field("json").locator("..").evaluate(el=>{el.open=true});
+ await field("json").fill(JSON.stringify(oneWay));
+ await click("applyJson");
+ await page.waitForFunction(()=>!JSON.parse(document.querySelector("#json").value).rooms[1].exits.some(e=>e.direction==="west"));
+ await page.locator("#rooms button").first().click();
+ assert.match(await east.innerText(),/Missing west return/);
+ assert.equal(await east.evaluate(el=>el.classList.contains("connection-missing")),true);
+ await east.getByRole("button",{name:"Add west return"}).click();
+ await status("Reciprocal connection created");
+ const repaired=structuredClone(oneWay);
+ repaired.rooms[1].exits.push({direction:"west",destination:room.room_id});
+ assert.deepEqual(JSON.parse(await field("json").inputValue()),repaired);
+ const afterStorage=await page.evaluate(()=>({...localStorage}));
+ for(const key of Object.keys(draftStorage).filter(key=>key.startsWith("hollowdeep.world-builder.draft"))) {
+  assert.equal(afterStorage[key],draftStorage[key]);
+ }
+ console.log("ROUND 67: connection inspection, guarded navigation, reciprocal repair and draft preservation PASS");
+}
 // Round 63: validated editing and recovery regression.
 {
  const original=JSON.parse(await field("json").inputValue());

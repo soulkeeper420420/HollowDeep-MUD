@@ -34,6 +34,8 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 #status{padding:12px;background:#101a2a;border-radius:6px}
 #download a{color:#fbbf24}
 .item{padding:8px;border-bottom:1px solid #354357}
+.connection{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.connection-missing{border-inline-start:3px solid #fbbf24;background:#392c18}
 @media(max-width:950px){main{grid-template-columns:1fr}}
 </style>
 </head>
@@ -100,7 +102,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <div id="round65Pending" role="status" aria-live="polite">
  No pending plan edits
 </div>
-<h3>Exits</h3>
+<h3>Room Connections</h3>
 <div id="exits"></div>
 <h3>Current Monsters</h3>
 <div id="monsters"></div>
@@ -223,12 +225,7 @@ function render(){
  $("shortDescription").value=room.short_description??"";
  $("longDescription").value=room.long_description??"";
  $("exits").replaceChildren();
- for(const e of room.exits??[]){
-  const p=document.createElement("div");
-  p.className="item";
-  p.textContent=e.direction+" → "+e.destination;
-  $("exits").append(p);
- }
+ renderConnections(room);
  for(const key of ["monsters","objects"]){
   $(key).replaceChildren();
   for(const e of room[key]??[]){
@@ -239,6 +236,54 @@ function render(){
   }
  }
  $("json").value=JSON.stringify(plan,null,2);
+}
+const oppositeExit={
+ north:"south",south:"north",east:"west",west:"east",up:"down",down:"up",
+ northeast:"southwest",southwest:"northeast",northwest:"southeast",southeast:"northwest"
+};
+function renderConnections(room){
+ const exits=room.exits??[];
+ if(!exits.length)$("exits").textContent="No exits";
+ for(const exit of exits){
+  const destination=plan.rooms.find(candidate=>candidate.room_id===exit.destination);
+  const reverse=Object.hasOwn(oppositeExit,exit.direction)?oppositeExit[exit.direction]:null;
+  const returns=(destination?.exits??[]).filter(link=>link.destination===room.room_id);
+  const reciprocal=reverse?returns.some(link=>link.direction===reverse):returns.length>0;
+  const row=document.createElement("div");
+  row.className="item connection";
+  const title=document.createElement(destination?"button":"span");
+  title.textContent=exit.direction+" → "+exit.destination+(destination?" · "+destination.name:"");
+  if(destination){
+   title.type="button";
+   title.onclick=()=>{
+    if(destination.room_id!==selected&&round64ConfirmNavigation()){
+     selected=destination.room_id;
+     render();
+    }
+   };
+  }
+  const detail=document.createElement("div");
+  detail.textContent=destination
+   ?"Editable area · "+(reciprocal?"Reciprocal":reverse?"Missing "+reverse+" return":"No return exit")
+   :"Outside editable area · Return unverified";
+  if(destination&&!reciprocal)row.classList.add("connection-missing");
+  row.append(title,detail);
+  // The validated link API can add a missing standard reverse without replacing either exit.
+  if(destination&&!reciprocal&&["north","south","east","west","up","down"].includes(exit.direction)&&
+     destination.room_id!==room.room_id&&!(destination.exits??[]).some(link=>link.direction===reverse)){
+   const repair=document.createElement("button");
+   repair.type="button";
+   repair.textContent="Add "+reverse+" return";
+   repair.onclick=()=>{
+    $("from").value=String(room.room_id);
+    $("to").value=String(destination.room_id);
+    $("direction").value=exit.direction;
+    $("link").click();
+   };
+   row.append(repair);
+  }
+  $("exits").append(row);
+ }
 }
 function catalogOptions(){
  const key=$("type").value;
