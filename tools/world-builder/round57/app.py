@@ -111,7 +111,30 @@ def custom_banks(plan):
             source = bank(source_group)
             start_source = source_slot * size
             record = bytearray(source[start_source:start_source + size])
-            record[:len(encoded)] = encoded
+            # Replace the complete ABI-defined name field; preserve other record bytes.
+            name_offset = ABI["name"] if kind == "monsters" else 0
+            name_width = ABI["name_size"] if kind == "monsters" else name_size
+            area.require(name_offset + name_width <= size, "Invalid native name field")
+            name_record = area.r51.encode_name(name, name_width)
+            record[name_offset:name_offset + name_width] = name_record
+
+            # Add an unambiguous lowercase native command keyword.
+            # Preserve every existing keyword and all unrelated bytes.
+            key_offset = 255 if kind == "monsters" else 160
+            alias = (("hdm" if kind == "monsters" else "hdo")
+                     + str(identifier)).encode("ascii")
+            area.require(key_offset + 60 <= size,
+                         "Invalid native keyword layout")
+            free = next((
+                key_offset + 20 * index
+                for index in range(3)
+                if not record[key_offset + 20 * index:
+                              key_offset + 20 * (index + 1)].split(
+                                  bytes(1), 1)[0]
+            ), None)
+            area.require(free is not None,
+                         "No unused native keyword slot")
+            record[free:free + 20] = alias.ljust(20, bytes(1))
             target[start:start + size] = record
             ids[kind].add(identifier)
             changed.add(target_group)

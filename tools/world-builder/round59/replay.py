@@ -25,6 +25,7 @@ sys.path.insert(0, str(stage / "builder"))
 import app
 import round55_http
 import round57_http
+import round69_custom
 
 runner = Path(sys.argv[2])
 allowed = {"verify", "private_loopback", "restricted", "start_server", "stop_server", "connect",
@@ -188,7 +189,7 @@ def gameplay(root, port, populated, browser_export=False):
                   "Original route reaches the embedded creature in room 16")
             check("boss practice golem" in command("look"),
                   "Embedded golem is visible immediately before combat")
-            defeat = defeat_golem("boss practice golem")
+            defeat = defeat_golem("boss")
             check("practice blade" in defeat and "carrying" in defeat,
                   "Defeated embedded creature drops its serialized carried blade")
             check(any("you get" in line and "practice blade" in line
@@ -274,6 +275,8 @@ gameplay(stage / "browser/rootfs", 4043, True, browser_export=True)
 print("PASS: Browser-downloaded ZIP passed native gameplay", flush=True)
 gameplay(stage / "populated/rootfs", 4041, True)
 gameplay(stage / "cleared/rootfs", 4042, False)
+round69_custom.native_gameplay(stage, scope, check)
+print("ROUND 69: native draft room, custom templates and named exit gameplay PASS", flush=True)
 print("ROUND 59: PASS", flush=True)
 print("ROUND 60: PASS", flush=True)
 print("ROUND 61: PASS", flush=True)

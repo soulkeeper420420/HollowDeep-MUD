@@ -342,6 +342,95 @@ async function main() {
   .filter(([key])=>key.startsWith("hollowdeep.world-builder.draft")))),saved);
  console.log("ROUND 68: connectivity audit, safe jumps, draft preservation and explicit repair PASS");
 }
+// Round 69: verify newly authored rooms and draft-scoped native templates.
+{
+ const cp=await browser.newPage();
+ cp.setDefaultTimeout(15000);
+ cp.on("pageerror",error=>errors.push(error));
+ const f=id=>cp.locator("#"+id);
+ const press=async id=>f(id).click();
+ const state=async()=>JSON.parse(await f("json").inputValue());
+ const wait=async phrase=>f("status").filter({hasText:phrase}).waitFor();
+ try{
+  await cp.goto(url);
+  await cp.waitForFunction(()=>document.querySelector("#template")?.options.length>0);
+  await press("create");await wait("Area created");
+  // Round 69 controls are in collapsed <details>; expand them before filling.
+  for(const id of ["newRoomId","exitLabel","customName"]){
+   await f(id).evaluate(el=>{const details=el.closest("details");if(details)details.open=true});
+  }
+  const before=await state();
+  await f("name").fill("Round 69 Gateway");
+  await press("save");await wait("Room changes validated");
+  await f("newRoomId").fill("8900");
+  await f("newRoomName").fill("Round 69 Portal");
+  await press("addNewRoom");await wait("New room added to draft");
+  assert.equal(await f("selected").innerText(),"Room 8900");
+  // Duplicate and invalid IDs cannot replace the valid plan.
+  const created=await state();
+  await press("addNewRoom");await wait("ERROR:");
+  assert.deepEqual(await state(),created);
+  await f("from").selectOption("14");
+  await f("to").selectOption("8900");
+  await f("exitLabel").fill("archway");
+  await f("returnLabel").fill("threshold");
+  await press("addNamedLink");await wait("Named exit pair validated");
+  const linked=await state();
+  assert(linked.rooms.find(r=>r.room_id===8900).exits.some(e=>e.direction==="threshold"));
+  await f("exitLabel").fill("Bad Label");
+  await f("returnLabel").fill("back");
+  await press("addNamedLink");await wait("ERROR:");
+  assert.deepEqual(await state(),linked);
+  await f("type").selectOption("monsters");
+  await f("template").selectOption("1");
+  await f("customName").fill("Round 69 Practice Golem");
+  await press("placeCustom");await wait("Custom placement validated");
+  await f("type").selectOption("objects");
+  await f("template").selectOption("1");
+  await f("customName").fill("Round 69 Practice Blade");
+  await press("placeCustom");
+  // A repeated status message can be stale from the previous monster placement.
+  // Wait until the asynchronous object placement has actually updated the plan.
+  await cp.waitForFunction(()=>{
+   const value=document.querySelector("#json")?.value;
+   if(!value)return false;
+   const draft=JSON.parse(value);
+   return draft.custom_templates?.objects?.length===1 &&
+    draft.rooms.some(room=>room.room_id===8900 && room.objects?.length===1);
+  });
+  await wait("Custom placement validated");
+  const final=await state();
+  const room=final.rooms.find(r=>r.room_id===8900);
+  assert.equal(room.monsters.length,1);
+  assert.equal(room.objects.length,1);
+  assert.equal(final.custom_templates.monsters.length,1);
+  assert.equal(final.custom_templates.objects.length,1);
+  for(const mutate of [
+    p=>p.custom_templates.monsters[0].base_id=999999,
+    p=>p.custom_templates.objects[0].id=1,
+    p=>p.rooms.find(r=>r.room_id===8900).exits=[],
+    p=>p.rooms.push(structuredClone(p.rooms.find(r=>r.room_id===8900))),
+    p=>p.rooms.find(r=>r.room_id===8900).room_id=8800,
+  ]){
+   const bad=structuredClone(final);mutate(bad);
+   const result=await cp.evaluate(async payload=>{
+    const response=await fetch("/api/validate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    return {code:response.status,body:await response.json()};
+   },bad);
+   assert.equal(result.code,400,JSON.stringify(result));
+  }
+  await press("validatePlan");await wait("PASS: 3 rooms validated");
+  await press("export");
+  const link=cp.getByRole("link",{name:"Download validated native ZIP"});
+  await link.waitFor();
+  const manifest=JSON.parse(await f("status").innerText());
+  const [download]=await Promise.all([cp.waitForEvent("download"),link.click()]);
+  await download.saveAs(path.join(output,"round69-browser.zip"));
+  await fs.writeFile(path.join(output,"round69-browser.json"),JSON.stringify({plan:final,result:manifest}));
+  assert.deepEqual(before.rooms.map(r=>r.room_id),[14,15]);
+  console.log("ROUND 69: browser draft room, custom entities, named exits and rejection cases PASS");
+ }finally{await cp.close()}
+}
 // Round 63: validated editing and recovery regression.
 {
  const original=JSON.parse(await field("json").inputValue());
