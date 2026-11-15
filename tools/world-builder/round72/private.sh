@@ -72,6 +72,7 @@ python3 "$REPO/tools/world-builder/round72/patch_native.py" "$ENGINE_SOURCE" "$B
 python3 "$REPO/tools/world-builder/round73/patch_native_locate.py" "$BUILD"
 python3 "$REPO/tools/world-builder/round73/patch_native_guard.py" "$BUILD"
 python3 "$REPO/tools/world-builder/round73/patch_native_radius.py" "$BUILD"
+python3 "$REPO/tools/world-builder/round73/patch_native_showmap.py" "$BUILD"
 make -C "$BUILD" clean >"$BUILD_PARENT/build.log" 2>&1
 make -C "$BUILD" -j2 >>"$BUILD_PARENT/build.log" 2>&1 || { tail -60 "$BUILD_PARENT/build.log"; exit 1; }
 ENGINE="$BUILD/frp.new"
@@ -87,6 +88,7 @@ cp "$REPO/tools/world-builder/round72/round72_native.py" "$TEST/builder/"
 cp "$REPO/tools/world-builder/round73/round73c_native.py" "$TEST/builder/"
 cp "$REPO/tools/world-builder/round73/round73d_native.py" "$TEST/builder/"
 cp "$REPO/tools/world-builder/round73/round73e_native.py" "$TEST/builder/"
+cp "$REPO/tools/world-builder/round73/round73f_native.py" "$TEST/builder/"
 for label in populated cleared browser custom quick wilderness mapped; do
   root="$TEST/$label/rootfs"
   mkdir -p "$root"
@@ -135,7 +137,8 @@ for marker in \
  'ROUND 72: browser-exported terrain and native map navigation PASS' \
  'ROUND 73C: native held-map locate, lost-map denial and owner isolation PASS' \
  'ROUND 73D: native guardian-bound virtual chest, dropped-map denial, no rewards PASS' \
- 'ROUND 73E: native mapradius 0-10 and map navigation PASS'; do
+ 'ROUND 73E: native mapradius 0-10 and map navigation PASS' \
+ 'ROUND 73F: native showmap movement, named-go, toggle, radius and suppression PASS'; do
   grep -Fxq "$marker" "$TEST/results.log" || { echo "Missing regression marker: $marker"; exit 1; }
 done
 grep -Fxq 'ROUND 71: validated connected 100-room wilderness batch PASS' "$TEST/regression.log"

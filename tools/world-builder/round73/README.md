@@ -176,3 +176,28 @@ automatic redraw after movement, rewards, or permanent map discovery.
 The C test harness runs without private fixtures. Its actual native Linode
 replay is a separate required gate; only the installer publishes validated
 source, and it must never change production or restart HollowDeep.
+
+
+## Round 73F — native opt-in `showmap` (isolated, not deployed)
+
+`showmap` toggles automatic wilderness mapping after **successful** movement;
+`showmap on`, `showmap off`, `showmap toggle` and `showmap status` explicitly
+control or inspect this setting. Default is **off**. Settings are session-only,
+not part of the legacy character/player serializer. `mapradius 0` suppresses
+map display even when `showmap` is enabled; higher radii use the selected size
+with the same restricted-exit mask and no extra discovery.
+
+The native dispatch delegates to the original 22 directional `move` aliases
+and two `go`/`enter` callbacks and checks that the player's room actually
+changed. It draws at most one map following a successful transition into an
+existing wilderness room, never after ordinary `look`, blocked movement,
+old-world movement or exits from the wilderness. Missing or malformed
+`wilderness.map` fails silently for auto-redraw and stays fail-closed for the
+explicit `map` command. The original room and exit functions are not changed.
+
+The offline C harness uses the exact Round 73E radius implementation plus
+new toggle, named-go/move, no-op, per-session, mapradius 0 and malformed
+sidecar tests. The Linode native and browser suite must pass **before**
+publication. Treasure-map reveal markers and durable rewards are later
+milestones. Never modify live world files or restart production as part of
+this test package.

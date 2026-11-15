@@ -81,3 +81,22 @@
 - Protected production source/rooms/fixtures/service/executable: UNCHANGED.
 - Private regression log SHA-256: 6622f633c41feadb63d5a96cac0f29d9e436f2219ca701d9947f7977aa43405d (private log not published).
 - Native showmap automatic redraw and treasure reward delivery: NOT IMPLEMENTED.
+
+
+## Round 73F showmap validation gate
+
+- Offline C wrapper and control tests: PASS locally before staging.
+- Actual private 32-bit native directional/named `go`, suppressed map,
+  radius-off and earlier Round 59–73E native/browser regressions: PENDING
+  until executing the guarded Linode installer.
+- Live MUD/website/admin/Discord rollout and persistent rewards: NOT ENABLED.
+
+## Round 73F complete isolated Linode replay
+
+- Parent source commit: bcb4f9e2b34d55231f55f151fd069e12dda01396.
+- Offline native-C command wrappers and behavior harness: PASS.
+- Isolated native 32-bit showmap, directional/named-go, radius, suppression: PASS.
+- Prior native/browser/security regressions from Round 59–73E: PASS.
+- Protected production and prior fixture/service/executable: UNCHANGED.
+- Private regression log SHA-256: b549a965327e2be073f0edb2f0adaa6a7ff4f85395ce1aa8df35119b8818a1eb (log not committed).
+- Treasure reward delivery, automatic site minting and live release: NOT ENABLED.
