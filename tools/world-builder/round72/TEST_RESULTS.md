@@ -22,3 +22,12 @@ The consolidated harness exited successfully with 125 `PASS:` lines in the repla
 A focused Linode replay exported the named Copperreach draft, imported it in a fresh Chromium context, and verified exact plan equality, including terrain, coordinates, landmark and exits. It rejected a zero column without changing the imported plan. The native game loaded the ZIP exported from the imported draft and passed map, ANSI, and travel checks.
 
 - Re-imported draft ZIP SHA-256: `a0c9e5f026ef4a05d07d629128cc6a1abd6e519a3bbb9b55c4f1e6b71b704c30`
+
+## Committed-branch runner reproducibility (2026-11-15T18:16:11Z)
+
+- Tested source parent commit: `251a9f05a4258ada99c5dc71bb66fd89d7804347` (plus the one-line runner ancestry guard repair).
+- Updated test-runner SHA-256: `0e895410cc0f4b8b6512960792364fb32377954e3ce0201d1ce07b5338e6b9e4`.
+- Full disposable Round 72 Linode browser/native regression suite: **PASS**.
+- Production and prior fixture identity/hash verification: **PASS**.
+- No production deployment or restart; private logs remain outside GitHub.
+- This validation documents the source tested before the report-only commit below.

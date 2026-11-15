@@ -22,7 +22,7 @@ export PYTHONDONTWRITEBYTECODE=1
 
 [[ $(id -u) == 0 ]] || { echo 'Must run as root on the isolated Linode checkout'; exit 1; }
 [[ "$REPO" == /root/hollowdeep-dev/round72-*/repo ]] || { echo "Unexpected checkout: $REPO"; exit 1; }
-[[ $(git -C "$REPO" rev-parse HEAD) == "$BASE" ]] || { echo 'Unexpected Git HEAD'; exit 1; }
+git -C "$REPO" merge-base --is-ancestor "$BASE" HEAD || { echo 'Unexpected Git ancestry'; exit 1; }
 [[ $(systemctl is-active hollowdeep.service) == active ]] || { echo 'Production service not active'; exit 1; }
 for f in "$SOURCE/populated/rootfs/bin/hollowdeep" "$SOURCE/populated/rootfs/rooms/r00014" \
          "$SOURCE/builder/app.py" "$SOURCE/builder/templates" "$RUNNER" \
