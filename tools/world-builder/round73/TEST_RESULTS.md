@@ -63,3 +63,21 @@
 - Private regression log SHA-256: cad995924f4f64b8c2315fbc08e6d6531e3203f9b9c472a649278557cf8a2dbc (log not published).
 - Real loot, respawn reset, party sharing, durable item claim receipts and
   live deployment: NOT IMPLEMENTED.
+
+
+## Round 73E mapradius tests
+
+- Local C harness: 10 PASS cases (radius 0/1/3/10, malformed values,
+  per-player isolation, default map/fog, ANSI, missing/corrupt metadata).
+- Isolated 32-bit Linode native test for `mapradius` and all prior
+  Round 59-73D regressions: PENDING before executing installer.
+- Automatic `showmap`, durable rewards, production rollout: NOT IMPLEMENTED.
+
+## Round 73E complete isolated Linode replay
+
+- Source parent: 6570299e0235c34ce952eb10237724de9ba1df75, plus exactly eleven reviewed source/test/doc files.
+- Offline C mapradius 0-10 tests: PASS.
+- Private 32-bit native command, movement and prior Round 59-73D browser/native suite: PASS.
+- Protected production source/rooms/fixtures/service/executable: UNCHANGED.
+- Private regression log SHA-256: 6622f633c41feadb63d5a96cac0f29d9e436f2219ca701d9947f7977aa43405d (private log not published).
+- Native showmap automatic redraw and treasure reward delivery: NOT IMPLEMENTED.
