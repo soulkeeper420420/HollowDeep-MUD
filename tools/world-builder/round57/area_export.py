@@ -337,6 +337,8 @@ def generate(plan, persist=True, extra_assets=None):
             manifest["template_banks"] = banks
         if "rooms/wilderness.map" in assets:
             manifest["wilderness_map_sha256"] = sha(assets["rooms/wilderness.map"])
+        if "rooms/treasure_sites.json" in assets:
+            manifest["treasure_sites_sha256"] = sha(assets["rooms/treasure_sites.json"])
 
     with io.BytesIO() as stream:
         with zipfile.ZipFile(

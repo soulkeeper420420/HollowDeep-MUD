@@ -78,7 +78,7 @@ TEST=$(mktemp -d /root/hollowdeep-dev/world-forge/round59-XXXXXXXX)
 mkdir -p "$TEST/builder" "$TEST/exports"
 echo "Private regression directory: $TEST"
 cp -a "$SOURCE/builder/." "$TEST/builder/"
-cp "$REPO/tools/world-builder/round57/"{area_export.py,app.py,round55_http.py,round57_http.py,round69_custom.py,test_exit_validation.py,wilderness_map.py} "$TEST/builder/"
+cp "$REPO/tools/world-builder/round57/"{area_export.py,app.py,round55_http.py,round57_http.py,round69_custom.py,test_exit_validation.py,wilderness_map.py,treasure_sites.py} "$TEST/builder/"
 cp "$REPO/tools/world-builder/round71/"{round71_http.py,round71_wilderness.py,round71_private.py} "$TEST/builder/"
 cp "$REPO/tools/world-builder/round72/round72_native.py" "$TEST/builder/"
 for label in populated cleared browser custom quick wilderness mapped; do
@@ -104,6 +104,8 @@ done
   python3 round55_http.py --test
   python3 round71_private.py --test
   PYTHONPATH=. python3 "$REPO/tools/world-builder/round72/test_region.py"
+  PYTHONPATH=. python3 "$REPO/tools/world-builder/round73/test_treasure.py"
+  echo 'ROUND 73: treasure blueprint and claim unit tests PASS'
 ) | tee "$TEST/regression.log"
 node --check "$REPO/tools/world-builder/round71/round71_browser.cjs"
 
@@ -130,6 +132,7 @@ done
 grep -Fxq 'ROUND 71: validated connected 100-room wilderness batch PASS' "$TEST/regression.log"
 grep -Fxq 'ROUND 71: collision, unsafe input and atomic rejection PASS' "$TEST/regression.log"
 grep -Fxq 'ROUND 72: deterministic terrain, connected restrictions and metadata validation PASS' "$TEST/regression.log"
+grep -Fxq 'ROUND 73: treasure blueprint and claim unit tests PASS' "$TEST/regression.log"
 check_production || { echo 'Protected production changed; publication blocked'; exit 1; }
 
 echo 'ROUND 72: private regression suite PASS'
