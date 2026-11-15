@@ -32,3 +32,13 @@
 - Private regression log SHA-256: `fabbc1fe2b7bc6617071f2ee499900101bea6eaa69dec992bb0479aad933ee31` (log not published).
 - Native C `locate`, real map pickup, guardian/chest interception and durable
   item delivery: **NOT IMPLEMENTED / NOT TESTED**.
+
+## Round 73C — read-only native locate candidate (private Linode replay)
+
+- Tested Round 73B parent source: `355fda16ce2ea52d629cd3fd2840b6a78ff5b3e2`, plus exactly six reviewed Round 73C source/docs file changes.
+- Native C 32-bit build, actual in-game pickup/locate/drop/owner-isolation, Round 59–72 browser and native suite, Round 73B 11 tests: **PASS**.
+- Protected production/fixture hashes and running service identity: **UNCHANGED**.
+- Private regression SHA-256: `979a0ca4f0b325fb603d5daeec489e9c4c949a456ebbac67a76f033862ad3b4a`. Private log not committed.
+- This validates only a read-only clue command with a trusted fixture sidecar;
+  unique map minting, guardian combat, chest pickup locks, enchanted item
+  delivery and crash-safe native receipts: **NOT IMPLEMENTED OR ENABLED**.

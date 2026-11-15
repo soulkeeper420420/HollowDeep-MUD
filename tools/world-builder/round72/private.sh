@@ -69,6 +69,7 @@ echo '=== ROUND 72: DISPOSABLE WILDERNESS REGRESSION ==='
 BUILD_PARENT=$(mktemp -d /root/hollowdeep-dev/round72-build-XXXXXXXX)
 BUILD="$BUILD_PARENT/round72-native-build"
 python3 "$REPO/tools/world-builder/round72/patch_native.py" "$ENGINE_SOURCE" "$BUILD"
+python3 "$REPO/tools/world-builder/round73/patch_native_locate.py" "$BUILD"
 make -C "$BUILD" clean >"$BUILD_PARENT/build.log" 2>&1
 make -C "$BUILD" -j2 >>"$BUILD_PARENT/build.log" 2>&1 || { tail -60 "$BUILD_PARENT/build.log"; exit 1; }
 ENGINE="$BUILD/frp.new"
@@ -81,6 +82,7 @@ cp -a "$SOURCE/builder/." "$TEST/builder/"
 cp "$REPO/tools/world-builder/round57/"{area_export.py,app.py,round55_http.py,round57_http.py,round69_custom.py,test_exit_validation.py,wilderness_map.py,treasure_sites.py} "$TEST/builder/"
 cp "$REPO/tools/world-builder/round71/"{round71_http.py,round71_wilderness.py,round71_private.py} "$TEST/builder/"
 cp "$REPO/tools/world-builder/round72/round72_native.py" "$TEST/builder/"
+cp "$REPO/tools/world-builder/round73/round73c_native.py" "$TEST/builder/"
 for label in populated cleared browser custom quick wilderness mapped; do
   root="$TEST/$label/rootfs"
   mkdir -p "$root"
@@ -126,7 +128,8 @@ for marker in \
  'ROUND 71: browser native ZIP export and existing validation PASS' \
  'ROUND 71: browser-generated 4x4 wilderness ZIP navigable in isolated native gameplay PASS' \
  'ROUND 72: seeded terrain, map preview, landmark and browser ZIP PASS' \
- 'ROUND 72: browser-exported terrain and native map navigation PASS'; do
+ 'ROUND 72: browser-exported terrain and native map navigation PASS' \
+ 'ROUND 73C: native held-map locate, lost-map denial and owner isolation PASS'; do
   grep -Fxq "$marker" "$TEST/results.log" || { echo "Missing regression marker: $marker"; exit 1; }
 done
 grep -Fxq 'ROUND 71: validated connected 100-room wilderness batch PASS' "$TEST/regression.log"

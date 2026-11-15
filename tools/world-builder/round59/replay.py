@@ -382,6 +382,8 @@ finally:
 print("ROUND 71: browser-generated 4x4 wilderness ZIP navigable in isolated native gameplay PASS",flush=True)
 from round72_native import replay as replay_map
 replay_map(stage, scope, check)
+from round73c_native import replay as replay_locate
+replay_locate(stage, scope, check)
 round69_custom.native_gameplay(stage, scope, check)
 print("ROUND 69: native draft room, custom templates and named exit gameplay PASS", flush=True)
 print("ROUND 59: PASS", flush=True)

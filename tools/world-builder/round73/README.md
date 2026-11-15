@@ -99,3 +99,24 @@ items. The **actual in-game `locate` command, treasure-map item serialization,
 combat, chest pickup locks, and player-save delivery are pending native C
 integration**. Do not deploy these prototype rules as player-accessible
 services or mistake tests for end-to-end native gameplay.
+
+
+## Round 73C — Native `locate` (read-only private gameplay candidate)
+
+The disposable engine now adds `locate` / `locate <map ID>`. This command
+requires a physically carried native object with the **exact** name
+`Treasure Map [<map ID>]` and a trusted, owner-bound entry in the room-side
+`treasure_locate.map` clue file. A dropped or unheld map gives no clue. Multiple
+held maps require selection, and a map bound to another owner cannot be read.
+Clues are never derived from player-supplied coordinates or client requests.
+
+This remains a **restricted prototype**: the private native replay creates a
+one-off map object and matching clue sidecar to verify actual game commands.
+A production-safe issuer needs to mint unique, nonclonable map identities
+and maintain their binding to the private claim ledger. No guardian defeat,
+chest unlock, gold, gear, enchantment or reward action is added in Round 73C.
+The native `get`, `take`, `open`, combat-death and player-save integration gates
+remain pending, and the only supported execution target is a disposable test
+world. The sidecar must be created by trusted server code, not the World
+Builder draft or a player-submitted map ID. The native player/room ABI is
+unchanged by this command.
