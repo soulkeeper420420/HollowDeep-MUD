@@ -7,7 +7,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from claim_ledger import TreasureLedger, TreasureError, GuardiansRemain
+from claim_ledger import TreasureLedger, TreasureError, GuardiansRemain, MapNotHeld
 from treasure_sites import assets, validate
 
 
@@ -73,15 +73,15 @@ class ClaimTests(unittest.TestCase):
                          "enchantment": {"effect": "frost_resist", "power": 17}},
                         {"kind": "gold", "amount": 850}]
         self.ledger.register("inst.0001", "map.0001", "player.01", 10002,
-                             ["guardian.1", "guardian.2"], self.rewards)
+                             ["guardian.1", "guardian.2"], self.rewards, clue="Beyond the cairn, seek the eastern shadow.")
 
     def test_early_claim_denied_and_owner_bound(self):
-        expected_error(lambda: self.ledger.claim("inst.0001", "player.01"), "guardians")
+        expected_error(lambda: self.ledger.claim("inst.0001", "player.01", ["map.0001"]), "guardians")
         self.assertFalse(self.ledger.record_verified_kill("inst.0001", "guardian.1", "event.1", "player.01"))
-        expected_error(lambda: self.ledger.claim("inst.0001", "player.02"), "another player")
-        expected_error(lambda: self.ledger.claim("inst.0001", "player.01"), "guardians")
+        expected_error(lambda: self.ledger.claim("inst.0001", "player.02", ["map.0001"]), "another player")
+        expected_error(lambda: self.ledger.claim("inst.0001", "player.01", ["map.0001"]), "guardians")
         self.assertTrue(self.ledger.record_verified_kill("inst.0001", "guardian.2", "event.2", "player.01"))
-        self.assertEqual(self.ledger.claim("inst.0001", "player.01")["rewards"], self.rewards)
+        self.assertEqual(self.ledger.claim("inst.0001", "player.01", ["map.0001"])["rewards"], self.rewards)
 
     def test_kill_replay_wrong_instance_and_duplicate_map(self):
         self.assertFalse(self.ledger.record_verified_kill("inst.0001", "guardian.1", "event.1", "player.01"))
@@ -92,7 +92,7 @@ class ClaimTests(unittest.TestCase):
         expected_error(lambda: self.ledger.register("inst.0002", "map.0001", "player.01", 10002,
                                                      ["guardian.3"], self.rewards), "already been activated")
         self.assertEqual(self.ledger.register("inst.0001", "map.0001", "player.01", 10002,
-                                               ["guardian.1", "guardian.2"], self.rewards), "inst.0001")
+                                               ["guardian.1", "guardian.2"], self.rewards, clue="Beyond the cairn, seek the eastern shadow."), "inst.0001")
         expected_error(lambda: self.ledger.register("inst.0001", "map.0001", "player.01", 10002,
                                                      ["guardian.1"], self.rewards), "reused")
 
@@ -100,7 +100,7 @@ class ClaimTests(unittest.TestCase):
         for index in (1, 2):
             self.ledger.record_verified_kill("inst.0001", f"guardian.{index}", f"event.{index}", "player.01")
         with ThreadPoolExecutor(max_workers=8) as workers:
-            claims = list(workers.map(lambda _: self.ledger.claim("inst.0001", "player.01"), range(20)))
+            claims = list(workers.map(lambda _: self.ledger.claim("inst.0001", "player.01", ["map.0001"]), range(20)))
         self.assertEqual(len({row["claim_id"] for row in claims}), 1)
         self.assertEqual({row["delivery_state"] for row in claims}, {"pending"})
         self.assertEqual(claims[0]["rewards"], self.rewards)
@@ -108,15 +108,64 @@ class ClaimTests(unittest.TestCase):
     def test_restart_pending_and_ack_idempotency(self):
         for index in (1, 2):
             self.ledger.record_verified_kill("inst.0001", f"guardian.{index}", f"event.{index}", "player.01")
-        pending = self.ledger.claim("inst.0001", "player.01")
+        pending = self.ledger.claim("inst.0001", "player.01", ["map.0001"])
         resumed = TreasureLedger(self.db_path)
-        self.assertEqual(resumed.claim("inst.0001", "player.01"), pending)
+        self.assertEqual(resumed.claim("inst.0001", "player.01", ["map.0001"]), pending)
         delivered = resumed.acknowledge_native_delivery(pending["claim_id"], "player.01", "native-receipt.01")
         self.assertEqual(delivered["delivery_state"], "delivered")
-        self.assertEqual(self.ledger.claim("inst.0001", "player.01"), delivered)
+        self.assertEqual(self.ledger.claim("inst.0001", "player.01", ["map.0001"]), delivered)
         self.assertEqual(resumed.acknowledge_native_delivery(pending["claim_id"], "player.01", "native-receipt.01"), delivered)
         expected_error(lambda: resumed.acknowledge_native_delivery(pending["claim_id"], "player.01", "native-receipt.02"), "conflicting receipt")
         expected_error(lambda: resumed.acknowledge_native_delivery(pending["claim_id"], "player.02", "native-receipt.01"), "unknown claim")
+
+    def test_locate_requires_physical_map_and_owner(self):
+        clue = "Beyond the cairn, seek the eastern shadow."
+        expected_error(lambda: self.ledger.locate("player.01", []), "carry")
+        expected_error(lambda: self.ledger.locate("player.01", ["map.other"]), "carry")
+        expected_error(lambda: self.ledger.locate("player.02", ["map.0001"]), "carry")
+        expected_error(lambda: self.ledger.locate("player.01", ["map.other"], "map.0001"), "matching")
+        info = self.ledger.locate("player.01", ["map.0001"])
+        self.assertEqual(info, {"map_id": "map.0001", "clue": clue})
+        self.assertEqual(self.ledger.locate("player.01", ["map.0001"], "map.0001"), info)
+        self.assertNotIn("room_id", info)
+        self.assertNotIn("coordinates", info)
+        expected_error(lambda: self.ledger.locate("player.01", []), "carry")
+        self.assertEqual(self.ledger.locate("player.01", ["map.0001"]), info)
+
+    def test_claim_denied_after_dropping_map_even_with_guardians_defeated(self):
+        for index in (1, 2):
+            self.ledger.record_verified_kill("inst.0001", f"guardian.{index}", f"event.{index}", "player.01")
+        expected_error(lambda: self.ledger.claim("inst.0001", "player.01"), "trusted")
+        expected_error(lambda: self.ledger.claim("inst.0001", "player.01", []), "matching")
+        expected_error(lambda: self.ledger.claim("inst.0001", "player.01", ["map.other"]), "matching")
+        claim = self.ledger.claim("inst.0001", "player.01", ["map.0001"])
+        expected_error(lambda: self.ledger.claim("inst.0001", "player.01", []), "matching")
+        self.assertEqual(self.ledger.claim("inst.0001", "player.01", ["map.0001"]), claim)
+
+    def test_locate_requires_map_selection_if_multiple_are_carried(self):
+        self.ledger.register("inst.0002", "map.0002", "player.01", 10003,
+                             ["guardian.3"], self.rewards, clue="Follow the river bend.")
+        expected_error(lambda: self.ledger.locate("player.01", ["map.0001", "map.0002"]), "multiple")
+        self.assertEqual(self.ledger.locate("player.01", ["map.0002", "map.0001"], "map.0002"),
+                         {"map_id": "map.0002", "clue": "Follow the river bend."})
+        expected_error(lambda: self.ledger.locate("player.01", "map.0001"), "snapshot")
+        expected_error(lambda: self.ledger.locate("player.01", ["../map"]), "carried map ID")
+        expected_error(lambda: self.ledger.locate("player.01", ["map.0001"] * 101), "snapshot")
+
+    def test_clue_registration_is_immutable_and_safe(self):
+        expected_error(lambda: self.ledger.register("inst.0001", "map.0001", "player.01", 10002,
+                            ["guardian.1", "guardian.2"], self.rewards, clue="Different clue."),
+                       "clue changed")
+        for bad in ("Bad\nclue", "<script>", "a" * 181, " leading space", "", None):
+            if bad is None:
+                # Existing activated clue cannot be erased by retry.
+                expected_error(lambda: self.ledger.register("inst.0001", "map.0001", "player.01", 10002,
+                                ["guardian.1", "guardian.2"], self.rewards), "clue changed")
+            else:
+                expected_error(lambda: self.ledger.register("inst.0003", "map.0003", "player.01", 10004,
+                                ["guardian.3"], self.rewards, clue=bad), "clue")
+        resumed = TreasureLedger(self.db_path)
+        self.assertEqual(resumed.locate("player.01", ["map.0001"])["map_id"], "map.0001")
 
     def test_invalid_reward_snapshot_rejected(self):
         bad_rewards = [

@@ -57,3 +57,45 @@ Round 73B: inspect native C combat/get/open/save code; implement actual instance
 
 **HollowDeep development — Treasure hunts (Round 73 foundation)**
 We're developing original treasure maps for the wilderness: follow location clues, challenge guardian encounters, and eventually unlock chests containing gold, materials and enchanted gear. The private foundation now validates treasure sites and tests durable one-time claim records. Native guardian combat, chest interaction and actual reward delivery are still being built and **are not live**. Production remains unchanged.
+
+## Round 73B design addition — map possession and `locate`
+
+**Requirement:** No player may see treasure-map clues, activate a hidden cache,
+or claim a guardian-unlocked chest merely by knowing its wilderness coordinates.
+The character **must actually carry the specific treasure-map item instance**.
+Possession is checked again for every `locate` and chest claim request; dropping
+or losing the map removes those permissions immediately. The current prototype
+also binds activated maps to their registered owner; trading/party access needs
+its own explicit trusted transfer rules before it is enabled.
+
+Planned native command behavior (not deployed or connected to C yet):
+
+```text
+> locate
+You must carry an activated treasure map to locate its clues.
+> get treasure map
+You pick up the Copperreach treasure map.
+> locate
+The markings suggest: Beyond the cairn, seek the eastern shadow.
+> locate Copperreach
+The markings suggest: Beyond the cairn, seek the eastern shadow.
+> drop treasure map
+> locate
+You must carry an activated treasure map to locate its clues.
+```
+
+When two or more activated maps are held, `locate` requires a specific map
+selection (`locate <map name>` in the native parser; the ledger uses the map instance ID). A map instance must resolve to its own encounter
+ID; the clue is stored immutably at registration, not supplied by the client.
+The authoritative inventory check must come from the **native server's actual
+player inventory**, not player-entered map IDs, a website form, command text,
+or an untrusted RPC. The clue API purposely does not reveal hidden room IDs or
+exact treasure coordinates, only the authored clue. Ordinary room exploration
+alone must not unlock the chest. `claim()` now fails closed on missing inventory
+proof, even if all guardians are defeated and even for claim replays.
+
+The Python ledger implements and unit-tests these rules without awarding any
+items. The **actual in-game `locate` command, treasure-map item serialization,
+combat, chest pickup locks, and player-save delivery are pending native C
+integration**. Do not deploy these prototype rules as player-accessible
+services or mistake tests for end-to-end native gameplay.

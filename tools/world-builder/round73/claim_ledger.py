@@ -15,6 +15,8 @@ import sqlite3
 
 TOKEN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{2,95}\Z")
 MAX_REWARD = 8
+CLUE = re.compile(r"[A-Za-z0-9 .,;:'!?()/-]{1,180}\Z")
+MAX_CARRIED_MAPS = 100
 
 
 class TreasureError(ValueError):
@@ -25,10 +27,34 @@ class GuardiansRemain(TreasureError):
     pass
 
 
+class MapNotHeld(TreasureError):
+    pass
+
+
 def check_token(value, label):
     if type(value) is not str or not TOKEN.fullmatch(value):
         raise TreasureError("Invalid " + label)
     return value
+
+
+def checked_inventory_map_ids(carried_map_ids):
+    """Accept only IDs reported by a *trusted native inventory traversal*.
+
+    Never populate this parameter from player-provided command arguments or a
+    browser JSON request. Map instance IDs must be unique in native storage.
+    """
+    if type(carried_map_ids) not in (list, tuple, set, frozenset) or \
+            len(carried_map_ids) > MAX_CARRIED_MAPS:
+        raise TreasureError("Invalid trusted carried-map snapshot")
+    for item in carried_map_ids:
+        check_token(item, "carried map ID")
+    return frozenset(carried_map_ids)
+
+
+def canonical_clue(clue):
+    if type(clue) is not str or not CLUE.fullmatch(clue) or clue != clue.strip():
+        raise TreasureError("Invalid treasure clue")
+    return clue
 
 
 def canonical_reward(rewards):
@@ -74,6 +100,10 @@ class TreasureLedger:
                   owner_id TEXT NOT NULL, room_id INTEGER NOT NULL,
                   guardians TEXT NOT NULL, reward_json TEXT NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS map_clues (
+                  instance_id TEXT PRIMARY KEY, clue TEXT NOT NULL,
+                  FOREIGN KEY(instance_id) REFERENCES encounters(instance_id)
+                );
                 CREATE TABLE IF NOT EXISTS defeats (
                   instance_id TEXT NOT NULL, guardian_id TEXT NOT NULL,
                   combat_event_id TEXT NOT NULL UNIQUE, killer_id TEXT NOT NULL,
@@ -109,7 +139,7 @@ class TreasureLedger:
         finally:
             db.close()
 
-    def register(self, instance_id, map_id, owner_id, room_id, guardian_ids, rewards):
+    def register(self, instance_id, map_id, owner_id, room_id, guardian_ids, rewards, *, clue=None):
         for value, label in ((instance_id, "instance ID"), (map_id, "map ID"), (owner_id, "owner ID")):
             check_token(value, label)
         if type(room_id) is not int or not 10000 <= room_id < 16000:
@@ -120,6 +150,8 @@ class TreasureLedger:
             check_token(guardian, "guardian instance ID")
         if len(set(guardian_ids)) != len(guardian_ids):
             raise TreasureError("Duplicate guardian instance")
+        if clue is not None:
+            clue = canonical_clue(clue)
         guard = json.dumps(guardian_ids, separators=(",", ":"))
         reward = canonical_reward(rewards)
         desired = (instance_id, map_id, owner_id, room_id, guard, reward)
@@ -128,12 +160,46 @@ class TreasureLedger:
             if existing is not None:
                 if existing != desired:
                     raise TreasureError("Encounter ID reused with different contents")
+                recorded = db.execute("SELECT clue FROM map_clues WHERE instance_id=?", (instance_id,)).fetchone()
+                if (recorded is not None and recorded[0] != clue) or (recorded is None and clue is not None):
+                    raise TreasureError("Encounter clue changed after activation")
                 return instance_id
             try:
                 db.execute("INSERT INTO encounters VALUES (?,?,?,?,?,?)", desired)
             except sqlite3.IntegrityError as exc:
                 raise TreasureError("Treasure map has already been activated") from exc
+            if clue is not None:
+                db.execute("INSERT INTO map_clues(instance_id,clue) VALUES(?,?)", (instance_id, clue))
         return instance_id
+
+    def locate(self, owner_id, carried_map_ids, map_id=None):
+        """Return a clue only for an activated map the character carries.
+
+        Native `locate [map ID]` must supply the carried_map_ids by walking the
+        authenticated player's real inventory immediately before this call.
+        It must NEVER accept player-submitted IDs as inventory proof. This
+        implementation deliberately reveals no destination room or coordinates.
+        """
+        check_token(owner_id, "owner ID")
+        held = checked_inventory_map_ids(carried_map_ids)
+        if map_id is not None:
+            check_token(map_id, "map ID")
+            if map_id not in held:
+                raise MapNotHeld("You must carry the matching treasure map to locate its clues")
+        with self.transaction() as db:
+            rows = db.execute(
+                "SELECT e.map_id,c.clue FROM encounters e "
+                "JOIN map_clues c ON c.instance_id=e.instance_id "
+                "WHERE e.owner_id=?", (owner_id,)
+            ).fetchall()
+            matches = [(mid, clue) for mid, clue in rows if mid in held and
+                       (map_id is None or mid == map_id)]
+            if not matches:
+                raise MapNotHeld("You must carry an activated treasure map to locate its clues")
+            if len(matches) != 1:
+                raise TreasureError("Multiple treasure maps: use locate <map ID>")
+            mid, clue = matches[0]
+            return {"map_id": mid, "clue": clue}
 
     def record_verified_kill(self, instance_id, guardian_id, combat_event_id, killer_id):
         """Only a trusted native-combat integration may invoke this method."""
@@ -168,16 +234,24 @@ class TreasureLedger:
                 "rewards": json.loads(row[3]), "delivery_state": row[4],
                 "delivery_receipt": row[5]}
 
-    def claim(self, instance_id, owner_id):
+    def claim(self, instance_id, owner_id, carried_map_ids=None):
+        """No claim or claim replay is returned without current map possession.
+
+        Native implementation must pass a fresh, trusted inventory snapshot.
+        Missing snapshots fail closed, including for previously created claims.
+        """
         check_token(instance_id, "instance ID")
         check_token(owner_id, "owner ID")
+        held = checked_inventory_map_ids(carried_map_ids)
         with self.transaction() as db:
-            encounter = db.execute("SELECT owner_id, guardians, reward_json FROM encounters WHERE instance_id=?",
+            encounter = db.execute("SELECT owner_id, guardians, reward_json, map_id FROM encounters WHERE instance_id=?",
                                    (instance_id,)).fetchone()
             if encounter is None:
                 raise TreasureError("Unknown encounter")
             if encounter[0] != owner_id:
                 raise TreasureError("Treasure map belongs to another player")
+            if encounter[3] not in held:
+                raise MapNotHeld("You must carry the matching treasure map to claim this chest")
             row = db.execute("SELECT * FROM claims WHERE instance_id=?", (instance_id,)).fetchone()
             if row:
                 return self._claim_row(row)
