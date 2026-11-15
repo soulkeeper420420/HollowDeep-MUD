@@ -158,3 +158,20 @@ cmd *cmnd;
     print(ply_ptr->fd, "The treasure map reveals: %s\n", clue);
     return 0;
 }
+
+/* Round 73D: one exact physical map, registered to this player, before
+ * the native virtual chest can be inspected. No client-provided inventory
+ * snapshot is trusted here. */
+int hd_treasure_has_map(creature *player, const char *map_id)
+{
+    otag *tag;
+    char candidate[HD_ID_SIZE], clue[HD_CLUE_SIZE];
+    int matches = 0, scanned = 0;
+    if (!player || !map_id || !hd_token(map_id, HD_ID_SIZE - 1)) return 0;
+    for (tag = player->first_obj; tag; tag = tag->next_tag) {
+        if (++scanned > 4096) return 0;
+        if (!hd_map_id(tag->obj, candidate) || strcmp(candidate, map_id)) continue;
+        if (++matches > 1) return 0;
+    }
+    return matches == 1 && hd_read_clue(player->name, map_id, clue);
+}
