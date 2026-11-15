@@ -120,3 +120,38 @@ remain pending, and the only supported execution target is a disposable test
 world. The sidecar must be created by trusted server code, not the World
 Builder draft or a player-submitted map ID. The native player/room ABI is
 unchanged by this command.
+
+
+## Round 73D — isolated guardian-locked virtual chest (not live)
+
+A separate native command handler intercepts `open chest` only in wilderness
+rooms with a private, server-authored `rooms/treasure_guardians.map` sidecar.
+The chest is **virtual**, not a room object: `get chest`, `take chest`,
+`get all` and room container paths cannot pick it up. The exact map object
+must be carried, and the owner's immutable clue registration must match.
+On the first `open chest`, the native engine binds the existing living guardian
+**creature pointers** in that room; a subsequent trusted `die()` callback
+credits only a matching pointer killed by the same room's map owner. Copies of
+the same template, other players' kills and repeated `open` cannot unlock or
+mint treasure. Opening after all verified kills prints an inspection message
+only—**no items, gold, enchanted loot, or claim receipts are granted**.
+
+Sidecar format (private trust boundary; not sourced from players):
+
+```
+HDGUARD1
+10001	map.0001	Round 73 Treasure Guardian
+```
+
+A site can name one to five *distinct native monster names*. This interim
+interface requires a monster to be present when the owner first inspects the
+chest. Guardian binding is memory-only, intentionally resets locked on restart,
+and does not implement respawn retries or party sharing. Before production,
+replace these prototype limitations with durable, genuinely instanced fights
+and native claim-ID receipts, native inventory saves and crash recovery.
+
+This does **not** deploy any live chest; the map clue and guardian sidecars in
+the replay are trusted fixture-only assets. The general World Builder
+`treasure_sites.json` remains inert; production enabling requires a reviewed
+site-instantiation/export/validation workflow that will not accept player
+supplied guardians or map identities.

@@ -42,3 +42,24 @@
 - This validates only a read-only clue command with a trusted fixture sidecar;
   unique map minting, guardian combat, chest pickup locks, enchanted item
   delivery and crash-safe native receipts: **NOT IMPLEMENTED OR ENABLED**.
+
+
+## Round 73D — virtual chest isolated native gameplay
+
+- Offline C harness: exact guardian pointer matching, actual-owner death,
+  wrong-owner death, duplicate-open denial, lost-map denial and malformed
+  sidecar rejection: **PASS before Linode native replay**.
+- Linode 32-bit native combat and full browser/native regression: **PENDING**.
+- No native treasure loot; no production deployment or service restart.
+
+## Round 73D isolated Linode gameplay validation
+
+- Tested Round 73C source: 3fedae0d781e1e49a7cd5ab9702558b1ba969ae2, plus exactly eight reviewed paths.
+- Offline C security harness and native 32-bit build: PASS.
+- Actual native guardian defeat, chest lock/unlock, physical map requirement,
+  and repeated-open without treasure rewards: PASS.
+- Full Round 59-73C native/browser regressions: PASS.
+- Production source, rooms, fixtures, executable/service identity: UNCHANGED.
+- Private regression log SHA-256: cad995924f4f64b8c2315fbc08e6d6531e3203f9b9c472a649278557cf8a2dbc (log not published).
+- Real loot, respawn reset, party sharing, durable item claim receipts and
+  live deployment: NOT IMPLEMENTED.
