@@ -155,3 +155,24 @@ the replay are trusted fixture-only assets. The general World Builder
 `treasure_sites.json` remains inert; production enabling requires a reviewed
 site-instantiation/export/validation workflow that will not accept player
 supplied guardians or map identities.
+
+
+## Round 73E — native `mapradius` (isolated, not live)
+
+A new native command, `mapradius [0-10]`, sets the radius of the existing
+wilderness `map` command. It defaults to 3 (7x7), supports radius 1 (3x3)
+through radius 10 (21x21), and `mapradius 0` turns rendering off. The command
+with no argument reports the active radius; invalid input is rejected without
+changing the setting. Player settings are **session-only** and are kept outside
+the legacy serialized creature and player save formats. Server restarts reset
+the radius to 3; no persistent character preference is implied.
+
+The map still respects the Round 72 'unscouted' mask; a larger radius does not
+reveal secret or invisible exits, hidden objects, treasure-site locations,
+or unvisited map locations. Carrying a treasure map is still required for
+`locate` and chest interaction. This milestone does not add `showmap`,
+automatic redraw after movement, rewards, or permanent map discovery.
+
+The C test harness runs without private fixtures. Its actual native Linode
+replay is a separate required gate; only the installer publishes validated
+source, and it must never change production or restart HollowDeep.

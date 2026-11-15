@@ -386,6 +386,8 @@ from round73c_native import replay as replay_locate
 replay_locate(stage, scope, check)
 from round73d_native import replay as replay_chest
 replay_chest(stage, scope, check)
+from round73e_native import replay as replay_radius
+replay_radius(stage, scope, check)
 round69_custom.native_gameplay(stage, scope, check)
 print("ROUND 69: native draft room, custom templates and named exit gameplay PASS", flush=True)
 print("ROUND 59: PASS", flush=True)
