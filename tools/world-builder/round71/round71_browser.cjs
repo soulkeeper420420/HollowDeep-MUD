@@ -71,6 +71,27 @@ async function main(){
     await fs.writeFile(path.join(output,'round71-browser.json'),JSON.stringify({plan:draft}));
     assert.equal(errors.length,0,errors.join('\n'));
     console.log('ROUND 71: browser native ZIP export and existing validation PASS');
+    await click('create'); await status('Area created');
+    await field('round71Prefix').fill('Copperreach');
+    await field('wildernessSeed').fill('42');
+    await click('round71MakeGrid'); await status('Wilderness region created: 16 rooms');
+    await field('wildernessPreview').locator('summary').click();
+    assert.match(await field('wildernessGrid').innerText(), /Copperreach · column 1, row 1[\s\S]*@/);
+    await field('wildernessLandmark').fill('Copper Cairn');
+    await field('wildernessTerrain').selectOption('ruins');
+    await click('saveWilderness'); await status('Wilderness metadata validated');
+    assert.match(await field('wildernessGrid').innerText(), /Landmark: Copper Cairn/);
+    await click('export');
+    await link.waitFor();
+    await page.waitForFunction(previous => {
+      const current = document.querySelector('#download a')?.getAttribute('href');
+      return current && current !== previous;
+    }, href);
+    const mapped = await page.request.get(url + await link.getAttribute('href'));
+    assert.equal(mapped.status(),200);
+    await fs.writeFile(path.join(output,'round72-browser.zip'),await mapped.body());
+    assert.equal(errors.length,0,errors.join('\n'));
+    console.log('ROUND 72: seeded terrain, map preview, landmark and browser ZIP PASS');
   } finally { await browser.close(); }
 }
 main().catch(error=>{console.error(error);process.exit(1)});

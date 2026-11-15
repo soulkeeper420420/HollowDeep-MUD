@@ -101,6 +101,8 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
  <input id="round71Columns" type="number" min="2" max="10" value="4">
  <label for="round71Prefix">Region name</label>
  <input id="round71Prefix" maxlength="31" value="HollowDeep Wilds">
+ <label for="wildernessSeed">Terrain seed (optional)</label>
+ <input id="wildernessSeed" type="number" min="0" max="2147483647" placeholder="Example: 42">
  <label for="round71Direction">Exit from anchor</label>
  <select id="round71Direction"><option>up</option><option>down</option></select>
  <button class="primary" id="round71MakeGrid" type="button">Create Connected Wilderness</button>
@@ -143,6 +145,16 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
  No pending plan edits
 </div>
 <h3>Room Connections</h3>
+<details id="wildernessPreview" hidden><summary>Wilderness map and terrain</summary>
+ <pre id="wildernessGrid"></pre>
+ <p>@ selected · F forest · . plains · ^ mountain · S swamp · ~ river · = road · # ruins</p>
+ <label for="wildernessTerrain">Terrain</label>
+ <select id="wildernessTerrain"><option>forest</option><option>plains</option><option>mountain</option>
+  <option>swamp</option><option>river</option><option>road</option><option>ruins</option></select>
+ <label for="wildernessLandmark">Landmark</label>
+ <input id="wildernessLandmark" maxlength="40">
+ <button id="saveWilderness">Apply terrain and landmark</button>
+</details>
 <div id="exits"></div>
 <details id="areaAudit"><summary>Area connectivity audit</summary>
  <p id="auditSummary" role="status">Load an area to audit connections.</p>
@@ -723,10 +735,42 @@ $("round71MakeGrid").onclick=()=>run(async()=>{
  const candidate=await api("/api/wilderness-grid",{
   plan,anchor:integer($("round71Anchor").value),first_id:first,
   rows,columns,direction:$("round71Direction").value,
-  prefix:$("round71Prefix").value.trim()
+  prefix:$("round71Prefix").value.trim(),
+  ...($("wildernessSeed").value===""?{}:{seed:integer($("wildernessSeed").value)})
  });
  plan=candidate;selected=first;
  render();status("Wilderness region created: "+(rows*columns)+" rooms");
+});
+
+const terrainSymbols={forest:"F",plains:".",mountain:"^",swamp:"S",river:"~",road:"=",ruins:"#"};
+function refreshWilderness(){
+ const tile=plan?.rooms.find(room=>room.room_id===selected)?.wilderness;
+ $("wildernessPreview").hidden=!tile;
+ if(!tile)return;
+ const region=plan.rooms.filter(room=>room.wilderness?.region===tile.region);
+ const map=Array.from({length:Math.max(...region.map(room=>room.wilderness.y))},
+  ()=>Array(Math.max(...region.map(room=>room.wilderness.x))).fill(" "));
+ for(const room of region){
+  const {x,y,terrain}=room.wilderness;
+  map[y-1][x-1]=room.room_id===selected?"@":terrainSymbols[terrain];
+ }
+ $("wildernessGrid").textContent=tile.region+" · column "+tile.x+", row "+tile.y+"\n"+
+  map.map(row=>row.join(" ")).join("\n")+
+  (tile.landmark?"\nLandmark: "+tile.landmark:"");
+ $("wildernessTerrain").value=tile.terrain;
+ $("wildernessLandmark").value=tile.landmark;
+}
+$("saveWilderness").onclick=()=>run(async()=>{
+ if(!round64ConfirmNavigation())return;
+ const candidate=structuredClone(plan);
+ const tile=candidate.rooms.find(room=>room.room_id===selected)?.wilderness;
+ if(!tile)throw Error("Select a mapped wilderness room");
+ tile.terrain=$("wildernessTerrain").value;
+ tile.landmark=$("wildernessLandmark").value.trim();
+ await api("/api/validate",candidate);
+ plan=candidate;
+ render();
+ status("Wilderness metadata validated");
 });
 
 $("addNamedLink").onclick=()=>run(async()=>{
@@ -1069,7 +1113,7 @@ function round66Refresh(){
   "No area loaded";
 }
 const round66PreviousRender=render;
-render=function(){round66PreviousRender();round66Refresh();refreshAudit();
+render=function(){round66PreviousRender();round66Refresh();refreshAudit();refreshWilderness();
  const selectedTemplate=$("template").value;
  catalogOptions();
  if(Array.from($("template").options).some(option=>option.value===selectedTemplate))

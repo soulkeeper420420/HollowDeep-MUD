@@ -6,6 +6,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+import wilderness_map
 from http.server import ThreadingHTTPServer
 
 ROOT = Path(__file__).resolve().parent
@@ -144,7 +145,8 @@ def custom_banks(plan):
 
 
 def generate(plan, persist=True):
-    return generate_original(plan, persist=persist, extra_assets=lambda value: custom_banks(value)[1])
+    return generate_original(plan, persist=persist,
+                             extra_assets=lambda value: custom_banks(value)[1] | wilderness_map.assets(value))
 
 
 def existing(data, table=ABI["table"]):
@@ -189,6 +191,7 @@ def placements(value, templates=TEMPLATES):
 
 def clean(plan):
     rooms = clean_original(plan)
+    wilderness_map.tiles(plan)
     custom, _ = custom_banks(plan)
     for entry in plan["rooms"]:
         if "monsters" in entry:
