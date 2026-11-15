@@ -1,6 +1,7 @@
 import hashlib
 import importlib.util
 import io
+import os
 import json
 import re
 import sqlite3
@@ -42,6 +43,10 @@ PAIRS = {
     "down": "up"
 }
 LOCK = threading.RLock()
+# High room IDs are only allowed in the isolated Round 71 environment.
+# Production's original World Builder behavior stays unchanged by default.
+EXTENDED_ROOMS = os.environ.get("HD_ROUND71_EXTENDED_ROOMS") == "1"
+PLAN_CAPACITY = 200 if EXTENDED_ROOMS else 50
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
@@ -69,8 +74,11 @@ def plan_room_id(entry):
     rid = entry.get("room_id")
     if "new_room" not in entry:
         return valid_id(rid)
-    require(entry["new_room"] is True and type(rid) is int and 8900 <= rid < 9000,
-            "New rooms require an ID from 8900 through 8999")
+    require(entry["new_room"] is True and type(rid) is int and
+            (8900 <= rid < 9000 or
+             (EXTENDED_ROOMS and 10000 <= rid < 16000)),
+            "New rooms require an ID from 8900 through 8999; "
+            "10000 through 15999 requires private extended-room mode")
     target = Path("/srv/hollowdeep/world/rooms") / f"r{rid:05d}"
     require(str(rid) not in INDEX and not target.exists() and not target.is_symlink(),
             "New room ID is already occupied")
@@ -85,7 +93,8 @@ def clean_plan(plan):
     require(isinstance(plan, dict), "Invalid plan")
     rooms = plan.get("rooms")
     require(isinstance(rooms, list), "Invalid room list")
-    require(2 <= len(rooms) <= 50, "Area must have 2–50 rooms")
+    require(2 <= len(rooms) <= PLAN_CAPACITY,
+            f"Area must have 2–{PLAN_CAPACITY} rooms")
 
     cleaned = {}
     available = set()

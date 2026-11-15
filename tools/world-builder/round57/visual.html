@@ -42,7 +42,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <body>
 <header>
 <h1>HollowDeep World Builder</h1>
-<small>Round 70 · Fast Room Creation · Private World Builder</small>
+<small>Round 71 · Wilderness Expansion · Private World Builder</small>
 </header>
 <main>
 <section>
@@ -75,8 +75,8 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <input id="addId" type="number" value="16">
 <button id="add">Add Room</button>
 <details><summary>Create a new room</summary>
- <label for="newRoomId">Unused room ID (8900–8999)</label>
- <input id="newRoomId" type="number" min="8900" max="8999" value="8900">
+ <label for="newRoomId">Unused room ID (8900–8999; 10000–15999 in private mode)</label>
+<input id="newRoomId" type="number" min="8900" max="15999" value="8900">
  <label for="newRoomName">Room name</label>
  <input id="newRoomName" maxlength="79">
  <button id="addNewRoom">Create room in draft</button>
@@ -87,6 +87,24 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
  </select>
  <button class="primary" id="quickAddRoom" type="button">Create &amp; Connect Room</button>
  <small>Creates a room and its reciprocal exit in one validated action. Select the source room first.</small>
+</details>
+<details><summary>Generate wilderness region (private Round 71)</summary>
+ <p>Create a connected grid of wilderness rooms, anchored to an existing room.
+    The entire region is validated before the draft changes.</p>
+ <label for="round71Anchor">Existing anchor room ID</label>
+ <input id="round71Anchor" type="number" value="14">
+ <label for="round71First">First new room ID (10000–15999)</label>
+ <input id="round71First" type="number" min="10000" max="15999" value="10001">
+ <label for="round71Rows">Rows (2–10)</label>
+ <input id="round71Rows" type="number" min="2" max="10" value="4">
+ <label for="round71Columns">Columns (2–10)</label>
+ <input id="round71Columns" type="number" min="2" max="10" value="4">
+ <label for="round71Prefix">Region name</label>
+ <input id="round71Prefix" maxlength="31" value="HollowDeep Wilds">
+ <label for="round71Direction">Exit from anchor</label>
+ <select id="round71Direction"><option>up</option><option>down</option></select>
+ <button class="primary" id="round71MakeGrid" type="button">Create Connected Wilderness</button>
+ <small>Only available to a private server with HD_ROUND71_EXTENDED_ROOMS=1 and a native 16,000-ID engine. Production deployment remains disabled.</small>
 </details>
 <h3>Connect Rooms</h3>
 <label>From</label><select id="from"></select>
@@ -690,9 +708,25 @@ $("quickAddRoom").onclick=()=>run(async()=>{
  render();
  $("newRoomName").value="";
  let next=id+1;
- while(next<=8999&&plan.rooms.some(room=>room.room_id===next))next++;
- if(next<=8999)$("newRoomId").value=String(next);
+ if(next>=9000&&next<10000)next=10000;
+ while(next<=15999&&plan.rooms.some(room=>room.room_id===next))next++;
+ if(next<=15999)$("newRoomId").value=String(next);
  status("Quick room created and connected");
+});
+
+// Round 71: the API constructs and validates the complete region atomically.
+$("round71MakeGrid").onclick=()=>run(async()=>{
+ if(!plan)throw Error("Create or open an area first");
+ const first=integer($("round71First").value);
+ const rows=integer($("round71Rows").value);
+ const columns=integer($("round71Columns").value);
+ const candidate=await api("/api/wilderness-grid",{
+  plan,anchor:integer($("round71Anchor").value),first_id:first,
+  rows,columns,direction:$("round71Direction").value,
+  prefix:$("round71Prefix").value.trim()
+ });
+ plan=candidate;selected=first;
+ render();status("Wilderness region created: "+(rows*columns)+" rooms");
 });
 
 $("addNamedLink").onclick=()=>run(async()=>{
@@ -959,7 +993,7 @@ round64UpdateDirty=function(){
  round65UpdatePending();
 };
 const round65ReplaceActions=new Set([
- "create","openDraft","add","addNewRoom","quickAddRoom","link","addNamedLink","place","placeCustom","remove","removeExisting",
+ "create","openDraft","add","addNewRoom","quickAddRoom","round71MakeGrid","link","addNamedLink","place","placeCustom","remove","removeExisting",
  "round63Undo","round63Redo"
 ]);
 const round65StaleActions=new Set([

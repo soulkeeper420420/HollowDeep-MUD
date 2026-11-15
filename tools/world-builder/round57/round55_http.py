@@ -17,8 +17,8 @@ def add_native_room(plan, room_id):
 
     rid = app.area.valid_id(room_id)
 
-    if len(rooms) >= 50:
-        raise ValueError("Area already contains 50 rooms")
+    if len(rooms) >= app.area.PLAN_CAPACITY:
+        raise ValueError(f"Area already contains {app.area.PLAN_CAPACITY} rooms")
 
     existing = [r.get("room_id") for r in rooms]
 

@@ -25,6 +25,7 @@ sys.path.insert(0, str(stage / "builder"))
 import app
 import round55_http
 import round57_http
+import round71_http
 import round69_custom
 
 runner = Path(sys.argv[2])
@@ -217,7 +218,7 @@ def gameplay(root, port, populated, browser_export=False):
         scope["stop_server"]()
 
 
-class BrowserHandler(round57_http.Handler):
+class BrowserHandler(round71_http.Handler):
     def do_GET(self):
         if self.path != "/":
             return super().do_GET()
@@ -237,6 +238,8 @@ thread.start()
 try:
     url = f"http://127.0.0.1:{server.server_port}"
     subprocess.run(["node", str(Path(__file__).with_name("browser.cjs")), url, str(stage)],
+                   check=True, timeout=120)
+    subprocess.run(["node", str(Path(__file__).resolve().parents[1] / "round71/round71_browser.cjs"), url, str(stage)],
                    check=True, timeout=120)
     exported = json.loads((stage / "browser.json").read_text())
     install(url, exported["plan"], stage / "browser/rootfs", "browser-verified", None,
@@ -325,6 +328,58 @@ finally:
     for client in scope["clients"]:client.close()
     scope["stop_server"]()
 print("ROUND 70: browser-exported new room navigable in isolated native gameplay PASS",flush=True)
+# Round 71: run the browser-downloaded 4x4 wilderness in native gameplay.
+wplan=json.loads((stage / "round71-browser.json").read_text())["plan"]
+wzip=(stage / "round71-browser.zip").read_bytes()
+wroot=stage / "wilderness/rootfs"
+check(len(wplan["rooms"])==18 and len(wzip)>0, "Round 71 wilderness plan and ZIP present")
+with zipfile.ZipFile(io.BytesIO(wzip)) as archive:
+    check(archive.testzip() is None, "Round 71 wilderness ZIP integrity")
+    manifest=json.loads(archive.read("manifest.json"))
+    expected={"manifest.json",*(f"r{r['room_id']:05d}.native-candidate" for r in wplan["rooms"])}
+    check(set(archive.namelist())==expected, "Round 71 wilderness ZIP contains exact rooms")
+    check(set(manifest["rooms"])=={str(r["room_id"]) for r in wplan["rooms"]},
+          "Round 71 wilderness manifest covers the complete grid")
+    for r in wplan["rooms"]:
+        rid=r["room_id"]
+        name=f"r{rid:05d}.native-candidate"
+        data=archive.read(name)
+        report=manifest["rooms"][str(rid)]
+        check(hashlib.sha256(data).hexdigest()==report["candidate_sha256"] and
+              all(report["checks"].values()), f"Round 71 native room {rid} checksum and ABI")
+        if rid in (14,15):
+            original,_=app.area.r50.baseline(rid)
+            old,_=app.area.r51.original_exits(original)
+            new,_=app.area.r51.original_exits(data)
+            check(all(x in new for x in old), f"Round 71 existing room {rid} exits preserved")
+            before,after=app.area.parse(original),app.area.parse(data)
+            check(all(before[key]==after[key] for key in ("creatures","objects","descriptions")),
+                  f"Round 71 existing room {rid} entities and descriptions preserved")
+        else:
+            check(not (wroot / "rooms" / f"r{rid:05d}").exists(),
+                  f"Round 71 no preexisting private room {rid}")
+        target=wroot / "rooms" / f"r{rid:05d}"
+        target.write_bytes(data)
+        shutil.copystat(wroot / "rooms/r00001",target)
+        os.chown(target,65534,65534)
+scope.update(root=wroot,PORT=4047,process=None,clients=[])
+scope["start_server"]()
+try:
+    token=lambda n:"".join(secrets.choice(string.ascii_lowercase) for _ in range(n))
+    player=scope["new_character"]("Hd"+token(7),"Test"+token(9))
+    for direction,room in (("north","goldenrod avenue"),
+                           ("up","hollowdeep wilds 1,1"),
+                           ("east","hollowdeep wilds 1,2"),
+                           ("south","hollowdeep wilds 2,2"),
+                           ("west","hollowdeep wilds 2,1"),
+                           ("north","hollowdeep wilds 1,1"),
+                           ("down","goldenrod avenue")):
+        actual=scope["command"](player,direction).lower()
+        check(room in actual, f"Round 71 native move {direction} to {room}")
+finally:
+    for client in scope["clients"]:client.close()
+    scope["stop_server"]()
+print("ROUND 71: browser-generated 4x4 wilderness ZIP navigable in isolated native gameplay PASS",flush=True)
 round69_custom.native_gameplay(stage, scope, check)
 print("ROUND 69: native draft room, custom templates and named exit gameplay PASS", flush=True)
 print("ROUND 59: PASS", flush=True)
