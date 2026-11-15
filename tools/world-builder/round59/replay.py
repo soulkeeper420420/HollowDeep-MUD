@@ -241,6 +241,39 @@ try:
     exported = json.loads((stage / "browser.json").read_text())
     install(url, exported["plan"], stage / "browser/rootfs", "browser-verified", None,
             download=(exported["result"], (stage / "browser.zip").read_bytes()))
+    # Round 70: stage the ZIP downloaded from the independent quick-create browser.
+    quick=json.loads((stage / "round70-browser.json").read_text())
+    quick_bundle=(stage / "round70-browser.zip").read_bytes()
+    quick_result=quick["result"]
+    check(hashlib.sha256(quick_bundle).hexdigest()==quick_result["bundle_sha256"],
+          "Round 70 browser ZIP checksum")
+    with zipfile.ZipFile(io.BytesIO(quick_bundle)) as quick_zip:
+        check(quick_zip.testzip() is None,"Round 70 native ZIP integrity")
+        expected={"manifest.json",*(f"r{room['room_id']:05d}.native-candidate" for room in quick["plan"]["rooms"])}
+        assert set(quick_zip.namelist())==expected
+        manifest=json.loads(quick_zip.read("manifest.json"))
+        assert set(manifest["rooms"])=={str(room["room_id"]) for room in quick["plan"]["rooms"]}
+        for room in quick["plan"]["rooms"]:
+            rid=room["room_id"]
+            data=quick_zip.read(f"r{rid:05d}.native-candidate")
+            report=manifest["rooms"][str(rid)]
+            assert hashlib.sha256(data).hexdigest()==report["candidate_sha256"]
+            assert all(report["checks"].values())
+            exits,_=app.area.r51.original_exits(data)
+            actual={app.area.r51.fields(record)["direction"]:app.area.r51.fields(record)["destination"] for record in exits}
+            if rid==8901:assert actual=={"down":14}
+            if rid==14:
+                assert actual["up"]==8901
+                old,_=app.area.r51.original_exits(app.area.r50.baseline(rid)[0])
+                assert all(record in exits for record in old)
+            if rid==15:
+                old,_=app.area.r51.original_exits(app.area.r50.baseline(rid)[0])
+                assert all(record in exits for record in old)
+            dest=stage/"quick/rootfs/rooms"/f"r{rid:05d}"
+            dest.write_bytes(data)
+            shutil.copystat(stage/"quick/rootfs/rooms/r00001",dest)
+            os.chown(dest,65534,65534)
+    check(True,"Round 70 reciprocal native room records and preserved exits")
     fixture = add_inventory_fixture()
     plan = json.loads(request(url + "/api/new?a=14&b=15"))
     plan = json.loads(request(url + "/api/add-room", {"plan": plan, "room_id": 16}))
@@ -275,6 +308,23 @@ gameplay(stage / "browser/rootfs", 4043, True, browser_export=True)
 print("PASS: Browser-downloaded ZIP passed native gameplay", flush=True)
 gameplay(stage / "populated/rootfs", 4041, True)
 gameplay(stage / "cleared/rootfs", 4042, False)
+# Confirm a player can traverse the freshly downloaded quick-create room.
+scope.update(root=stage / "quick/rootfs",PORT=4046,process=None,clients=[])
+scope["start_server"]()
+try:
+    player=scope["new_character"](
+        "Hd"+"".join(secrets.choice(string.ascii_lowercase) for _ in range(7)),
+        "Test"+"".join(secrets.choice(string.ascii_lowercase) for _ in range(9)))
+    first=scope["command"](player,"north").lower()
+    check("goldenrod avenue" in first,"Round 70 original native room still reachable")
+    arrival=scope["command"](player,"up").lower()
+    check("round 70 quick landing" in arrival,"Round 70 native up exit reaches new room")
+    returned=scope["command"](player,"down").lower()
+    check("goldenrod avenue" in returned,"Round 70 native reciprocal down exit returns")
+finally:
+    for client in scope["clients"]:client.close()
+    scope["stop_server"]()
+print("ROUND 70: browser-exported new room navigable in isolated native gameplay PASS",flush=True)
 round69_custom.native_gameplay(stage, scope, check)
 print("ROUND 69: native draft room, custom templates and named exit gameplay PASS", flush=True)
 print("ROUND 59: PASS", flush=True)

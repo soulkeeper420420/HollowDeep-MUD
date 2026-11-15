@@ -44,7 +44,7 @@ cc -m32 -Wall -Wextra -shared -fPIC \
   "$(dirname "$(realpath "$0")")/../../../engine/experiments/guild-social-v2/round11q_rng.c" \
   -ldl -o "$stage/replay-rng.so"
 cp -p "$prior/rootfs/objmon/"{m00,o00} "$stage/builder/templates/"
-for label in populated cleared browser custom; do
+for label in populated cleared browser custom quick; do
   root="$stage/$label/rootfs"
   mkdir -p "$root"
   for asset in "$prior"/rootfs/*; do
@@ -70,3 +70,5 @@ grep -Fxq 'ROUND 59: PASS' "$stage/results.log"
 grep -Fxq 'ROUND 60: PASS' "$stage/results.log"
 grep -Fxq 'ROUND 61: PASS' "$stage/results.log"
 grep -Fxq 'ROUND 62: PASS' "$stage/results.log"
+grep -Fxq 'ROUND 70: atomic room creation, reciprocal exits, rejection, dirty protection and ZIP PASS' "$stage/results.log"
+grep -Fxq 'ROUND 70: browser-exported new room navigable in isolated native gameplay PASS' "$stage/results.log"

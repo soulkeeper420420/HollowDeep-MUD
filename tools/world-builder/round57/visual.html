@@ -42,7 +42,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <body>
 <header>
 <h1>HollowDeep World Builder</h1>
-<small>Round 68 · Private World Builder</small>
+<small>Round 70 · Fast Room Creation · Private World Builder</small>
 </header>
 <main>
 <section>
@@ -80,6 +80,13 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
  <label for="newRoomName">Room name</label>
  <input id="newRoomName" maxlength="79">
  <button id="addNewRoom">Create room in draft</button>
+ <label for="quickDirection">Quick-connect exit from selected room</label>
+ <select id="quickDirection" aria-label="Quick-connect direction">
+  <option>up</option><option>north</option><option>south</option>
+  <option>east</option><option>west</option><option>down</option>
+ </select>
+ <button class="primary" id="quickAddRoom" type="button">Create &amp; Connect Room</button>
+ <small>Creates a room and its reciprocal exit in one validated action. Select the source room first.</small>
 </details>
 <h3>Connect Rooms</h3>
 <label>From</label><select id="from"></select>
@@ -658,6 +665,36 @@ $("addNewRoom").onclick=()=>run(async()=>{
  status("New room added to draft");
 });
 
+// Round 70: atomic new-room creation and reciprocal routing.
+// The server validates the entire candidate before it becomes the active draft.
+$("quickAddRoom").onclick=()=>run(async()=>{
+ if(!plan)throw Error("Create or open an area first");
+ const id=integer($("newRoomId").value);
+ const name=$("newRoomName").value.trim();
+ if(!name)throw Error("Enter a new room name");
+ const directions={north:"south",south:"north",east:"west",west:"east",up:"down",down:"up"};
+ const direction=$("quickDirection").value;
+ const reverse=directions[direction];
+ if(!reverse)throw Error("Invalid quick-connect direction");
+ const candidate=structuredClone(plan);
+ const source=candidate.rooms.find(room=>room.room_id===selected);
+ if(!source)throw Error("Select a source room");
+ if(candidate.rooms.some(room=>room.room_id===id))throw Error("Room ID already in draft");
+ if(source.exits.some(exit=>exit.direction===direction))
+  throw Error("Source room already has a "+direction+" exit");
+ source.exits.push({direction,destination:id});
+ candidate.rooms.push({room_id:id,new_room:true,name,exits:[
+  {direction:reverse,destination:source.room_id}],monsters:[],objects:[]});
+ await api("/api/validate",candidate);
+ plan=candidate;selected=id;
+ render();
+ $("newRoomName").value="";
+ let next=id+1;
+ while(next<=8999&&plan.rooms.some(room=>room.room_id===next))next++;
+ if(next<=8999)$("newRoomId").value=String(next);
+ status("Quick room created and connected");
+});
+
 $("addNamedLink").onclick=()=>run(async()=>{
  if(!plan)throw Error("Create or open an area first");
  const candidate=structuredClone(plan);
@@ -922,7 +959,7 @@ round64UpdateDirty=function(){
  round65UpdatePending();
 };
 const round65ReplaceActions=new Set([
- "create","openDraft","add","addNewRoom","link","addNamedLink","place","placeCustom","remove","removeExisting",
+ "create","openDraft","add","addNewRoom","quickAddRoom","link","addNamedLink","place","placeCustom","remove","removeExisting",
  "round63Undo","round63Redo"
 ]);
 const round65StaleActions=new Set([

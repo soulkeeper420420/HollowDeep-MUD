@@ -431,6 +431,65 @@ async function main() {
   console.log("ROUND 69: browser draft room, custom entities, named exits and rejection cases PASS");
  }finally{await cp.close()}
 }
+// Round 70: create a playable reciprocal room in one browser action.
+{
+  const qp=await browser.newPage();
+  qp.setDefaultTimeout(15000);
+  qp.on("pageerror",error=>errors.push(error));
+  const f=id=>qp.locator("#"+id);
+  const press=async id=>f(id).click();
+  const state=async()=>JSON.parse(await f("json").inputValue());
+  const wait=async phrase=>f("status").filter({hasText:phrase}).waitFor();
+  try{
+    await qp.goto(url);
+    await qp.waitForFunction(()=>document.querySelector("#template")?.options.length>0);
+    await press("create");await wait("Area created");
+    const original=await state();
+    await f("newRoomId").evaluate(el=>{el.closest("details").open=true});
+    await f("newRoomId").fill("8901");
+    await f("newRoomName").fill("Round 70 Quick Landing");
+    await f("quickDirection").selectOption("up");
+    await press("quickAddRoom");await wait("Quick room created and connected");
+    const connected=await state();
+    assert.equal(connected.rooms.length,3);
+    assert.equal(await f("selected").innerText(),"Room 8901");
+    assert(connected.rooms.find(room=>room.room_id===14).exits.some(
+      exit=>exit.direction==="up"&&exit.destination===8901));
+    assert.deepEqual(connected.rooms.find(room=>room.room_id===8901).exits,
+      [{direction:"down",destination:14}]);
+    assert.deepEqual(connected.rooms.find(room=>room.room_id===15),original.rooms[1]);
+    assert.equal(await f("newRoomId").inputValue(),"8902");
+    // Duplicate IDs are rejected without changing the draft.
+    await f("newRoomId").fill("8901");
+    await f("newRoomName").fill("Duplicate");
+    await press("quickAddRoom");await wait("ERROR: Room ID already in draft");
+    assert.deepEqual(await state(),connected);
+    // A reused exit is rejected; existing and new rooms remain intact.
+    await qp.getByRole("button",{name:/^14 · /}).click();
+    await f("newRoomId").fill("8902");
+    await f("newRoomName").fill("Conflicting exit");
+    await press("quickAddRoom");await wait("ERROR: Source room already has a up exit");
+    assert.deepEqual(await state(),connected);
+    // Unsaved room text requires permission before an action can replace it.
+    await f("name").fill("Unsaved quick edit");
+    qp.once("dialog",dialog=>dialog.dismiss());
+    await press("quickAddRoom");
+    await wait("Action cancelled; unapplied edits preserved");
+    assert.deepEqual(await state(),connected);
+    assert.equal(await f("name").inputValue(),"Unsaved quick edit");
+    await f("name").fill(connected.rooms.find(room=>room.room_id===14).name);
+    await f("newRoomId").fill("8901");
+    await press("validatePlan");await wait("PASS: 3 rooms validated");
+    await press("export");
+    const link=qp.getByRole("link",{name:"Download validated native ZIP"});
+    await link.waitFor();
+    const result=JSON.parse(await f("status").innerText());
+    const [download]=await Promise.all([qp.waitForEvent("download"),link.click()]);
+    await download.saveAs(path.join(output,"round70-browser.zip"));
+    await fs.writeFile(path.join(output,"round70-browser.json"),JSON.stringify({plan:connected,result}));
+    console.log("ROUND 70: atomic room creation, reciprocal exits, rejection, dirty protection and ZIP PASS");
+  }finally{await qp.close()}
+}
 // Round 63: validated editing and recovery regression.
 {
  const original=JSON.parse(await field("json").inputValue());
