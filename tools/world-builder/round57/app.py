@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import wilderness_map
+import treasure_sites
 from http.server import ThreadingHTTPServer
 
 ROOT = Path(__file__).resolve().parent
@@ -144,9 +145,15 @@ def custom_banks(plan):
     return ids, assets
 
 
+def export_assets(plan):
+    ids, native_assets = custom_banks(plan)
+    guardian_templates = set(TEMPLATES) | ids.get("monsters", set())
+    return (native_assets | wilderness_map.assets(plan) |
+            treasure_sites.assets(plan, guardian_templates))
+
+
 def generate(plan, persist=True):
-    return generate_original(plan, persist=persist,
-                             extra_assets=lambda value: custom_banks(value)[1] | wilderness_map.assets(value))
+    return generate_original(plan, persist=persist, extra_assets=export_assets)
 
 
 def existing(data, table=ABI["table"]):
@@ -193,6 +200,7 @@ def clean(plan):
     rooms = clean_original(plan)
     wilderness_map.tiles(plan)
     custom, _ = custom_banks(plan)
+    treasure_sites.validate(plan, set(TEMPLATES) | custom.get("monsters", set()))
     for entry in plan["rooms"]:
         if "monsters" in entry:
             rid = entry["room_id"]
