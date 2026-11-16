@@ -64,3 +64,28 @@ The test executes in a disposable `/tmp` player directory and cleans up.
 
 No private player records, production paths, credentials, fixtures, or test
 runtime logs should be published with the patch.
+
+## Operator-reported Linode candidate validation — 2026-11-16
+
+The owner launched the guarded candidate-specific regression in a disposable
+workspace `/root/hollowdeep-dev/round73g-candidate-nGN4h1BE` and reported
+`candidate.status` **exit code 0**. The supplied log tail confirms:
+
+- `ROUND 73F: native showmap movement, named-go, toggle, radius and suppression PASS`
+- `ROUND 69: native draft room, custom templates and named exit gameplay PASS`
+- `ROUND 59: PASS`, `ROUND 60: PASS`, `ROUND 61: PASS`, `ROUND 62: PASS`
+- `ROUND 72: private regression suite PASS`
+- `PASS: Production and prior fixture unchanged`
+
+The guarded runner invokes `apply_private.py` and ELF32
+`test_private.sh` in the private build before native/browser replay; its exit
+status 0 means that command chain completed. The pasted excerpt includes the
+**final** replay markers rather than the earlier candidate-specific test lines.
+These results are operator-provided; no private Linode log or fixture was
+uploaded to GitHub.
+
+**Validation scope:** native file codec / save-load candidate and full
+isolated regression **passed**. **Not proven / not enabled:** native chest
+reward item creation, durable guardian/claim authorization, in-memory player
+reconciliation after on-disk claim save, and ledger acknowledgment. Real chest
+loot remains disabled. No live deployment/restart was performed.
