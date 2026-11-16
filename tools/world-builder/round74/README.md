@@ -125,3 +125,15 @@ ELF32 build and isolated gameplay replay are pending. See
 [native hook milestone](native-hook/ROUND74B.md) and the
 [source atlas](../../../docs/HOLLOWDEEP_SOURCE_ATLAS.md) for precise file/function
 references. HollowDeep's maintainer does not need to edit source manually.
+
+## Round 74B source-level XP/training milestone
+
+Under `native-hook/xp60/`, the new SHA-guarded additive patch connects the
+Round 74A XP curve (60 proposed levels) to actual private native training,
+character-sheet calculations, death penalties and saturating XP grants. It
+builds **only after** `native-hook/apply_private.py` installs the prior
+65-point creator and `hprogress` features. The actual `train()` function,
+math/overflow boundaries, legacy/private syntax, and local sanitizer checks
+passed; Linode ELF32 and in-game replay are pending. It does **not** implement
+remort, skill inheritance, Legacy items or character-save migration. See the
+[XP/training integration and file guide](native-hook/xp60/ROUND74B_XP_TRAINING.md).
