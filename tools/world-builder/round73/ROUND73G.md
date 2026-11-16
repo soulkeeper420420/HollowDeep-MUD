@@ -72,3 +72,17 @@ and death-event identities, but the record is not a secure ledger authority:
 same-game-UID file writes could forge its CRC. A trusted process-authenticated
 native-to-SQLite handoff remains mandatory before rewards may be enabled.
 `open chest` still reports disabled rewards. Production unchanged.
+
+## Round 73I exact-PID native ledger bridge — private test candidate
+
+A test-only C transport now forwards exact pointer-verified guardian events
+from the Round 73H native hook to the existing Python SQLite `TreasureLedger`.
+The trusted daemon checks kernel `SO_PEERCRED` for both exact game process PID
+and UID, and supplies server-configured immutable rewards; an unrelated process
+sharing the game UID is denied. A recovered client cannot create a second
+claim after daemon restart. Local sanitizer-enabled cross-process tests passed.
+The test-only same-UID model is NOT sufficient for production privilege
+separation; real map minting, crash/uncertain event reconciliation, trusted
+reward manifest transport, and native player-save/ledger acknowledgment still
+remain. **No loot enabled; no production changes.** See
+`bridge/ROUND73I.md`.
