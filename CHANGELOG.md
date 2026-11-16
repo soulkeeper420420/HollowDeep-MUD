@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-16 — Proposed future game-wide event systems (design only)
+
+Added the [HollowDeep Events Roadmap](docs/HOLLOWDEEP_EVENTS_ROADMAP.md), an original event-system design covering Last Man Standing, 1v1/team arenas, in-game-only lottery, boss raids/invasions, treasure hunts, guild championships, seasonal activities, automation and staff controls. Includes source-file integration map, safe PvP rollback and reconnect handling, auditable/restart-safe claims, first-life/remort matchmaking policy, planned event/GM commands and future PHP website/Discord calendar support. This change is **documentation only**, not deployed gameplay or a website update; Round 74B progression and native save gates remain in progress.
+
 ## 2026-11-16 — Round 74B private level-60 XP/training integration (not deployed)
 
 A checksum-guarded *second-stage* private patch extends the previously validated 65-point character creator with a consistent level-60 training curve `XP(level)=1000*(level-1)^2+50*(level-1)^3`, live `command7.c::train()` checks, level-cap refusal without gold deduction, matching `info`/`hclass progress`/`exp_to_lev`, bounded native combat/quest/pledge XP accumulation and death XP-floor handling. All new code is gated with `HD74_PRIVATE_NATIVE`; the legacy 25-entry XP table and production behavior remain intact. The actual native `train()` function passed standalone tests for insufficient XP, gold spent, 59→60 advancement and no cap bypass; 11 native files compiled syntax-only under both legacy/private macros. Local normal and ASan/UBSan tests passed, as did source SHA/reapply checks. **No Linode ELF32 build, full isolated game replay, character save migration or production deployment is claimed for this candidate.** Rebirth/class inheritance and Legacy equipment are still model-only. See [Round 74B XP guide](tools/world-builder/round74/native-hook/xp60/ROUND74B_XP_TRAINING.md). No PHP website update or service restart.
