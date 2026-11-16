@@ -112,3 +112,7 @@ unchanged. See the [source-level walkthrough](../tools/world-builder/round74/nat
 These features are **not deployed**. The level-60 cap is a proposed private
 playtest setting, not an agreed production rule. Character save migrations,
 rebirth/skills and full native gameplay replay remain pending.
+
+## First-life half-cost and five banked level thresholds (private candidate)
+
+The latest assistant-maintained [training policy guide](ROUND74B_FIRST_LIFE_AND_BANK5.md) covers first-life **half cumulative XP threshold and half ordinary training gold fee**, reborn full cost, banked XP for at most five future levels, and **one level granted per `train` use**. The C helper lives in `hd74_xp.[ch]`, actual training is in `command7.c`, bounded awards in `creature.c` and `command2/8/10.c`. Unknown remort status receives regular fees; real save-backed life counting and native ELF32 gameplay remain pending. This is not live.
