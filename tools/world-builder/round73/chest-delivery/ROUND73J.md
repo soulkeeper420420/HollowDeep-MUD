@@ -44,7 +44,7 @@ in the same compressed character file, and asks the ledger to mark it delivered
 
 `HD_TEST_ELF32=0 HD_SANITIZE=0 bash round73j/run.sh DISPOSABLE_PATCHED_NATIVE_SOURCE`
 
-**PASS:** normal authorization/grant/ledger ACK; ACK interrupted after native
+**PASS in both unsanitized and ASan/UBSan 64-bit builds:** normal authorization/grant/ledger ACK; ACK interrupted after native
 save; failed write before rename; uncertain post-rename write; exact PID
 spoof denial; previously owned nested item survival; reconnect and repeat
 open without duplicate items/gold; independent directory fsync + receipt
