@@ -81,7 +81,7 @@ The executable should report **ELF 32-bit**. The command builds only a private e
 
 The old code uses `MAXALVL` in `mtype.h`, a 25-element `needed_exp[]` table in `global.c`, a fixed declaration in `mextern.h`, and readers in `command4.c`, `command7.c`, `misc.c` and `creature.c`. Changing only the constant or adding thresholds can read past array boundaries or overflow ELF32 `long`.
 
-Likewise, character creation currently uses a fixed **54-point** stat total and an independent range of **3–18** per stat. Updating the printed message without the validation logic will mislead players. Do not alter the real constraints until Round 74B hooks and tests agree.
+The original production character creator enforces **up to 54 total points** with **3–18** per stat. The updated private Round 74B test candidate uses **up to 65 total points**, keeping 3–18 per stat. Both the prompt and strict input validator are changed together; production is still at 54 until an approved native deployment. Changing the message alone would mislead players.
 
 ## 5. How to inspect, test and restore
 
