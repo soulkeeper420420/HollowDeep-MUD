@@ -1,5 +1,18 @@
 # HollowDeep release notes
 
+## 2026-11-16 — Round 74B Codex handoff and rollback compatibility (NO-GO)
+
+The maintainer supplied interim Codex findings: new compressed-save life
+metadata reportedly persists across character reconnect/restart; five native
+`train` uses, 525/1,050 cumulative XP life thresholds, equipment preservation
+and first-life death XP regression were exercised privately. **New blocker:**
+the prior live executable reportedly reads but silently strips life metadata
+on its next save. The final full replay is not confirmed complete, and the
+unpushed Codex source is not present on the checked GitHub branch. Recorded
+these findings in the [release checklist](docs/ROUND74B_PRODUCTION_RELEASE_GATE.md)
+and published a tested [source-only recovery helper](tools/world-builder/round74/handoff/collect_codex_candidate.sh).
+**No production deployment, live player/world modification or restart.**
+
 ## 2026-11-16 — Round 74B conditional production-release review (NO-GO)
 
 The maintainer authorized deploying Round 74B **before** proceeding to Round 74C, conditional on successful validation. The private combined ELF32 build and focused tests passed, but a live release is **not yet safe**. `hd74_xp.c::hd74_verified_remorts()` still returns unknown outside the test-only bridge, so real first-life 50% training is unavailable. Existing saved players lack a verified remort migration, and complete isolated native login/combat/save/restart, historical World Builder regressions and production rollback validation remain outstanding. Published the [Round 74B release gate](docs/ROUND74B_PRODUCTION_RELEASE_GATE.md) with specific blockers, source-file owners, and approval criteria. **No live MUD, service, player files, PHP website or Discord announcement has been modified.** Round 74C stays on hold while 74B release stabilization is prioritized.
