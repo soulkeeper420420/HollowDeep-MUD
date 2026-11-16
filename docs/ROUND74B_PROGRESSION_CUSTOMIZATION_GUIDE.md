@@ -98,3 +98,17 @@ Only change these after inspecting the exact call sites. On this legacy engine, 
 ## Step 8: Safe publishing
 
 Keep playtest JSON, generated XP tables, player data, fixtures and any credentials private until reviewed. Publish tested source, public documentation and changelogs to GitHub. Update the public PHP website and Discord guide only when describing the feature's verified state—**development** until it is deployed. Do not restart the live MUD without explicit authorization after all native integration checks.
+
+## Round 74B private native XP integration (later development)
+
+A tested **private** patch now connects the sample level-60 XP curve to the
+real Mordor training and character-sheet functions: `command7.c::train`,
+`command4.c::info`, `misc.c::exp_to_lev`, `player.c::up_level`,
+`hollowdeep.c::training_progress`, `creature.c::die`, and the quest/pledge
+XP writers. The native train test verifies 1→2, 59→60, correct gold charges,
+and no gold loss at cap. The SHA-pinned patch leaves the non-test legacy build
+unchanged. See the [source-level walkthrough](../tools/world-builder/round74/native-hook/xp60/ROUND74B_XP_TRAINING.md).
+
+These features are **not deployed**. The level-60 cap is a proposed private
+playtest setting, not an agreed production rule. Character save migrations,
+rebirth/skills and full native gameplay replay remain pending.
