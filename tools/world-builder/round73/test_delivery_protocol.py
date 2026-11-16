@@ -119,6 +119,15 @@ class Tests(unittest.TestCase):
         with self.assertRaises(ValueError): self.deliver(held=[])
         self.assertEqual(self.native.totals("player.01"), (0, (), 0))
 
+    def test_wrong_killer_is_not_credited(self):
+        # A native combat event must be accepted only for this map owner.
+        with self.assertRaises(ValueError):
+            self.ledger.record_verified_kill("encounter.001", "guardian.01", "event.bad", "player.02")
+        self.ledger.record_verified_kill("encounter.001", "guardian.01", "event.001", "player.01")
+        with self.assertRaises(ValueError): self.deliver()
+        self.ledger.record_verified_kill("encounter.001", "guardian.02", "event.002", "player.01")
+        self.assertEqual(self.deliver()["gold"], 850)
+
     def test_single_delivery_and_idempotent_reopen(self):
         self.defeat()
         result = self.deliver()
