@@ -39,3 +39,39 @@ The private scripts are layered **in order** over the verified uploaded Round 74
 2. Verify native ELF32 build and run isolated creation, login, repeated training, XP accumulation, save/reload, remort, death and older-character replay. Evaluate reward amounts and any PvP/social economy impact.
 3. Keep the level-60 proposal separate from actual production balance approval. Run a full isolated Round 59–74B regression before scheduling a reviewed deployment and restart.
 4. Update website/Discord/player help only after production activation; keep private credentials/logs/player data out of GitHub.
+
+## Operator-reported Linode ELF32 combined validation — 2026-11-16
+
+The maintainer executed the all-in-one Round 74B disposable candidate on Linode and
+reported these results, verbatim (these are operator-supplied terminal markers,
+not independently retrieved server logs):
+
+```text
+ROUND 74B: checksum-guarded private native stats/progress hooks installed
+ROUND 74B: guarded level-60 training/score/death/XP cap hooks staged privately
+ROUND 74B: first-life 50%% XP/50%% gold private training policy staged
+ROUND 74B: unknown remort status defaults to standard costs (safe)
+ROUND 74B: XP bank capped at five future level thresholds (private)
+ROUND 74B: actual train remains one level per command
+ROUND 74B: first-life 50% XP / 50% normal gold cost policy and cap checks PASS
+ROUND 74B: actual native train() firstlife/reborn/unknown price and cap PASS
+ROUND 74B: firstlife private native compiler branches PASS
+ROUND 74B: trusted remort save bridge PENDING; live MUD unchanged
+ROUND 74B: five-level cumulative XP bank, life-based thresholds, cap, legacy XP preservation PASS
+ROUND 74B: first-life 5 banked levels -> 5 separate train uses, no sixth PASS
+ROUND 74B: reborn 5 banked levels -> 5 separate train uses, no sixth PASS
+ROUND 74B: native train remains exactly one level per invocation PASS
+ROUND 74B: 5-level banked XP award paths and private/legacy syntax PASS
+ROUND 74B COMBINED ELF32 BUILD: PASS
+PRODUCTION DEPLOYMENT: NONE
+WORKSPACE: /root/hollowdeep-dev/round74b-SVnpPdcJ
+```
+
+**Scope:** checksum-verified private stage application, targeted real native
+`train()` tests, 32-bit compilation and binary creation. This is **not** a
+full isolated multiplayer/login/combat/save/restart gameplay regression and
+not a production deployment. The native remort count is still unavailable;
+unknown count defaults to normal fees. Before live enablement, the first-life
+counter must be saved/recovered durably and authenticated; combined progression
+and save migration plus isolated real-game replay must pass. No live world,
+player file, PHP site or service was modified by this validation.
