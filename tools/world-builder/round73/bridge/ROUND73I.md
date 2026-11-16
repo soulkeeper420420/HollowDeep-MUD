@@ -48,9 +48,12 @@ Makefile, existing guardian test feature, or live player saves.
 **THIS IS NOT PRODUCTION AUTHENTICATION YET.** In offline tests the server and
 native client run as the *same* UID; the protected PID check still rejects
 unrelated processes. A real deployment MUST run the SQLite service under a
-**different privileged service identity**, use a root-controlled 0700 socket
-parent and trusted supervisor-pinned game PID/UID after each native restart,
-restrict daemon access to the game, and prevent stale or inherited socket FDs.
+**different privileged service identity**, provide a separately designed
+socket directory and ACL/group access policy (the current 0700 directory and
+0600 socket work only for the same-UID private test), and use a trusted
+supervisor-pinned game PID/UID after each native restart. It must also prevent
+stale or inherited socket FDs. **None of that privilege-separated service
+setup has been implemented or tested yet.**
 The test-only socket is selected by an environment variable and must never be
 enabled as a production configuration interface. Do not run this as root to
 bypass identity separation.
