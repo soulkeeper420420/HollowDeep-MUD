@@ -124,3 +124,7 @@ The assistant-maintained [XP + training integration guide](../tools/world-builde
 ## Future world events (planned)
 
 See the [HollowDeep Events Roadmap](HOLLOWDEEP_EVENTS_ROADMAP.md) for the planned Event Director, opt-in arenas, Last Man Standing, virtual-only lottery, city invasions, world bosses, seasonal events, player/GM commands, website/Discord announcements and durable-reward safety gates. Start with private noncombat events, then isolated arenas, and do not enable prize delivery until the Round 73G–73J claim security/deployment gates pass. No native event hooks have been installed or deployed.
+
+## Round 74B combined first-life pricing and XP banking (private only)
+
+Read the [first-life and five-level bank guide](ROUND74B_FIRST_LIFE_AND_BANK5.md). The four-stage native candidate lives under `tools/world-builder/round74/native-hook/` and has one runner at `combined/run_combined_private.sh`. `command7.c::train` applies a life-based XP threshold and gold fee and calls `up_level()` exactly once, while `hd74_xp.[ch]` calculates the bank limit (five future levels) and all combat/quest XP writers use it. `command4.c`, `hollowdeep.c`, and `hd74_native.c` show costs/status. **No actual durable remort-count lookup exists yet**; the test-only remort lookup is not player authority. Original production code path is unchanged. Actual 32-bit full game, remort durability, death XP penalties, and level migration still require validation.
