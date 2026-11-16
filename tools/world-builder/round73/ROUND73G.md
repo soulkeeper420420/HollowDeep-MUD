@@ -42,3 +42,7 @@ no production deployment or restart was performed by this change.
 **Next gate:** inspect and implement the real native save/receipt transaction;
 validate actual 32-bit item/gold persistence with interrupted save/reconnect/restart
 and then rerun the private regression suite. Do not enable chest rewards earlier.
+
+## Native save-format source-only foundation — after validated private regression
+
+Separate branch `round73g-native-save-foundation` contains only authored C receipt/atomic-save primitives, a 64-bit private serializer compatibility harness and documentation. The code is NOT compiled into the native engine, does not enable treasure rewards, and was never deployed. The supplied `files2.c` still rotates backups before writing and lacks bounded compression and a same-save claim receipt. `files3.c` returns consumed serialized inventory bytes, permitting an *inert* trailing receipt format (verified in a private 64-bit harness with nested inventory and a historical compressor round-trip). The standalone primitive rejects corrupt receipts and uses file+directory fsync/rename with an explicit uncertain-result state after rename. Before enabling native loot, bound the real save and load paths, retain every receipt on ordinary saves, save items/gold/receipt atomically, test actual ELF32 crash recovery and repeat Round 59–73F isolated regressions. Production untouched.
