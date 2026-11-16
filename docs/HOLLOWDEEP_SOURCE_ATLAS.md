@@ -120,3 +120,7 @@ For hands-on lessons later, see `docs/ROUND74B_EDITING_GUIDE.md` and
 ## Round 74B private XP/training patch — exact source hooks
 
 The assistant-maintained [XP + training integration guide](../tools/world-builder/round74/native-hook/xp60/ROUND74B_XP_TRAINING.md) maps every guarded C file. The **test-only** level-60 curve is implemented in `hd74_xp.[ch]` and compiled via `Makefile`. The key entry points are `command7.c::train` (XP/gold/cap), `misc.c::exp_to_lev` (XP-to-level), `player.c::up_level` (HP/MP/stat and cap), `command4.c::info` (character sheet), `hollowdeep.c::training_progress` (class guide), `creature.c::die` (combat/death), and `command2.c`/`command8.c`/`command10.c` (quest/pledge XP). All changes are conditional on `HD74_PRIVATE_NATIVE`; production retains the original 54-point cap and 25-entry XP table. Real 32-bit gameplay and existing-character migration remain unverified.
+
+## Future world events (planned)
+
+See the [HollowDeep Events Roadmap](HOLLOWDEEP_EVENTS_ROADMAP.md) for the planned Event Director, opt-in arenas, Last Man Standing, virtual-only lottery, city invasions, world bosses, seasonal events, player/GM commands, website/Discord announcements and durable-reward safety gates. Start with private noncombat events, then isolated arenas, and do not enable prize delivery until the Round 73G–73J claim security/deployment gates pass. No native event hooks have been installed or deployed.
