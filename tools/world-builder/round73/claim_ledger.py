@@ -207,10 +207,12 @@ class TreasureLedger:
                              (combat_event_id, "combat event"), (killer_id, "killer")):
             check_token(value, label)
         with self.transaction() as db:
-            row = db.execute("SELECT guardians FROM encounters WHERE instance_id=?", (instance_id,)).fetchone()
+            row = db.execute("SELECT owner_id, guardians FROM encounters WHERE instance_id=?", (instance_id,)).fetchone()
             if row is None:
                 raise TreasureError("Unknown encounter")
-            guardians = json.loads(row[0])
+            if killer_id != row[0]:
+                raise TreasureError("Verified guardian kill belongs to another player")
+            guardians = json.loads(row[1])
             if guardian_id not in guardians:
                 raise TreasureError("Guardian does not belong to encounter")
             prior_event = db.execute("SELECT instance_id, guardian_id, killer_id FROM defeats WHERE combat_event_id=?",
