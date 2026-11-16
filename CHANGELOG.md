@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-16 — Round 73I native-to-SQLite guardian claim bridge (test only)
+
+The `round73i-native-ledger-bridge` branch adds a process-credential-checked Unix socket ledger service, bounded C client, exact-guard-variant patch, and isolated cross-process native harness. Local ASan/UBSan replay passed exact guardian pointer death → owner-checked SQLite event → **one pending** claim; same-UID wrong-PID socket spoof rejection; server-selected rewards; daemon outage denial; trusted daemon/native-client restart with idempotent kill and claim replay. **No native reward grants or player save writes were performed**, and `open chest` still prints loot disabled in the test candidate. The test uses the same UID for both processes and does NOT demonstrate the separate-UID privileged deployment that production would require. ELF32 Linode replay pending. This change has no live server integration, no production deployment or restart. See [Round 73I](tools/world-builder/round73/bridge/ROUND73I.md).
+
 ## 2026-11-16 — Round 73H durable guardian evidence (test-gated)
 
 Source-only branch `round73h-durable-guardian-proof` adds an opt-in C evidence record to the existing exact-pointer guardian-death hook. Per-map owner/site/guardian challenge IDs, random death-event IDs, locked 0600 atomic file writes, corruption/replay/owner checks, and state recovery after simulated process restart passed local 64-bit ASan/UBSan C harnesses. The test-only native variant preserves non-chest commands and keeps treasure rewards **disabled**. This record has **CRC32 integrity but is not authenticated against same-UID writers** and MUST NOT by itself authorize SQLite ledger kills or native loot. ELF32 Linode validation and any game-level replay are still pending. No production deployment or restart. See [Round 73H implementation](tools/world-builder/round73/guard-proof/ROUND73H.md).
