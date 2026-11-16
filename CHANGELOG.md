@@ -1,5 +1,17 @@
 # HollowDeep release notes
 
+## 2026-11-16 — Round 74B player/developer source-editing guides
+
+The private `round74b-native-integration` branch publishes hands-on VS Code
+Remote SSH source editing instructions, an exact native file/function map and
+an offline XP/stat/remort/Legacy Points customization walkthrough. Both guides
+use the reviewed Round 74B native source archive and prior Round 74A test-only
+progression model. **No Round 74B native gameplay hooks, player save migrations,
+production restarts or website deployments are claimed.** The guide's examples
+modify disposable source copies only. See
+[editing guide](docs/ROUND74B_EDITING_GUIDE.md) and
+[progression customization guide](docs/ROUND74B_PROGRESSION_CUSTOMIZATION_GUIDE.md).
+
 ## 2026-11-16 — Round 74A character progression foundation (development only)
 
 The private `round74a-progression-core` branch introduces a native C progression model designed against the actual Mordor 3.00 32-bit `creature` ABI: configurable 2–100 level caps with signed-32-bit-safe total XP thresholds; five-stat starting allocation; class-specific skill gates with permanent prior-class access earned via timed remort; owner-and-unique-event-verified remort kills; capped Legacy Points, separate Divine Favor bookkeeping, owner-bound equipment purchase intents, and a versioned 512-byte CRC-checked progression snapshot. Its local 64-bit `-Werror` and ASan/UBSan tests passed; the sample 60-level XP preview is explicitly **not active config**. The optional Linode ELF32 compiler/ABI test and all actual native command/player-save integrations remain **pending**. CRC is integrity-only and does not authorize game rewards. The legacy `No Save` item flag is not considered compatible with permanent equipment without further review. **No production MUD/website deployment or service restart**; treasure rewards remain disabled. See [Round 74A](tools/world-builder/round74/README.md).
