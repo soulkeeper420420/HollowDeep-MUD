@@ -84,3 +84,32 @@ on the predecessor branches and are not changed or rerun by this local test.
 **No production deployment, service restart, player writes or private
 configuration publication authorized.** This branch is suitable for a private
 ELF32 milestone check, not production release or claims of playable live loot.
+
+## Operator-reported ELF32 validation — 2026-11-16
+
+The operator supplied the output of the **private ELF32** `run.sh` replay from
+`/root/hollowdeep-dev/round73j-IaltphxW`. It includes:
+
+- `ROUND 73J: same-UID wrong-PID manifest spoof DENIED PASS`
+- `ROUND 73J: native chest grant/save/receipt gameplay PASS`
+- `ROUND 73J: native chest reconnect/no duplicate claim PASS`
+- `ROUND 73J: normal durable native chest->receipt->ledger recovery PASS`
+- `ROUND 73J: successful save interrupted before ledger ack stays pending PASS`
+- `ROUND 73J: ack_lost durable native chest->receipt->ledger recovery PASS`
+- `ROUND 73J: failed native save does not acknowledge/alter existing player PASS`
+- `ROUND 73J: failed_before durable native chest->receipt->ledger recovery PASS`
+- `ROUND 73J: uncertain save blocks session until reload PASS`
+- `ROUND 73J: uncertain rename leaves ledger pending until fresh process+dir fsync PASS`
+- `ROUND 73J: uncertain_after durable native chest->receipt->ledger recovery PASS`
+- `ROUND 73J: isolated native playable-claim simulator PASS (production rewards disabled)`
+- `ROUND 73J ELF32 PRIVATE INTEGRATION: PASS`
+- `Production deployment: NONE`
+
+This evidence was supplied by the operator and not fetched independently from
+Linode. The new combined replay demonstrates a **private simulator**, not an
+actual full native engine gameplay session. The existing production chest
+continues to disable loot. Remaining activation gates include authenticated
+map issuance/ownership, actual privileged ledger socket access policy,
+native object bank/carry validation and single-session synchronization, and
+an isolated full MUD native/browser regression after hooking the integration.
+No production deployment, live-world modifications or server restart occurred.
