@@ -88,7 +88,7 @@ systems; `auth.c` login/security.
 
 - Increasing `MAXALVL` alone is unsafe. The 25 threshold entries are declared
   separately, and other code computes level losses and XP from that table.
-- Original `create_ply()` allows five stats from 3 to 18 totaling **up to 54**;
+- Original production `create_ply()` allows five stats from 3 to 18 totaling **up to 54**; the guarded Round 74B development build raises the ceiling to **65** without changing the per-stat bounds.
   it is not the Round 74A base-10-plus-20 system.
 - `creature.level`, `creature.class`, and stats are signed one-byte fields;
   `experience` and `gold` are signed 32-bit `long` in the 32-bit binary.
