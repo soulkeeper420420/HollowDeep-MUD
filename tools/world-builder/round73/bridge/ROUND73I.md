@@ -92,3 +92,29 @@ The referenced source must still contain the exact original Round73D
 `treasure_guard.c`, not the later 73H patched variant. `run.sh` never writes
 that source directory or starts a game server. The Python test spins up only a
 private transient local socket and SQLite file, then removes them.
+
+## Operator-reported Linode ELF32 validation — 2026-11-16
+
+The operator ran the private test command on Linode and supplied the following
+results (source is the operator's terminal output, not a fetched server log):
+
+```text
+ROUND 73H: test-gated guardian proof variant generated
+ROUND 73I: test-gated exact-PID guardian/SQLite guard variant generated
+ROUND 73I: same-UID wrong-PID socket forgery DENIED PASS
+ROUND 73I: actual guard pointer/death -> exact-PID SQLite ledger -> pending claim PASS (NO LOOT)
+ROUND 73I: server-selected rewards, unique defeat, pending claim persisted PASS
+ROUND 73I: daemon outage refuses native authorization PASS
+ROUND 73I: trusted daemon restart + same claim replay + conflicting kill denial PASS
+ROUND 73I: private exact-PID combat-to-SQLite integration PASS; rewards DISABLED
+ROUND 73I ELF32 LEDGER BRIDGE: PASS
+Production deployment: NONE
+Private workspace: /root/hollowdeep-dev/round73i-hbHkDgNd
+```
+
+The ELF32 private bridge tests are **PASS**, production deployment was **NONE**.
+This does not prove a privileged distinct-UID ledger deployment, authentic
+map minting, or actual gameplay treasure delivery; the private daemon/socket
+run uses a same-UID exact-PID credential check. Rewards remain disabled.
+The remaining gate is a trusted manifest-to-native-save handoff, reconciliation
+and an end-to-end disposable game replay with failure/restart injection.
