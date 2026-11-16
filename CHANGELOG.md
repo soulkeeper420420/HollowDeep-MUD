@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-16 — Round 73H durable guardian evidence (test-gated)
+
+Source-only branch `round73h-durable-guardian-proof` adds an opt-in C evidence record to the existing exact-pointer guardian-death hook. Per-map owner/site/guardian challenge IDs, random death-event IDs, locked 0600 atomic file writes, corruption/replay/owner checks, and state recovery after simulated process restart passed local 64-bit ASan/UBSan C harnesses. The test-only native variant preserves non-chest commands and keeps treasure rewards **disabled**. This record has **CRC32 integrity but is not authenticated against same-UID writers** and MUST NOT by itself authorize SQLite ledger kills or native loot. ELF32 Linode validation and any game-level replay are still pending. No production deployment or restart. See [Round 73H implementation](tools/world-builder/round73/guard-proof/ROUND73H.md).
+
 ## 2026-11-16 — Round 73G native reward staging and ledger-to-ELF32 gate (isolated)
 
 The private `round73g-native-reward-stage` branch adds an unhooked native reward-staging component (`hd_native_reward.[ch]`) plus C test and real SQLite-ledger/Python manifest fixture. Local 64-bit address/undefined sanitizers passed: verified owner/map/guardian prerequisite in the ledger; immutable claim/digest/item IDs; native object and gold save/reload; receipt-based replay rejection; old nested inventory preservation; failed-write rollback; post-rename uncertainty treated as non-durable until recovery. **No ELF32 result for this new staging component is claimed yet.** Existing 73G candidate ELF32 and native/browser regression exit code 0 were reported earlier and are not rerun by this change. Chest rewards, persistent guardian identity and ledger-to-live integration **remain disabled**. No production modification or restart. See [Round 73G reward staging](tools/world-builder/round73/native-save-foundation/ROUND73G_NATIVE_REWARD_STAGING.md).
