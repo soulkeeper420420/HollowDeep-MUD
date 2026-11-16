@@ -61,3 +61,14 @@ accepted as crash durability. This component is **not hooked to**
 persistent guardian mapping, live-session exclusivity and ELF32 native replay
 are validated. Details:
 `native-save-foundation/ROUND73G_NATIVE_REWARD_STAGING.md`.
+
+## Round 73H private guardian-evidence candidate
+
+The `round73h-durable-guardian-proof` branch contains a new **test-gated**
+C guardian-evidence recorder and native pointer/death/restart test harness.
+Local sanitizer checks passed; ELF32 runtime has not yet been verified. This
+fixes the volatile *test* challenge-state limitation by persisting encounter
+and death-event identities, but the record is not a secure ledger authority:
+same-game-UID file writes could forge its CRC. A trusted process-authenticated
+native-to-SQLite handoff remains mandatory before rewards may be enabled.
+`open chest` still reports disabled rewards. Production unchanged.
