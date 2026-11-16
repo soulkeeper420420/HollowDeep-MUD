@@ -112,3 +112,16 @@ The Round 74B branch includes two hands-on guides for the existing source:
 Both are **development-only**. Practice against an isolated copy of the
 private source archive; do not edit/restart production or advertise the model
 as live gameplay. Round 74B native command/save integration is still pending.
+
+## Round 74B source map and first gated native hooks
+
+The `round74b-native-integration` branch now has a source-verified patch in
+`native-hook/` for a strict new-character stat parser and read-only
+`hprogress` development preview. `command1.c`, `global.c`, and `Makefile`
+are modified **only** in a disposable native copy with an exact SHA guard.
+Original `train`, 25-entry XP table, old player saves and all remort mechanics
+are unchanged. Normal + sanitizer 64-bit tests and native syntax checks passed;
+ELF32 build and isolated gameplay replay are pending. See
+[native hook milestone](native-hook/ROUND74B.md) and the
+[source atlas](../../../docs/HOLLOWDEEP_SOURCE_ATLAS.md) for precise file/function
+references. HollowDeep's maintainer does not need to edit source manually.
