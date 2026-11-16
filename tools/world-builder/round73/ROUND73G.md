@@ -86,3 +86,14 @@ separation; real map minting, crash/uncertain event reconciliation, trusted
 reward manifest transport, and native player-save/ledger acknowledgment still
 remain. **No loot enabled; no production changes.** See
 `bridge/ROUND73I.md`.
+
+## Round 73J grouped treasure delivery replay (offline candidate)
+
+A single `chest-delivery/` candidate now tests the entire native chest ->
+process-credential-pinned SQLite -> immutable manifest -> native object/gold +
+compressed player receipt -> independently verified ledger ACK chain across
+four failure/reconnect paths. Both local 64-bit normal and ASan/UBSan test
+runs passed. It is **not integrated in a deployed/real-game chest**: map
+minting, separate-UID daemon, native object bank/carry and live single-session
+reconciliation are still missing. ELF32 test and full runtime regression of
+this combined candidate are pending. Production unchanged.
