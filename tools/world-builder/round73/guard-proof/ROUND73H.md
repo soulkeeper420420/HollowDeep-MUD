@@ -73,3 +73,34 @@ minting), immutable reward manifest authority, no stale sessions, native
 `hd_native_reward_apply` integration, durable receipt/ledger acknowledgment
 and one full Round59–73F isolated native/browser replay. No production
 restart or publication of private fixtures, credentials or player data.
+
+## Operator-reported Linode ELF32 result — 2026-11-16
+
+The operator ran the private 32-bit test/build command against an audited,
+**disposable** native source checkout and reported the following exact markers:
+
+```text
+ROUND 73H: durable unique guardian IDs, death proof, restart, spoof/corruption/symlink denial PASS
+ROUND 73H: test-gated guardian proof variant generated
+ROUND 73H: native pointer-only death, restart recovery, owner denial, disabled rewards PASS
+ROUND 73H: private evidence gate PASS; chest rewards remain disabled
+ROUND 73H: verified private guardian-evidence source installed
+REWARDS: DISABLED; no production or service changes
+ROUND 73H ELF32 PRIVATE BUILD: PASS
+Production deployment: NONE
+Private workspace: /root/hollowdeep-dev/round73h-clzepqqB
+```
+
+This is an **operator-reported** PASS of the focused ELF32 tests and native
+compile in a test-only checkout; the publisher has not independently inspected
+the private build or its logs. The full candidate-specific native/browser
+regression **has not been rerun** with Round 73H enabled. The proof's CRC is
+not an authenticated event, so the SQLite claim ledger must not import it as
+trusted combat proof. The built game still has treasure rewards **disabled**.
+
+Next complete integration gate (single milestone): in-process authenticated
+native death and carried-map authorization into the trusted SQLite claim
+boundary, exact guardian instance binding, durable claim receipt and live
+inventory reconciliation, then one isolated native chest-kill-reconnect-restart
+regression and full prior regressions. Never use `g-*.proof` records as an
+independent grant authority, and do not deploy or restart production.
