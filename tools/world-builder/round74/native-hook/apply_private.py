@@ -42,7 +42,7 @@ def main():
     prompt='\t\tprint(fd, "\\nYou have 54 points to distribute among your 5 stats. Please enter your 5\\nnumbers in the following order: Strength, Dexterity, Constitution,\\nIntelligence, Piety.  No stat may be smaller than 3 or larger than 18.\\nUse the following format: ## ## ## ## ##\\n");'
     c=replace_once(c,prompt,
         '#ifdef HD74_PRIVATE_NATIVE\n'
-        '\t\tprint(fd, "\\nRound 74 private playtest: 20 points above base 10,\\nfor 5 stats STR DEX CON INT PIE (exact total 70, each 10..18).\\nUse ## ## ## ## ##\\n");\n'
+        '\t\tprint(fd, "\\nRound 74 private playtest: up to 65 total points,\\nfor 5 stats STR DEX CON INT PIE (each 3..18).\\nUse ## ## ## ## ##\\n");\n'
         '#else\n'+prompt+'\n#endif',"character creation prompt")
     start='\t\tn = strlen(str); l = 0; k = 0;'
     end='\t\tPly[fd].ply->piety = num[4];'
@@ -51,7 +51,7 @@ def main():
     legacy=c[a:b]
     private='''#ifdef HD74_PRIVATE_NATIVE
         if (!hd74_parse_starting_stats(str,num)) {
-            print(fd, "Enter exactly five whole stats (10..18) totaling 70.\\n: ");
+            print(fd, "Enter five whole stats (3..18) totaling at most 65.\\n: ");
             RETURN(fd, create_ply, 4);
         }
         Ply[fd].ply->strength=num[0];
