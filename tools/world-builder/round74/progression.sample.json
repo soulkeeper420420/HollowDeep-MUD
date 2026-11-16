@@ -1,0 +1,13 @@
+{
+  "status": "DEVELOPMENT_ONLY_NOT_ACTIVE",
+  "level_cap": 60,
+  "xp_base": 1000,
+  "xp_growth": 50,
+  "stat_base": 10,
+  "stat_max": 18,
+  "starting_points": 20,
+  "remort_kills": 3,
+  "remort_seconds": 180,
+  "points_per_remort": 2,
+  "legacy_points_cap": 10
+}
