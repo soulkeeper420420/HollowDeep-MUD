@@ -101,3 +101,14 @@ layout; it does **not** validate hooked character creation, player save/load,
 legacy skill commands, or production level-cap migration. No production game,
 player records, website or service was modified by this test. Round 74B must
 integrate incrementally into another disposable candidate and revalidate.
+
+## Learn to edit the native files
+
+The Round 74B branch includes two hands-on guides for the existing source:
+
+- [VS Code Remote SSH + exact native C editing workflow](../../../docs/ROUND74B_EDITING_GUIDE.md)
+- [Customize XP, stats, class inheritance, rebirth and Legacy Points](../../../docs/ROUND74B_PROGRESSION_CUSTOMIZATION_GUIDE.md)
+
+Both are **development-only**. Practice against an isolated copy of the
+private source archive; do not edit/restart production or advertise the model
+as live gameplay. Round 74B native command/save integration is still pending.
