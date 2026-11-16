@@ -23,3 +23,22 @@ The test suite uses real `claim_ledger.py` from that directory and a **simulated
 ## Mandatory next native milestone
 
 **Do not wire `DurableRewardCoordinator.deliver()` into `open chest` yet.** The legacy Mordor engine still stores characters using native binary files, with no atomically persisted claim receipt. Separate sidecar writes are NOT sufficient. Before enabling loot, inspect the exact `savegame` and `read_ply` contracts, add a claim-key-aware native save format or a proven atomic equivalent without breaking existing characters, build a verified 32-bit candidate, replay actual inventory/gear/gold behavior through crash/restart, and rerun the complete Round 59–73F native/browser suite. Keep test assets and runtime secrets private, and leave production untouched.
+## 2026-11-16 — operator-reported private Linode regression (Round 73G checkpoint)
+
+The operator supplied the terminal output from the disposable checkout
+`/root/hollowdeep-dev/round72-73g-5RBvsQC2/repo`, using the Round 73G
+source at commit `ad0b288b883364928233ac71197713e29acbfd86`.
+
+- Combined `test_treasure` and `test_delivery_protocol`: **21 tests passed**.
+- The full `tools/world-builder/round72/private.sh` test exited with status **0**.
+- The final log includes **`ROUND 73F: native showmap movement, named-go, toggle, radius and suppression PASS`** and **`ROUND 72: private regression suite PASS`**.
+- The test's production guard reported **`PASS: Production and prior fixture unchanged`**.
+- Tests included existing native/browser regressions; the Round 73G delivery tests use a simulated SQLite native-save bridge, **not** actual in-game reward grants.
+
+This result was reported by the operator, rather than independently fetched
+from Linode by the GitHub publisher. No player reward delivery is enabled and
+no production deployment or restart was performed by this change.
+
+**Next gate:** inspect and implement the real native save/receipt transaction;
+validate actual 32-bit item/gold persistence with interrupted save/reconnect/restart
+and then rerun the private regression suite. Do not enable chest rewards earlier.
