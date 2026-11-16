@@ -128,3 +128,15 @@ See the [HollowDeep Events Roadmap](HOLLOWDEEP_EVENTS_ROADMAP.md) for the planne
 ## Round 74B combined first-life pricing and XP banking (private only)
 
 Read the [first-life and five-level bank guide](ROUND74B_FIRST_LIFE_AND_BANK5.md). The four-stage native candidate lives under `tools/world-builder/round74/native-hook/` and has one runner at `combined/run_combined_private.sh`. `command7.c::train` applies a life-based XP threshold and gold fee and calls `up_level()` exactly once, while `hd74_xp.[ch]` calculates the bank limit (five future levels) and all combat/quest XP writers use it. `command4.c`, `hollowdeep.c`, and `hd74_native.c` show costs/status. **No actual durable remort-count lookup exists yet**; the test-only remort lookup is not player authority. Original production code path is unchanged. Actual 32-bit full game, remort durability, death XP penalties, and level migration still require validation.
+
+## Round 74B conditional production release review
+
+The maintainer requested Round 74B go live before Round 74C **once validated**.
+Read the [Round 74B Production Release Gate](ROUND74B_PRODUCTION_RELEASE_GATE.md)
+before considering a build switch. Private ELF32 compilation and focused
+training tests PASS, but actual saved remort count, legacy-player migration,
+full isolated gameplay regression and rollback exercise are unresolved. The
+unhooked `hd74_xp.c::hd74_verified_remorts` returns -1 outside a test bridge,
+which correctly denies unknown-life discounts. The private `Makefile` enables
+`HD74_PRIVATE_NATIVE`; neither omitting this flag nor copying an unverified
+test binary is a safe production rollout. No live deployment happened.
