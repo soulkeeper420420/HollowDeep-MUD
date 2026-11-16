@@ -60,3 +60,43 @@ The maintainer requested that Round 74B go live before starting Round 74C, **if 
 ## Current decision
 
 **NO-GO for live deployment as of this review.** Continue Round 74B release stabilization; do **not** begin Round 74C or change production until a real-game PASS plus remort-save migration and rollback evidence exist. Publish this gate and changes to guides/changelog, but do not equate a GitHub push with a Linode deploy.
+
+## Codex handoff — unpushed private release-candidate findings
+
+The maintainer pasted interim **Codex-reported** results from a Linode/private
+Round 74B stabilization attempt. **These code changes, test fixtures, and
+complete final regression logs have not been uploaded or pushed to this branch.**
+Therefore they are evidence to recover and revalidate, not a new verified release:
+
+- Pinned source archive checksum matched.
+- A revised ELF32 candidate reportedly passed character creation, save/restart
+  and truncated-save refusal without replacing the existing save.
+- A life count was placed in the existing receipt trailer, with original
+  creature/inventory layout unchanged.
+- Focused native tests reportedly passed five **separate** `train` commands,
+  first-life gold discount, standard reborn/legacy cost, level-60 guard and
+  save/restart preserving level, XP, gold, and exactly one wielded blade.
+- Actual training boundary reportedly required **525 cumulative XP** on first
+  life versus **1,050** for reborn/legacy fixtures.
+- A private trap-death test initially showed the wrong XP curve; after a
+  candidate fix the reported first-life level changed **4 → 3** and XP
+  **5,175 → 3,882**.
+- **New critical rollback blocker:** the old live predecessor reportedly
+  reads a new-format save but *drops the life-count metadata on its next save*.
+  Replacing the new binary with the old one is therefore **not a safe
+  rollback**, even if the old binary can start. This must be fixed by a
+  save-aware rollback build that preserves the trailer (and tested), or a
+  comparably safe full player-data restoration/forward-compatibility protocol
+  that guarantees no lost progress. Never silently use the old executable as
+  a rollback target.
+- The final regression was still running when the pasted progress ended;
+  **do not mark it PASS without actual completion evidence**.
+
+**Next actions:** recover the unpushed private Codex source patch and final
+regression artifacts from its disposable workspace; review and pin exact
+candidate checksums; audit that old saves still load and that the replacement
+trailer is authenticated/atomic; close rollback compatibility and run a
+crash/reconnect/old-binary-write test. Then execute the complete native
+gameplay and Round 59–74B regressions, publish only safe tested source,
+prepare a compatible rollback and explicit production cutover plan.
+**Release status remains NO-GO. Production unchanged.**
