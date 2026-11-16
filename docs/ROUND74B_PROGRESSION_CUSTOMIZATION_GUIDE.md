@@ -28,9 +28,9 @@ Edit `progression.playtest.json` with VS Code. The starting example has:
   "level_cap": 60,
   "xp_base": 1000,
   "xp_growth": 50,
-  "stat_base": 10,
+  "stat_base": 3,
   "stat_max": 18,
-  "starting_points": 20,
+  "starting_points": 50,
   "remort_kills": 3,
   "remort_seconds": 180,
   "points_per_remort": 2,
@@ -60,7 +60,7 @@ total_xp(level) = xp_base * (level - 1)^2 + xp_growth * (level - 1)^3
 
 `stat_base` defines the initial value for each of STR, DEX, CON, INT and PIETY. `starting_points` is the additional pool distributed before play; `stat_max` is the per-stat limit. A valid pool must fit within `5 * (stat_max - stat_base)`.
 
-The original `command1.c` instead uses five manually typed values totaling no more than **54**, each from **3 to 18**. Replacing that behavior requires a native hook and a legacy migration decision; changing JSON alone does not update character creation.
+The original production `command1.c` accepts five manually typed values totaling **up to 54**, each from **3 to 18**. The updated Round 74B **private** parser raises the cap to **65**, with the same per-stat limits and acceptance of totals below the cap. It rejects 66 or more. The development model example (`stat_base=3`, `starting_points=50`) represents a full 65-point allocation, but the private native creation command keeps the legacy **up-to** semantics. JSON changes by themselves never modify production character creation.
 
 ## Step 5: Rebirth and class inheritance
 
