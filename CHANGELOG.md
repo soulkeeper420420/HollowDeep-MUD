@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-16 — Round 74B guarded native creation and progression preview
+
+A private-source-only Round 74B candidate now patches the **actual** Mordor `command1.c`, `global.c`, and `Makefile` behind a `HD74_PRIVATE_NATIVE` test macro: new characters enter exactly 20 allocated points above base-10 stats (total 70, per-stat range 10–18); a read-only `hprogress` command prints the player's real native level/class/stats and a **development-only** XP threshold preview. The original 54-point character creation logic remains in the non-test compile branch. Actual legacy `train`, XP, existing characters, skills and remort remain unchanged. The patch requires exact uploaded-source SHA-256 checks and a fresh `round74b-*` disposable checkout; it refuses production paths, drift and reapplication. Native-struct parser/preview and existing Round 74A core tests passed locally in normal and ASan/UBSan 64-bit builds; patched native `command1.c` and `global.c` passed syntax-only compilation. **ELF32 candidate build and isolated game replay are pending on Linode.** Added a [full source-file atlas](docs/HOLLOWDEEP_SOURCE_ATLAS.md) for future guides. No production deployment, PHP website change or restart.
+
 ## 2026-11-16 — Round 74B player/developer source-editing guides
 
 The private `round74b-native-integration` branch publishes hands-on VS Code
