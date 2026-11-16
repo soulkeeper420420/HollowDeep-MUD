@@ -78,3 +78,26 @@ The GitHub Next.js site and the live Linode PHP site are distinct codebases;
 no PHP deployment is inferred from publishing this source. Publish a
 player-facing guide only after real native command hooks and migration tests
 pass. No server process, production player/world record or website changed.
+
+## Operator-reported Linode ELF32 validation — 2026-11-16
+
+The operator executed the private 32-bit test against the disposable Mordor
+native source and supplied these final markers:
+
+```text
+ROUND 74A: config XP/ELF32 cap/starting stat allocation PASS
+ROUND 74A: timed remort/unique kills/class inheritance/bound legacy PASS
+ROUND 74A: fixed-size native-safe progression receipt/CRC/reload PASS
+ROUND 74A: PRIVATE CORE PASS (NO NATIVE HOOKS/PRODUCTION)
+ROUND 74A: native ELF32 Mordor level/XP/stats/class ABI PASS
+ROUND 74A ELF32: PASS
+PRODUCTION DEPLOYMENT: NONE
+WORKSPACE: /root/hollowdeep-dev/round74a-DOMysFit
+```
+
+This is user-supplied terminal evidence, not independently retrieved from
+Linode. The model validates the source-only progression core and native field
+layout; it does **not** validate hooked character creation, player save/load,
+legacy skill commands, or production level-cap migration. No production game,
+player records, website or service was modified by this test. Round 74B must
+integrate incrementally into another disposable candidate and revalidate.
