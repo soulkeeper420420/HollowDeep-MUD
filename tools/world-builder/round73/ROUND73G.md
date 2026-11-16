@@ -46,3 +46,18 @@ and then rerun the private regression suite. Do not enable chest rewards earlier
 ## Native save-format source-only foundation — after validated private regression
 
 Separate branch `round73g-native-save-foundation` contains only authored C receipt/atomic-save primitives, a 64-bit private serializer compatibility harness and documentation. The code is NOT compiled into the native engine, does not enable treasure rewards, and was never deployed. The supplied `files2.c` still rotates backups before writing and lacks bounded compression and a same-save claim receipt. `files3.c` returns consumed serialized inventory bytes, permitting an *inert* trailing receipt format (verified in a private 64-bit harness with nested inventory and a historical compressor round-trip). The standalone primitive rejects corrupt receipts and uses file+directory fsync/rename with an explicit uncertain-result state after rename. Before enabling native loot, bound the real save and load paths, retain every receipt on ordinary saves, save items/gold/receipt atomically, test actual ELF32 crash recovery and repeat Round 59–73F isolated regressions. Production untouched.
+
+## Round 73G native reward staging — offline extension
+
+The `round73g-native-reward-stage` development branch now has an independent
+`hd_native_reward.[ch]` staging API and C replay harness. A real SQLite
+`TreasureLedger` authorizes a test encounter, issues an immutable Python
+reward manifest, and compiles its stable claim/digest/item IDs into a native
+save/reload harness. Local 64-bit ASan/UBSan replay passed for grants, duplicate
+reopens, nested inventory, invalid owner/enchantment/template/IDs, failed
+writes and explicit uncertain-save recovery. Post-rename visibility is **not**
+accepted as crash durability. This component is **not hooked to**
+`treasure_guard.c` or the native game and must remain disabled until the
+persistent guardian mapping, live-session exclusivity and ELF32 native replay
+are validated. Details:
+`native-save-foundation/ROUND73G_NATIVE_REWARD_STAGING.md`.
