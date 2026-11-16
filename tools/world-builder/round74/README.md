@@ -10,7 +10,7 @@ Round 73G native source. It does not overwrite legacy player records.
 
 - **Starting stat allocation:** five native stats (STR/DEX/CON/INT/PIETY),
   strict point pool and caps, immutable after finalize. The sample uses
-  base 10, maximum 18 and 20 points; these are example playtest values.
+  base 3, maximum 18 and 50 additional points (65 total). These are **development-only** sample values; the private native creation hook accepts totals up to 65, while the standalone model requires full allocation.
 - **XP curve & level cap:** `XP(L) = base*(L-1)^2 + growth*(L-1)^3` total
   experience. Integer-only calculations, overflow checks, dynamic levels.
   The sample cap is 60; valid caps are 2–100 while thresholds must fit the
