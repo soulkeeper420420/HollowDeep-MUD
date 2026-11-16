@@ -140,3 +140,20 @@ unhooked `hd74_xp.c::hd74_verified_remorts` returns -1 outside a test bridge,
 which correctly denies unknown-life discounts. The private `Makefile` enables
 `HD74_PRIVATE_NATIVE`; neither omitting this flag nor copying an unverified
 test binary is a safe production rollout. No live deployment happened.
+
+## Round 74B Codex handoff — persistent life metadata and rollback gate
+
+Codex reportedly embedded remort/life metadata in the existing compressed
+receipt trailer and verified character restart and first-life death XP, but the
+**older executable reportedly drops the new life metadata when it saves that
+character**. Merely being able to *read* the save is not rollback compatibility.
+The release gate remains [NO-GO](ROUND74B_PRODUCTION_RELEASE_GATE.md) until a
+metadata-preserving rollback binary (or equivalently safe recovery protocol)
+passes old-binary write/reload tests. Target sources:
+`hd_player_store.c`, `treasure_receipt.c`, `files2.c`, `hd74_xp.c`,
+`creature.c`, and the single-level `train()` in `command7.c`. These are
+**operator-pasted interim findings**, not source/test artifacts on GitHub yet.
+The [private source recovery helper](../tools/world-builder/round74/handoff/collect_codex_candidate.sh)
+creates a source-only archive from disposable Round 74B Linode workspaces
+without modifying live services or player saves. Do not publish raw private
+source archives or runtime logs into the public repository.
