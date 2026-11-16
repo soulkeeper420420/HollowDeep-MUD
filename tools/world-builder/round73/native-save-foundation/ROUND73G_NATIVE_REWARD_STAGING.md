@@ -82,3 +82,26 @@ not the guardian/map authority and cannot be exposed as a command or RPC.
 **Do not wire `hd_native_reward_apply()` into `hd_treasure_open()` at this
 stage.** This is a tested native grant building block, not a complete trust
 boundary or approved production deployment.
+
+## Operator-reported ELF32 private validation — 2026-11-16
+
+The owner executed `HD_TEST_ELF32=1 HD_SANITIZE=0` for this branch's
+`run_native_reward.sh` against a disposable 32-bit native source tree on
+Linode. The operator-provided output reported:
+
+- `ROUND 73G: trusted native reward staging/rollback/receipt/restart PASS`
+- `ROUND 73G: trusted ledger guardian/map/immutable manifest fixture PASS`
+- `ROUND 73G: Python ledger -> actual native inventory + durable receipt PASS`
+- `ROUND 73G NATIVE REWARD ELF32: PASS`
+- `Production deployment: NONE`
+
+The test emitted pre-existing warnings in `files2.c` about potential
+`sprintf(filebak, "%s~", file)` overflow in `load_rom` and `resave_rom`,
+and `files3.c` about unchecked `fgets` in `load_crt_tlk`. Those warnings
+remain outstanding, and no fixes or production changes are implied here.
+
+**Scope remains offline/native-component validation only.** This does not
+establish persistent authenticated guardian/minted map identities, a trusted
+live `open chest` integration, full-game ELF32 build/replay or production
+readiness. Previous isolated game regression passed on the *player-store*
+candidate, before this native reward staging extension.
