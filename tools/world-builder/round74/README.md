@@ -137,3 +137,7 @@ math/overflow boundaries, legacy/private syntax, and local sanitizer checks
 passed; Linode ELF32 and in-game replay are pending. It does **not** implement
 remort, skill inheritance, Legacy items or character-save migration. See the
 [XP/training integration and file guide](native-hook/xp60/ROUND74B_XP_TRAINING.md).
+
+## Private first-life training and five-level bank (Round 74B)
+
+The combined guarded patch now includes **50% first-life XP and training gold**, reverting to full cost after rebirth, plus an XP bank permitting up to **five future level thresholds**. Every `train` still grants just **one level**, charges its own gold fee and preserves cumulative XP. A new `combined/run_combined_private.sh` runs all patch stages and focused native tests in one disposable workspace; normal + ASan/UBSan checks passed locally. The game still needs a secure atomic saved remort count for first-life pricing, synchronized death penalties and complete native gameplay regression before activation. [Guide and file map](../../../docs/ROUND74B_FIRST_LIFE_AND_BANK5.md). No production deployment.
