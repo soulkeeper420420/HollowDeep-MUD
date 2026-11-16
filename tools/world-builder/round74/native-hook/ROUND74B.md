@@ -11,10 +11,10 @@ records, enable remort, unlock skills, change native training, or activate a
 ## Implemented in the disposable native build
 
 1. `command1.c` calls the strict `hd74_parse_starting_stats` parser **only** with
-   `HD74_PRIVATE_NATIVE` defined. New characters allocate base 10 in five
-   stats plus exactly 20 points, each stat 10–18, with total 70. The strict
-   parser rejects extra tokens, non-decimal input, negative numbers, under-
-   allocation and oversized values *without changing input or stat output*.
+   `HD74_PRIVATE_NATIVE` defined. New characters may distribute up to **65 total points**
+   across five stats, each stat **3–18**, matching the legacy allocation
+   semantics except for increasing the ceiling from 54 to 65. The strict
+   parser rejects extra tokens, non-decimal input, negative numbers, oversized totals and out-of-range values *without changing input or stat output*.
    Existing race modifiers still run afterward, and legacy characters remain
    untouched. Without the private macro, the original 54-point creation flow
    is bit-for-bit the original source.
