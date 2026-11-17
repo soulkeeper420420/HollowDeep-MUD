@@ -1,0 +1,14 @@
+RAISE SKELETON — NECROMANCER (PRIVATE PLAYTEST)
+Syntax: raise skeleton   (alias: raiseskeleton)
+Cost: 8 mana. One active skeleton per Necromancer.
+
+Defeat an eligible monster yourself in your current room, then raise its
+skeleton. It inherits that monster's maximum HP and MP, starting full.
+There is no duration timer. The skeleton follows you and aids your attacks.
+It cannot independently finish a monster or generate loot or experience.
+Use Vigor, Mend, Restore, compatible wands/scrolls, or a healing potion:
+  drink <healing-potion> on skeleton
+A skeleton can survive reconnects in the same running server. Durable
+restart/room unload persistence is still in development. Pet death ends
+its existence. Physical corpses and sacrifice are not enabled yet.
+See also: help necromancer | help corpse
