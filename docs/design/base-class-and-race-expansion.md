@@ -39,6 +39,23 @@ Spiritcaller and Beastkeeper are distinct proposals. Spiritcaller issues short-l
 
 For an early Monster Scholar playtest, give one creature a readable tell and a short opening the whole party can use. Test the mechanic before expanding it to other monsters.
 
+### Classic fantasy base-class candidates
+
+| Class | First distinctive mechanic |
+|---|---|
+| Necromancer | Raise one skeleton from a defeated foe. Order it to attack or guard an ally. |
+| Warlock | Borrow power from a patron. Cast a stronger spell by spending a limited pact charge. |
+| Vampire | Drain health from a foe to build a blood reserve. Spend it to heal yourself or power an ability. |
+| Witch | Curse enemies or brew remedies. Switch between curses that weaken a foe's attacks, defenses, or healing. |
+| Shaman | Place one totem that heals allies, protects them, or damages enemies in the room. |
+| Druid | Shift into a wolf for offense or a bear for defense, then return to your normal form to cast. |
+| Sorcerer | Choose an elemental affinity and build a spell list around fire, frost, or lightning. |
+| Berserker | Build rage by dealing and taking damage. Spend it on a heavy strike or a burst of attacks. |
+| Demon Hunter | Mark a demon or undead enemy to expose a weakness the party can exploit. |
+| Death Knight | Strike with a cursed weapon to build power for a self-heal or an unholy strike. |
+
+Proposed Vampire implementation uses a playable base class independent of the character's race. Check for overlap with existing classes such as Barbarian before adding Berserker as a separate class. Review all names against the deployed roster before assigning IDs.
+
 ## Proposed races
 
 | Race | Connection to HollowDeep | First racial feature |
