@@ -42,6 +42,13 @@ death. Track each award independently so it cannot repeat on replay.
 - On successful revival, roll independently for a 5% chance to raise a unique undead variant. Double its base attributes and maximum HP and MP, capped by the native field limits. The unique still occupies one slot and uses the usual mana cost, bonus XP, and loot rules.
 - Persist the unique identity and resulting stats with the pet. Restore those values as saved on relog or restart. Private acceptance must cover both alias forms, the shared timer, and unique persistence.
 
+The operator confirmed the private ELF32 corpse-rule fixture passed on
+Linode for draft commit `2c116545dd2359846d9c334d16b7662240d005e5`.
+The fixture covered the shared cooldown boundary, the RC parser alias,
+the unique roll boundary, doubled attributes and vitals, and original
+loot ownership. Full command dispatch and unique pet save and restore
+still need native gameplay validation.
+
 ## Proposed commands
 
 | Command | Behavior |
