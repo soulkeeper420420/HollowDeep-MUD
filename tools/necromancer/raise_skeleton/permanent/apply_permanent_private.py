@@ -32,10 +32,17 @@ def main():
         not src.parent.name.startswith('necromancer-playtest-') or
         any(str(src).startswith(prefix) for prefix in ['/srv/','/var/www/','/usr/','/etc/','/opt/'])):
         raise SystemExit('Refusing non-disposable source')
-    for name,sha in BASE_SHA256.items():
-        p=src/name
-        if not p.is_file() or p.is_symlink() or hashlib.sha256(p.read_bytes()).hexdigest()!=sha:
-            raise SystemExit('Source SHA mismatch or missing: '+name)
+    for name, sha in BASE_SHA256.items():
+        p = src / name
+        if not p.is_file() or p.is_symlink():
+            raise SystemExit('Source missing or symlinked: ' + name)
+        actual = hashlib.sha256(p.read_bytes()).hexdigest()
+        if actual != sha:
+            raise SystemExit(
+                'Source SHA mismatch: %s\nExpected: %s\nActual:   %s\n'
+                'No source files were changed. Keep the checksum guard; '
+                'run the read-only diagnose_creature_sha.sh before retrying.'
+                % (name, sha, actual))
     for f in ('hd_necro_skeleton.c','hd_necro_skeleton.h'):
         if not (pkg/f).is_file() or (pkg/f).is_symlink(): raise SystemExit('Untrusted missing package: '+f)
     out={f:(src/f).read_text('latin-1') for f in BASE_SHA256 if f not in ('hd_necro_skeleton.c','hd_necro_skeleton.h')}
