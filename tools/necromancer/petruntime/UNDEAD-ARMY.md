@@ -122,8 +122,16 @@ On November 17, 2026, the Linode operator confirmed the private ELF32
 Undead Army game built successfully from `3a3d7961f10f3743465155ce625b95b246de8506`.
 The storage and lifecycle fixtures reconstructed three native creatures
 from disk and restored only the surviving pets on a fresh login. The
-binary is a private build candidate. End-to-end socket gameplay and pet
-orders remain open before gameplay acceptance.
+binary is a private build candidate.
+
+The Linode operator also confirmed the private ELF32 socket replay passed
+using the pet orders build at `16946c5fdcf50f48b6f7b234f4275dbde279ce11`
+and the durable logout barrier at `adf9776a335fc4fe0ec2bdba61c0e8b4bdb944a6`.
+Seeded pets exercised stay, follow, unique restoration, permanent combat
+death, and dismissal across three listener processes. The final owner
+save retained room 2, and the production service PID was unchanged.
+A live `rc` summon, its loot and XP, and targeted healing still need a
+native socket acceptance run.
 
 ## Future class development
 
