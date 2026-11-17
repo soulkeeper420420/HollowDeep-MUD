@@ -19,6 +19,26 @@ BASE_SHA256 = {
     "magic3.c": "a044f83e1d82fe5ebfc41b609c78d4a982062934822d3e00f9fa4aa9c044ca65",
 }
 
+# Two *coupled*, exact source profiles are approved.  The integrated version
+# was recovered from the operator's complete creature.c diff and reproduced
+# byte-for-byte from the pinned original archive (SHA-256 verified).
+# command1.c's paired fingerprint is the exact output from the same private
+# Linode candidate. We do not accept a mixture or arbitrary new source edits.
+ROUND74B_INTEGRATED_SHA256 = {
+    "creature.c": "6df6f74bce702363c9eae7506d96c962b9b3e3d3e178f07f7ea61015b07c9001",
+    "command1.c": "c8525fb2615c49e9c5cebcf321b83b28a3eaa0fea2a8c8bb372904bef20ddd1e",
+}
+PROFILE_FILES = ("creature.c", "command1.c")
+
+def accepted_source_profile(hashes):
+    current = tuple(hashes[name] for name in PROFILE_FILES)
+    if current == tuple(BASE_SHA256[name] for name in PROFILE_FILES):
+        return "first-skill-only"
+    if current == tuple(ROUND74B_INTEGRATED_SHA256[name] for name in PROFILE_FILES):
+        return "round74b-integrated"
+    return None
+
+
 def repl(source, old, new, title):
     n = source.count(old)
     if n != 1:
@@ -32,17 +52,44 @@ def main():
         not src.parent.name.startswith('necromancer-playtest-') or
         any(str(src).startswith(prefix) for prefix in ['/srv/','/var/www/','/usr/','/etc/','/opt/'])):
         raise SystemExit('Refusing non-disposable source')
+    actual_hashes = {}
     for name, sha in BASE_SHA256.items():
         p = src / name
         if not p.is_file() or p.is_symlink():
             raise SystemExit('Source missing or symlinked: ' + name)
         actual = hashlib.sha256(p.read_bytes()).hexdigest()
-        if actual != sha:
+        actual_hashes[name] = actual
+        if name not in PROFILE_FILES and actual != sha:
             raise SystemExit(
                 'Source SHA mismatch: %s\nExpected: %s\nActual:   %s\n'
-                'No source files were changed. Keep the checksum guard; '
-                'run the read-only diagnose_creature_sha.sh before retrying.'
+                'No source files were changed; do not force-patch.'
                 % (name, sha, actual))
+    profile = accepted_source_profile(actual_hashes)
+    if profile is None:
+        raise SystemExit(
+            'Refusing unknown or mixed creature.c + command1.c source profiles.\n'
+            'Expected first-skill pair: %s / %s\n'
+            'Approved Round74B pair: %s / %s\n'
+            'Actual pair: %s / %s\nNo source files were changed.'
+            % (BASE_SHA256['creature.c'], BASE_SHA256['command1.c'],
+               ROUND74B_INTEGRATED_SHA256['creature.c'],
+               ROUND74B_INTEGRATED_SHA256['command1.c'],
+               actual_hashes['creature.c'], actual_hashes['command1.c']))
+    if profile == 'round74b-integrated':
+        # No reversion of first-life death, quest XP, or five-level banking.
+        for name in ('hd74_xp.c', 'hd74_xp.h'):
+            p = src / name
+            if not p.is_file() or p.is_symlink():
+                raise SystemExit('Missing trusted Round74B helper: ' + name)
+        native = (src / 'creature.c').read_text('latin-1')
+        creation = (src / 'command1.c').read_text('latin-1')
+        for term in ('hd74_xp_add_banked(', 'hd74_verified_remorts(',
+                     'hd74_level_from_xp_for_life(', 'hd74_xp_for_life_next('):
+            if term not in native:
+                raise SystemExit('Round74B source contract missing: ' + term)
+        if 'hd_store_create_necromancer(' not in creation:
+            raise SystemExit('Necromancer creation contract missing')
+    print('NECROMANCER: accepted exact private input profile: ' + profile)
     for f in ('hd_necro_skeleton.c','hd_necro_skeleton.h'):
         if not (pkg/f).is_file() or (pkg/f).is_symlink(): raise SystemExit('Untrusted missing package: '+f)
     out={f:(src/f).read_text('latin-1') for f in BASE_SHA256 if f not in ('hd_necro_skeleton.c','hd_necro_skeleton.h')}
