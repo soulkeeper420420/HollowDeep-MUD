@@ -3,7 +3,7 @@
 An online multiplayer dungeon using the **original Mordor 3.00 C server**, a browser terminal and native Telnet clients. The game runs on a persistent Linux host; Sites serves the browser interface.
 
 - **Play with a MUD client:** `172.233.176.81`, port `4040`, Telnet.
-- **Website:** https://hollowdeep-dungeon.soulkeeper420.chatgpt.site/
+- **Website:** https://hollowdeepmud.com/
 - **Source:** https://github.com/soulkeeper420420/HollowDeep-MUD
 
 Native access has been confirmed by the host. The host has confirmed the earlier spells/progression/staff update. New help, skills, builder/event and staff-clan changes in this source version still require their guarded native update to be installed. Browser play needs the separate authenticated TLS bridge and a matching website deployment. Publishing source does not install either service.
