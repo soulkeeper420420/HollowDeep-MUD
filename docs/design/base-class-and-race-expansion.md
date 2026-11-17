@@ -56,6 +56,23 @@ For an early Monster Scholar playtest, give one creature a readable tell and a s
 
 Proposed Vampire implementation uses a playable base class independent of the character's race. Check for overlap with existing classes such as Barbarian before adding Berserker as a separate class. Review all names against the deployed roster before assigning IDs.
 
+### Starting and rebirth skills
+
+Each class starts with its first skill at level 1. Completing a life in the class and successfully rebirthing earns its second skill once in the Past Lives journal. The earned skill can be equipped in the existing proposed single inherited-skill slot, including on a later return to its original class. Inherited skills use a cooldown when carried into a class that lacks the original resource. Set costs, durations, and damage after a private playtest. Room-wide hostile skills affect only eligible enemies already in combat with the player or their party. Effects from repeated casts of the same aura refresh its duration without stacking.
+
+| Class | Level 1 | Earned on rebirth |
+|---|---|---|
+| Necromancer | **Raise Skeleton** — Raise one skeleton from a defeated foe and order it to attack or guard. | **Graveburst** — Channel a pulse of grave energy that damages enemies already fighting your party in the room. |
+| Warlock | **Pact Bolt** — Fire a bolt and spend an optional pact charge to empower it. | **Pactbrand** — Enchant your weapon so its next landed hit releases a burst of pact damage. |
+| Vampire | **Blood Drain** — Drain a foe to fill your blood reserve and spend some of it to heal yourself. | **Crimson Veil** — Surround yourself with a short aura that drains a small amount of health from enemies who strike you. |
+| Witch | **Wither** — Curse one foe to weaken its attacks briefly. | **Witchfire** — Enchant an ally’s weapon so its next landed hit reduces the target’s healing received. |
+| Shaman | **Healing Totem** — Place one totem that periodically heals allies in the room. | **Spirit Ward** — Project a short aura that reduces elemental damage taken by nearby allies. |
+| Druid | **Wolf Form** — Shift into a wolf for faster melee attacks and return to your normal form to cast. | **Briar Ring** — Root enemies already fighting your party in the room without affecting their ability to attack. |
+| Sorcerer | **Elemental Bolt** — Fire a bolt attuned to fire, frost, or lightning. | **Elemental Surge** — Release a room-wide burst against engaged foes. Fire burns, frost slows, and lightning can arc to a second target. |
+| Berserker | **Rage Strike** — Build rage in combat and spend it on a heavy melee hit. | **War Cry** — Give yourself and nearby allies a brief damage boost. Repeated cries refresh the effect. |
+| Demon Hunter | **Hunter’s Mark** — Mark a demon or undead enemy to expose a weakness your party can exploit. | **Silver Edge** — Enchant your weapon so its next few strikes deal bonus damage to demons and undead. |
+| Death Knight | **Unholy Strike** — Strike with a cursed weapon and build power you can spend on a small self-heal. | **Grave Guard** — Raise an aura that absorbs part of the next hit you or a nearby ally takes. |
+
 ## Proposed races
 
 | Race | Connection to HollowDeep | First racial feature |
