@@ -93,3 +93,20 @@ player-vs-monster recordings. Add one safe `dismiss skeleton` command and
 potential target restrictions, **then** consider additional minions, spell
 advancement, curses, or a later Graveburst rebirth quest. The maintainer does
 not need to edit C files manually; this guide explains exactly where they live.
+
+## One-command private Linode validation
+
+The helper `onepass_linode.sh` creates a new disposable prototype from the
+pinned original Necromancer build script (`3324e24`), verifies both private
+source archives and the build-script SHA-256, applies this skill to the
+freshly generated `necromancer-playtest-*/src` directory, and compiles the
+result as ELF32. It checks the live service's PID **without restarting or
+writing to the service**. When invoked with `EXPECTED_COMMIT`, it refuses
+an unexpected branch revision. Run via the pinned GitHub commit, not an
+unreviewed working-tree script. It will create private test logs under
+`/root/hollowdeep-dev/necromancer-skeleton-onepass-*`.
+
+**Passing this check is still not a real gameplay replay.** A later private
+socket/world replay must verify the `raise skeleton` command, monster room
+visibility, follow, combat, death, expiry, disconnected sessions, and no
+item/XP duplication before deployment can be approved.
