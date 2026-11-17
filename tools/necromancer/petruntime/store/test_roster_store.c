@@ -1,0 +1,57 @@
+#define main legacy_main
+#include "test_pet_store.c"
+#undef main
+#include "hd_pet_roster.h"
+
+int hd_roster_store_read(const char *, hd_pet_roster *);
+int hd_roster_store_checkpoint(const char *, const hd_pet_roster *,
+                               const hd_pet_roster *, hd_pet_roster *);
+
+int main(int argc, char **argv)
+{
+    char *seed[] = {argv[0], "seed", NULL};
+    char *raise[] = {argv[0], "raise", NULL};
+    hd_pet_roster old, next, check;
+    hd_pet_state legacy;
+    creature *owner;
+    (void)argc;
+
+    assert(legacy_main(2, seed) == 0);
+    assert(legacy_main(2, raise) == 0);
+    assert(hd_roster_store_read(name, &old) == HD_PET_OK);
+    assert(old.revision == 2 && old.count == 1 && old.pets[0].hpcur == 147);
+    next = old;
+    next.pets[0].hpcur = 100;
+    next.pets[0].stay = 1;
+    setenv("HD_ATOMIC_FAIL", "before_rename", 1);
+    assert(hd_roster_store_checkpoint(name, &old, &next, &check) == HD_PET_ERROR);
+    unsetenv("HD_ATOMIC_FAIL");
+    assert(hd_pet_store_read(name, &legacy) == HD_PET_OK && legacy.hpcur == 147);
+    assert(hd_roster_store_checkpoint(name, &old, &next, &check) == HD_PET_OK);
+    assert(check.revision == 3 && check.pets[0].hpcur == 100 && check.pets[0].stay);
+    assert(hd_pet_store_init(name, &legacy) == HD_PET_ERROR);
+    assert(hd_roster_store_checkpoint(name, &old, &old, &next) == HD_PET_CONFLICT);
+
+    assert(hd_store_load_player(name, &owner) == 0);
+    owner->mpcur = 109;
+    assert(hd_store_save_live_player(name, owner) == 0);
+    free_crt(owner);
+    native_player(109);
+    assert(hd_store_read_claim(name, claim, digest) == 1);
+    assert(hd_roster_store_read(name, &next) == HD_PET_OK);
+    assert(next.revision == 3 && next.pets[0].hpcur == 100 && next.pets[0].stay);
+
+    next.count = 0;
+    setenv("HD_ATOMIC_FAIL", "after_rename", 1);
+    assert(hd_roster_store_checkpoint(name, &check, &next, &old) == HD_PET_UNCERTAIN);
+    unsetenv("HD_ATOMIC_FAIL");
+    assert(hd_roster_store_read(name, &next) == HD_PET_OK);
+    assert(next.revision == 4 && next.count == 0 && next.next_id == 2);
+    assert(hd_roster_store_checkpoint(name, &next, &check, &old) == HD_PET_ERROR);
+    check.revision = next.revision;
+    assert(hd_roster_store_checkpoint(name, &next, &check, &old) == HD_PET_ERROR);
+    native_player(109);
+    assert(hd_store_read_claim(name, claim, digest) == 1);
+    puts("PASS: atomic roster migration, save preservation, failure recovery, and removal");
+    return 0;
+}
