@@ -12,6 +12,10 @@ BEFORE=$(systemctl show hollowdeep.service -p MainPID --value)
 # This fetch changes ONLY the private repository's Git objects/refs.
 git -C "$R" fetch -q --no-tags origin "$BRANCH"
 COMMIT=$(git -C "$R" rev-parse FETCH_HEAD)
+if [[ -n ${EXPECTED_COMMIT:-} && "$COMMIT" != "$EXPECTED_COMMIT" ]]; then
+  echo "Unexpected branch revision: $COMMIT" >&2
+  exit 2
+fi
 W=$(mktemp -d /root/hollowdeep-dev/necromancer-skeleton-onepass-XXXXXXXX)
 mkdir -m 700 "$W/pkg"
 git -C "$R" show "$PIN_BASE:tools/necromancer/build-and-check.sh" > "$W/prototype.sh"
