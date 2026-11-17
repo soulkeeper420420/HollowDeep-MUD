@@ -24,6 +24,21 @@ Expand the starting roster before implementing special-class remort recipes. The
 
 Spiritcaller and Beastkeeper are distinct proposals. Spiritcaller issues short-lived tactical orders to a bound spirit. Beastkeeper invests in training a persistent animal companion. Check for overlap with the current playable roster before selecting either.
 
+### Further base-class candidates
+
+| Class | Role | First distinctive mechanic |
+|---|---|---|
+| Chronomancer | Timing and turn control | Delay one incoming hit for a round, giving the party time to heal or shield the target before it lands. |
+| Standard-Bearer | Party positioning | Plant a banner that supports allies in your room. Move it as the fight shifts to another room. |
+| Lancer | Reach and momentum | Build momentum by advancing into a fight, then spend it on a thrust. Getting blocked or pinned breaks momentum. |
+| Threadmender | Damage management | Link yourself to an ally and take on part of their damage, then spend actions mending the strain. |
+| Gambler | Risk and resource management | Draw a card and choose to take its modest effect or wager a second draw for a stronger payoff with a setback on failure. |
+| Monster Scholar | Enemy analysis | Observe a foe to learn a tell, then share it so allies can recognize and exploit the same opening. |
+| Relic Hunter | Dungeons and salvage | Salvage a discovered relic for parts or keep it intact and take it to an appraiser to uncover its history and function. |
+| Storm Channeler | Terrain-sensitive casting | Choose whether to store a charge for a later fight or spend it now. Rain and exposed terrain change how the charge behaves. |
+
+For an early Monster Scholar playtest, give one creature a readable tell and a short opening the whole party can use. Test the mechanic before expanding it to other monsters.
+
 ## Proposed races
 
 | Race | Connection to HollowDeep | First racial feature |
