@@ -121,3 +121,7 @@ help and reconstructed-source syntax tests passed. The operator has not yet
 run this new ELF32 build or a real socket replay. Room-local corpse escrow is
 not yet durable; room unload/restart, registry capacity fallback, pet state,
 crash-safe exactly-once transactions and rollback are explicit release blockers.
+
+## Same-process room-cache persistence (next private milestone)
+
+The previous combined corpse candidate passed a complete operator-reported native socket replay, including same-process logout/reconnect. The [cache milestone](../tools/necromancer/cache/README.md) now preserves living pets and corpse escrow through native room-cache eviction/reload, excludes registered pets from room saves, removes the fixed corpse registry ceiling, reserves the Necromancer title for the verified class (the old Mage level 7-9 title becomes Conjurer), and provides seven ASCII help pages. Local reconstructed-source tests passed, including native LRU and both room replacement paths; Linode ELF32 and repeat socket tests remain pending. This does not persist corpse escrow or pet state across process restart. Durable ownership, exactly-once crash recovery, capacity and rollback are still required. No live deployment.
