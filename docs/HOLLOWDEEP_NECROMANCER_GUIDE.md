@@ -100,3 +100,7 @@ consume operation releases them exactly once. Ordinary players will use
 `raise corpse`. If allegiance storage is unreadable, sacrifice must be
 denied. Death auto-drop, room serialization, crash rollback, summoned-pet
 no-loot rules and favor-credit durability are still separate release gates.
+
+### Native in-game help (private deity and Necromancer build)
+
+The corrected private patch accepts the complete, independently reconstructed Round 74B source fingerprint and gives `*deity` command ID 151 (150 remains `raiseskeleton`). Every feature milestone must supply its native in-game help pages, its relevant help index/skill/staff visibility updates, and a regression that opens those pages before release. The new [native help files](../tools/necromancer/deity/help) cover `help necromancer`, `help raise skeleton`, `help raiseskeleton`, `help deity`, authorized `help *deity`, and a clearly labeled development-status `help corpse` / `help sacrifice` page. `skills` lists Raise Skeleton only for verified eligible Necromancers, while `skills all` shows the class requirement. `dmcommands` lists deity administration only for an authorized DM. The private [help installer](../tools/necromancer/deity/stage_help.py) installs these pages into the native `help/` directory of an isolated world; conflicts are refused. For a future approved live deployment, back up existing help files, install the reviewed runtime pages, and test through player and DM sessions. **Nothing has been installed in the production game yet.**
