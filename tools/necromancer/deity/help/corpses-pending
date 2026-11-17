@@ -1,0 +1,9 @@
+CORPSES, LOOT AND SACRIFICE — IN DEVELOPMENT
+These physical-corpse commands are NOT enabled in this build.
+Planned commands:
+  loot corpse       release the contents to the room and consume the corpse
+  sacrifice corpse  same loot release; requires a confirmed assigned deity
+  raise corpse      Necromancer only; 8 mana, inherited HP/MP, no timer
+A corpse will release its gold/inventory only once. Pet remains will never
+create loot, XP, additional summons or deity favor. Favor is not implemented.
+Current private playtest summon: raise skeleton (see help raise skeleton).
