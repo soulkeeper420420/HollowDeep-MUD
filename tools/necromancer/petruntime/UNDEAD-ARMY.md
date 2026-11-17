@@ -130,8 +130,11 @@ and the durable logout barrier at `adf9776a335fc4fe0ec2bdba61c0e8b4bdb944a6`.
 Seeded pets exercised stay, follow, unique restoration, permanent combat
 death, and dismissal across three listener processes. The final owner
 save retained room 2, and the production service PID was unchanged.
-A live `rc` summon, its loot and XP, and targeted healing still need a
-native socket acceptance run.
+The Linode operator then confirmed that the ELF32 replay at
+`5e8c7081fcacdc6969c7e320da32b738add357ed` passed live `rc`, the shared
+cooldown, original loot, exact bonus XP, targeted healing, pet orders,
+unique restoration, and permanent combat death. The production service
+PID was unchanged.
 
 ## Future class development
 
