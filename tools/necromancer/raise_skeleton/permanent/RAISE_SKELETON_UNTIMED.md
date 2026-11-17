@@ -69,26 +69,30 @@ Only a restricted private source build is permitted by this milestone: no
 live `hollowdeep.service` restart, player data mutation, public website update,
 Discord announcement or game-world replacement.
 
-## SHA mismatch diagnostics
+## Integrated Round 74B SHA repair (2026-11-16)
 
-The private SHA guard in `apply_permanent_private.py` expects the original
-first-skill `creature.c` SHA-256
-`9a1c158811a1c96d4f0190f4c88876afb9dc16d1edba12e08a4dcc18c7f21243`.
-The operator reported `Source SHA mismatch or missing: creature.c` during the
-one-pass Linode validation. **No live deployment occurred.** This means a
-private source differs from the pinned first-skill stage; it does not establish
-which edits are present. Do not remove the checksum check, replace the C file
-from production, or run `patch --force`.
+The earlier untimed patch failed in the user's disposable stage because its
+input allowlist expected only the first-skill `creature.c` and `command1.c`.
+The actual source also carried the reviewed Round 74B banked XP and
+life-dependent death progression. The **complete operator-supplied creature
+diff** was reconstructed byte-for-byte against the pinned first-skill baseline:
 
-A read-only diagnostic is at
-[`diagnose_creature_sha.sh`](diagnose_creature_sha.sh). It verifies the pinned
-source archive, locates the newest private untimed build, reconstructs the
-exact expected first-skill `creature.c`, reports the actual SHA-256, and prints
-at most 100 diff lines. It refuses a production source path and never writes to
-existing source, player files, or game services. The helper was locally tested
-against both exact-baseline and pre-modified source copies. The patch now also
-prints expected/actual SHA hashes on failure while still refusing drift.
+- First-skill `creature.c`: `9a1c158811a1c96d4f0190f4c88876afb9dc16d1edba12e08a4dcc18c7f21243`
+- Round 74B integrated `creature.c`: `6df6f74bce702363c9eae7506d96c962b9b3e3d3e178f07f7ea61015b07c9001`
+- Round 74B integrated `command1.c`: `c8525fb2615c49e9c5cebcf321b83b28a3eaa0fea2a8c8bb372904bef20ddd1e` (operator-reported fingerprint)
 
-**Current status:** needs the Linode diagnostic output before a safe rebase or
-fresh candidate correction; the untimed skill has *not* passed Linode ELF32
-validation. Preserve the older private test workspace for comparison.
+The patch now accepts **only** the paired first-skill fingerprints or the
+paired Round 74B integrated fingerprints. Mixed pairs and arbitrary drift
+are rejected before any source writes. The integrated profile additionally
+requires its XP helper files and actual life-based functions, and the
+Necromancer creation entry. We did not remove or weaken the SHA guard.
+
+Local verification: exact reconstruction of the user's `creature.c` checksum;
+paired-profile allow/deny unit tests; an isolated synthetic integration
+replay applying the patch to those exact `creature.c` bytes (with a
+locally simulated `command1.c` contract); unchanged old XP/death functions;
+no-op rejection on repeat invocation; native gnu89 syntax for integrated
+`creature.c`, and 64-bit lifecycle/healing tests under normal and ASan/UBSan
+builds. **The user's exact `command1.c` bytes are not yet uploaded;** the
+real Linode run is still required to confirm all its anchors and complete
+the combined 32-bit build. There was no production deployment/restart.
