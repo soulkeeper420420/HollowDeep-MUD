@@ -88,6 +88,19 @@ def correct_movement(source):
     return corrected, len(pending)
 
 
+def stage_payload(work, payload, replay):
+    package = work / 'pkg'
+    package.mkdir()
+    for name, body in payload.items():
+        relative = Path(name)
+        if relative.is_absolute() or '..' in relative.parts or not relative.parts:
+            raise ValueError('Invalid replay payload path: ' + name)
+        path = package / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(replay if name == 'runtime_gameplay.py' else body,
+                        encoding='ascii')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('runner', type=Path)
@@ -141,6 +154,7 @@ def main():
         copied = work / 'src'
         shutil.copytree(src, copied)
         check_binary(copied / 'frp.new')
+        stage_payload(work, payload, replay)
         print(f'Private replay results: {work}', flush=True)
         scope = {'__name__': 'runtime_gameplay'}
         exec(compile(replay, '<runtime_gameplay>', 'exec'), scope)
