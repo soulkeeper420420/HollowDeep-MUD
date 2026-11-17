@@ -106,6 +106,16 @@ zero pet HP and MP after death and restart. The production service PID
 was unchanged. The successful run brought up loopback inside the private
 network namespace before launching the replay.
 
+## Roster v2 ELF32 storage verified
+
+On November 17, 2026, the operator confirmed both private ELF32 storage
+suites passed on Linode for `ef0f5292f81a96960936b2d360c5975d9038d27d`.
+The suite preserved unique identity and boosted stats through a native
+save and reload. It also passed atomic migration, failure recovery,
+three durable summons, exact mana debit, bounded XP and stale retry tests.
+Recreating the saved pets as native creatures after a full game restart
+remains a private gameplay acceptance case.
+
 ## Future class development
 
 Graveburst remains the proposed rebirth unlock for a completed Necromancer
