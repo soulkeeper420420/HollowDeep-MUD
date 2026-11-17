@@ -43,7 +43,7 @@ For an early Monster Scholar playtest, give one creature a readable tell and a s
 
 | Class | First distinctive mechanic |
 |---|---|
-| Necromancer | Reanimate a defeated monster as an undead pet. Higher-level Necromancers raise more reliably and can command more pets. |
+| Necromancer | Reanimate a defeated monster as an undead pet. Higher-level Necromancers raise more reliably and can command more pets. Successful raises award bonus XP. |
 | Warlock | Borrow power from a patron. Cast a stronger spell by spending a limited pact charge. |
 | Vampire | Drain health from a foe to build a blood reserve. Spend it to heal yourself or power an ability. |
 | Witch | Curse enemies or brew remedies. Switch between curses that weaken a foe's attacks, defenses, or healing. |
@@ -94,10 +94,26 @@ Necromancer is the first class selected for an isolated playtest. Start with cha
 #### Raise Corpse playtest design
 
 - `raise corpse` selects an eligible monster corpse in the room. `raise corpse <monster>` selects a particular corpse when several are present. Each successful cast adds one undead pet up to the active limit.
-- The pet keeps the monster's name and basic combat role, such as an undead wolf that bites or an undead troll that hits hard. First-pass pets use capped stats and ordinary attacks. Player corpses, boss corpses, and summoned creatures are excluded. A raised pet yields no XP, loot, or raisable corpse when destroyed.
-- Initial pet limits are 1 at levels 1–19, 2 at 20–39, 3 at 40–59, and 4 at 60. Reaching the cap rejects the command before a revival roll. Use the existing pet orders where possible and support selecting a particular pet for dismissal or orders.
+- The pet keeps the monster's name and basic combat role, such as an undead wolf that bites or an undead troll that hits hard. First-pass pets use capped stats and ordinary attacks. Player corpses, boss corpses, and summoned creatures are excluded. Raised pets earn their own XP from eligible kills and drop loot when killed in combat. Pet-assisted kills use normal owner and party XP credit, with each kill counted once.
+- Pet slots unlock at the following Necromancer levels. Reaching the cap rejects the command before a revival roll. Use existing pet orders where possible and support selecting a particular pet for dismissal or orders.
+
+  | Level unlocked | Active pet cap |
+  |---:|---:|
+  | 1 | 3 |
+  | 7 | 4 |
+  | 14 | 5 |
+  | 20 | 6 |
+  | 27 | 7 |
+  | 34 | 8 |
+  | 40 | 9 |
+  | 47 | 10 |
+  | 54 | 11 |
+  | 60 | 12 |
+
+- Suggested first-pass Raise Corpse bonus is 10% of the monster's ordinary XP value, awarded to the Necromancer once on a successful raise and subject to normal XP limits. Failed raises award zero XP. Track pet XP for the pet's lifetime. Pet ranks and their effects are open for playtesting.
+- On combat death a pet drops its own loot once. The original corpse retains its original loot. Dismissal, logout, expiry, and restart do not generate drops. A dead raised pet cannot be raised again.
 - Proposed revival chance is 50% + 1 percentage point per Necromancer level above 1 + 5 percentage points per level the Necromancer is above the monster. Monsters above the Necromancer's level subtract 5 points per level. Clamp the result to 10–95%. A level-10 Necromancer gets 59% against a level-10 monster, 84% against a level-5 monster, and 34% against a level-15 monster.
 - Give each eligible corpse one actual revival roll so repeated casts cannot guarantee success. A failed roll leaves the corpse lootable but spent for revival. Validation failures, including a full pet roster, do not spend a corpse. Preserve corpse loot and ownership through revival. Pets are temporary and disappear on dismissal, death, logout, or restart.
-- In an isolated gameplay replay, exercise qualifying and rejected corpses, chance boundaries, multiple active pets, cap and dismissal, loot preservation, and cleanup across movement and logout. Review the corpse lifetime and follower code before wiring it into the private build.
+- In an isolated gameplay replay, exercise qualifying and rejected corpses, chance boundaries, pet cap unlocks, pet XP and normal owner credit on a kill, once-per-corpse raise XP, pet death drops, original loot preservation, and cleanup across movement and logout. Review the corpse lifetime and follower code before wiring it into the private build.
 
 The creation prototype uses the existing Mage combat and training rules and stores a distinct Necromancer identity in the atomic player-save trailer. The current native class number is also used in staff authority comparisons, so the prototype leaves numeric class and race IDs alone. The prototype is opt-in for the private build. Local ELF64 compilation and native persistence checks passed. The ELF32 build and interactive creation replay still require Linode. See [build-and-check.sh](../../tools/necromancer/build-and-check.sh).
