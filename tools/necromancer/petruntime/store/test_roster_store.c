@@ -11,6 +11,25 @@
 #include "hd_necro_skeleton.h"
 
 void hd_necro_skeleton_death(creature *);
+int hd_army_pet_command(creature *, cmd *);
+static creature target;
+static int enemy;
+creature *find_crt(creature *viewer, ctag *list, char *query, int number)
+{
+    (void)viewer;
+    (void)list;
+    return number == 1 && !strcmp(query, "trialghoul") ? &target : NULL;
+}
+int is_enm_crt(char *name, creature *pet) { (void)name; return enemy && pet == &target; }
+void add_enm_dmg(char *name, creature *pet, int damage)
+{ (void)name; assert(pet == &target && damage > 0); }
+
+static void pet_order(creature *owner, const char *text)
+{
+    cmd command = {0};
+    strcpy(command.fullstr, text);
+    hd_army_pet_command(owner, &command);
+}
 void print(int fd, char *format, ...) { (void)fd; (void)format; }
 void del_active(creature *pet) { (void)pet; }
 void add_crt_rom(creature *pet, room *where, int announce)
@@ -63,9 +82,22 @@ int main(int argc, char **argv)
             first = hd_necro_skeleton_probe(owner);
             assert(first && first->parent_rom == &before && first->hpcur == 83);
             assert(hd_necro_skeleton_is_pet(first));
+            pet_order(owner, "pets");
+            pet_order(owner, "pet stay 2");
+            assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.pets[0].stay);
+            target.type = MONSTER;
+            target.parent_rom = &before;
+            target.hpcur = 12;
+            pet_order(owner, "pet attack trialghoul");
+            assert(target.hpcur == 12);
+            enemy = 1;
+            pet_order(owner, "pet attack trialghoul");
+            assert(target.hpcur < 12 && target.hpcur >= 1);
             owner->parent_rom = &after;
             owner->rom_num = 2;
             hd_necro_skeleton_follow(owner, &before, &after);
+            assert(first->parent_rom == &before);
+            pet_order(owner, "pet follow 2");
             assert(first->parent_rom == &after);
             hd_necro_skeleton_death(first);
             del_crt_rom(first, &after);
@@ -106,6 +138,15 @@ int main(int argc, char **argv)
         assert(old.pets[2].id == 5 && old.pets[2].unique && old.pets[2].strength == 20 &&
                !strcmp(old.pets[2].name, "cave ghoul"));
         assert(!hd_army_raise_ready(owner, &corpse));
+        pet_order(owner, "pet dismiss 4294967296");
+        assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 3);
+        pet_order(owner, "pet dismiss 3");
+        assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 2 &&
+               old.pets[0].id == 4 && old.pets[1].id == 5);
+        pet_order(owner, "pet dismiss all");
+        assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 0 &&
+               old.next_id == 6);
+        puts("PASS: pet status, stay, follow, combat assist, and durable dismissal");
         hd_necro_skeleton_logout(owner);
         free_crt(owner);
         puts("PASS: fresh login restores survivors and excludes the dead pet");

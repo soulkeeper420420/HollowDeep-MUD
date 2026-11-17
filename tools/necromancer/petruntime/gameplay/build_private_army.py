@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -29,6 +30,18 @@ def main():
         raise ValueError('Private runtime skeleton source fingerprint mismatch')
     stage_corpse(source)
     stage_command_and_login(source)
+    table = source / 'global.c'
+    commands = table.read_text(encoding='latin-1')
+    alias = '\t{ "rc", 150, hd_corpse_raise },'
+    if (commands.count(alias) != 1 or
+            re.search(r'"pets?"\s*,|,\s*154\s*,', commands)):
+        raise ValueError('Unexpected native pet command table')
+    commands = commands.replace(alias, alias + '\n'
+        '\t{ "pet", 154, hd_army_pet_command },\n'
+        '\t{ "pets", 154, hd_army_pet_command },')
+    table.write_text('struct creature; struct cmd;\n'
+        'extern int hd_army_pet_command(struct creature *, struct cmd *);\n'
+        + commands, encoding='latin-1')
     shutil.copyfile(HERE / 'hd_army_runtime.c', skeleton)
     for name in ('hd_army_restore.c', 'hd_army_restore.h'):
         shutil.copyfile(HERE / name, source / name)

@@ -7,9 +7,11 @@
 #include "hd_army_restore.h"
 #include "hd_corpse.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -156,14 +158,10 @@ void hd_necro_skeleton_logout(creature *owner)
     memset(session, 0, sizeof *session);
 }
 
-void hd_necro_skeleton_death(creature *pet)
+static void remove_pet(army_session *session, size_t index)
 {
-    size_t index, remaining;
-    army_session *session = find_pet(pet, &index);
-    hd_pet_roster next;
-    if (!session)
-        storage_stop("unregistered death", HD_PET_ERROR);
-    next = session->saved;
+    size_t remaining;
+    hd_pet_roster next = session->saved;
     --next.count;
     remaining = next.count - index;
     memmove(&next.pets[index], &next.pets[index + 1], remaining * sizeof next.pets[0]);
@@ -174,6 +172,15 @@ void hd_necro_skeleton_death(creature *pet)
             remaining * sizeof session->last_hit[0]);
     session->pets[next.count] = NULL;
     session->last_hit[next.count] = 0;
+}
+
+void hd_necro_skeleton_death(creature *pet)
+{
+    size_t index;
+    army_session *session = find_pet(pet, &index);
+    if (!session)
+        storage_stop("unregistered death", HD_PET_ERROR);
+    remove_pet(session, index);
 }
 
 void hd_necro_skeleton_on_free(creature *who)
@@ -357,7 +364,133 @@ int hd_army_raise_commit(creature *owner, const hd_army_corpse *corpse)
     owner->mpcur -= 8;
     owner->experience = xp;
     add_crt_rom(session->pets[index], owner->parent_rom, 0);
-    print(owner->fd, "You raise %s [pet %lu].\n", entry.name,
-          (unsigned long)session->saved.pets[index].id);
+    {
+        char line[132];
+        snprintf(line, sizeof line, "You raise %s [pet %lu].\n", entry.name,
+                 (unsigned long)session->saved.pets[index].id);
+        print(owner->fd, "%s", line);
+    }
     return 1;
+}
+
+static void describe_pets(army_session *session)
+{
+    size_t i;
+    char line[220];
+    snprintf(line, sizeof line, "Pets: %lu/%u\n", (unsigned long)session->saved.count,
+             hd_roster_capacity(session->owner->level));
+    print(session->owner->fd, "%s", line);
+    for (i = 0; i < session->saved.count; ++i) {
+        const hd_roster_pet *entry = &session->saved.pets[i];
+        creature *pet = session->pets[i];
+        snprintf(line, sizeof line, "Pet %lu: %s%s | HP %d/%u MP %d/%u | XP %lu | %s\n",
+                 (unsigned long)entry->id, entry->unique ? "Unique " : "", pet->name,
+                 (int)pet->hpcur, (unsigned)entry->hpmax, (int)pet->mpcur,
+                 (unsigned)entry->mpmax, (unsigned long)entry->experience,
+                 entry->stay ? "stay" : "follow");
+        print(session->owner->fd, "%s", line);
+    }
+}
+
+static size_t select_pet(const army_session *session, const char *token)
+{
+    uint32_t id = 0;
+    size_t i;
+    for (; *token; ++token) {
+        unsigned digit;
+        if (!isdigit((unsigned char)*token))
+            return session->saved.count;
+        digit = (unsigned)(*token - '0');
+        if (id > (UINT32_MAX - digit) / 10)
+            return session->saved.count;
+        id = 10 * id + digit;
+    }
+    for (i = 0; i < session->saved.count; ++i)
+        if (session->saved.pets[i].id == id)
+            break;
+    return i;
+}
+
+static void dismiss_all(army_session *session)
+{
+    hd_pet_roster next = session->saved;
+    size_t i, count = next.count;
+    if (!count)
+        return;
+    next.count = 0;
+    checkpoint(session, &next);
+    for (i = 0; i < count; ++i) {
+        detach(session->pets[i]);
+        free_crt(session->pets[i]);
+        session->pets[i] = NULL;
+        session->last_hit[i] = 0;
+    }
+}
+
+int hd_army_pet_command(creature *owner, cmd *command)
+{
+    army_session *session = find_session(owner);
+    char verb[16], order[16], argument[80], extra[2];
+    int words;
+    size_t index, count, i;
+    hd_pet_roster next;
+
+    if (!owner || !owner->parent_rom || !command ||
+        !memchr(command->fullstr, 0, sizeof command->fullstr))
+        return 0;
+    if (!session) {
+        print(owner->fd, "Only Necromancers can give undead pet orders.\n");
+        return 0;
+    }
+    words = sscanf(command->fullstr, "%15s %15s %79s %1s", verb, order, argument, extra);
+    if ((words == 1 && !strcasecmp(verb, "pets")) ||
+        (words == 2 && !strcasecmp(order, "status"))) {
+        describe_pets(session);
+        return 0;
+    }
+    count = session->saved.count;
+    if (words == 3 && !strcasecmp(order, "attack")) {
+        creature *target = find_crt(owner, owner->parent_rom->first_mon, argument, 1);
+        if (!target || hd_necro_skeleton_is_pet(target) || F_ISSET(target, MUNKIL) ||
+            F_ISSET(target, MMGONL) || !is_enm_crt(owner->name, target)) {
+            print(owner->fd, "Order your pets to attack a monster you are already fighting.\n");
+            return 0;
+        }
+        hd_necro_skeleton_assist(owner, target);
+        return 0;
+    }
+    if (words == 3 && !strcasecmp(order, "dismiss")) {
+        if (!strcasecmp(argument, "all")) {
+            dismiss_all(session);
+            print(owner->fd, "You dismiss your undead servants.\n");
+            return 0;
+        }
+        index = select_pet(session, argument);
+        if (index < count) {
+            creature *pet = session->pets[index];
+            remove_pet(session, index);
+            detach(pet);
+            free_crt(pet);
+            print(owner->fd, "You dismiss your undead servant.\n");
+            return 0;
+        }
+    }
+    if ((words == 2 || words == 3) &&
+        (!strcasecmp(order, "follow") || !strcasecmp(order, "stay"))) {
+        int stay = !strcasecmp(order, "stay");
+        index = words == 3 ? select_pet(session, argument) : 0;
+        if (index < count) {
+            next = session->saved;
+            for (i = index; i < (words == 3 ? index + 1 : count); ++i)
+                next.pets[i].stay = stay;
+            checkpoint(session, &next);
+            if (!stay)
+                hd_necro_skeleton_follow(owner, NULL, owner->parent_rom);
+            print(owner->fd, stay ? "Pet order: stay.\n" : "Pet order: follow.\n");
+            return 0;
+        }
+    }
+    print(owner->fd, "Use pets, pet status, pet follow [id], pet stay [id], "
+                     "pet attack <monster>, or pet dismiss <id|all>.\n");
+    return 0;
 }
