@@ -15,6 +15,24 @@ To edit, copy the accepted JSON to a draft, keep its kind and key, and
 change the desired fields. Review it with
 `python3 content.py preview draft.json --against accepted.json`.
 Definitions start with `selectable: false`. Ability, trait, equipment and
-allowed class entries are symbolic keys for review. Actual reference
-resolution, importing native entries and generation against the pinned
-engine tables belong to the next integration step.
+allowed class entries are symbolic keys for review. Reference resolution and generating brand-new native entries belong to
+the next integration step.
+
+## Import and preview an existing native entry
+
+Use a development source directory containing `mtype.h`, `global.c` and
+`command1.c`.
+
+```sh
+python3 native.py export ./src race dwarf dwarf.json
+python3 native.py export ./src class mage mage.json
+python3 native.py preview ./src dwarf.json
+```
+
+Permitted native edits currently include display labels, starting racial
+attribute offsets, and class HP/MP gained per level. Keep the exported key
+when renaming a display label. The existing creation menu text, input
+selectors, adjectival race names, and saved numeric IDs remain the same.
+Class growth edits apply to future level gains and preserve existing saved
+HP/MP. Unsupported field changes and new native keys are rejected.
+The preview prints a unified diff and leaves the source directory alone.
