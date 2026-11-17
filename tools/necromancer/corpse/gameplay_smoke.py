@@ -201,9 +201,54 @@ def room_view(client):
     return command(client, "look").lower()
 
 
+def quit_with_cooldown(client, process):
+    """Honor the actual native combat logout restriction, never bypass it."""
+    deadline = time.monotonic() + 120
+    for attempt in range(8):
+        if process.poll() is not None or time.monotonic() >= deadline:
+            break
+        send(client, "quit")
+        reply = bytearray()
+        until = min(deadline, time.monotonic() + 10)
+        closed = False
+        delay = None
+        while time.monotonic() < until:
+            client.settimeout(min(1, max(0.01, until - time.monotonic())))
+            try:
+                part = client.recv(8192)
+            except socket.timeout:
+                continue
+            if not part:
+                closed = True
+                break
+            reply.extend(part)
+            if len(reply) > 262144:
+                raise RuntimeError("Oversized quit response")
+            match = re.search(rb"Please wait\s+(\d+)\s+more seconds?\.", reply, re.I)
+            if match:
+                delay = int(match.group(1))
+                break
+        print("COMMAND: quit\n" + reply.decode("latin-1", errors="replace"), flush=True)
+        if process.poll() is not None:
+            raise RuntimeError("Private listener exited during logout")
+        if closed and delay is None:
+            print("PASS: native quit closed the original player socket", flush=True)
+            return
+        if delay is not None:
+            wait = delay + 1
+            if wait > deadline - time.monotonic():
+                raise RuntimeError("Native logout cooldown exceeded replay deadline")
+            print(f"Native logout cooldown: {delay}s; retry after cooldown", flush=True)
+            time.sleep(wait)
+            continue
+        raise RuntimeError("Native quit neither closed the socket nor reported a cooldown")
+    raise RuntimeError("Native logout did not complete within bounded retries")
+
+
 def kill_and_find(client, victim, treasure):
     pattern = r"the corpse of\s+" + re.escape(victim) + r"\s+lies here\.\s*\[corpse (\d+)\]"
-    for _ in range(6):
+    deadline = time.monotonic() + 150
+    while time.monotonic() < deadline:
         view = room_view(client)
         match = re.search(pattern, view)
         if match:
@@ -350,11 +395,19 @@ def run_socket_replay(exe: Path, stage: Path) -> None:
                     require(command(faithful, f"sacrifice corpse {third}"), "You sacrifice the corpse")
                     after_release(faithful, third, "jadefixture")
                     print("PASS: assigned deity sacrifices a real corpse; repeat ID rejected")
-                    send(sock, "quit")
-                    recv_until(sock, b"Goodbye!")
+                    quit_with_cooldown(sock, process)
+                    # A second logged-in player remains in the room as a
+                    # witness; verify a fresh room display, not just EOF.
+                    witness = room_view(faithful)
+                    if any(re.search(r"\bhdnecroqa\b", line) for line in witness.splitlines()
+                           if line.strip().startswith("you see")):
+                        raise RuntimeError("Logged-out character remains visible")
                     with connect_game(port, process) as rejoined:
                         login(rejoined)
-                        require(room_view(rejoined), "skeleton")
+                        view = room_view(rejoined)
+                        if not any("skeleton servant" in line for line in view.splitlines()
+                                   if line.strip().startswith("you see")):
+                            raise RuntimeError("Skeleton not visible in fresh room display after relogin")
                         print("PASS: surviving skeleton visible after same-process reconnect")
             print("CORPSE: REAL NATIVE SOCKET RAISE/SACRIFICE/LOOT/HELP PASS", flush=True)
         except Exception:
