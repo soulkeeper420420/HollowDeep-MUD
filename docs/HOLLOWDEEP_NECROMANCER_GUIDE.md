@@ -16,18 +16,23 @@ The prototype identity and its initial ELF32 verification script are at
 
 ## First skill — Raise Skeleton
 
-`raise skeleton` summons one skeletal servant for two minutes at a cost of
-8 MP. The skeleton follows the caster and assists their attacks against
-monsters, but cannot kill a target by itself. It carries no loot, is worth no
-XP or gold, and disappears on expiry, owner death, logout or destruction.
+`raise skeleton` costs **8 MP** and requires a monster the Necromancer actually
+killed in the current room. The one-use kill record captures that monster's
+**maximum HP and MP**, which the raised skeleton receives at full health/mana.
+There is **no duration timer**. The skeleton assists the caster's attacks but
+cannot independently kill its target, and its own death gives no XP/loot/gold.
+It can receive Vigor, Mend, and Restore healing spells and compatible wands,
+scrolls, or `drink <healing potion> on skeleton`. The pet remains in memory
+through a logout and same-process reconnect; restart durability is not yet built.
 
 The historical `raise` social action is **still available** for other
 arguments; `raiseskeleton` is also an exact alias.
 
 **This is a test-only skill:** its implementation requires
-`HD_NECROMANCER_PLAYTEST` and a disposable source copy. The first skill does
-not depend on actual bones/corpses, does not interact with PvP, and does not
-persist pets in player save files.
+`HD_NECROMANCER_PLAYTEST` and a disposable source copy. The first skill uses a trusted monster-death snapshot instead of a physical
+corpse object, does not interact with PvP, and does not yet persist pets in
+player save files. **A server restart or room unload can still remove a pet;
+durable until-killed persistence remains a release blocker.**
 
 ## Which C files control which parts?
 
@@ -37,24 +42,25 @@ persist pets in player save files.
 | `hd_player_store.c`, `hd_player_store.h` | Saved identity marker, native character/receipt save and reload |
 | `player.c::title_ply` | Displays Necromancer as the character title |
 | `global.c::cmdlist` | Maps `raise skeleton` and preserves existing raise social |
-| `hd_necro_skeleton.c` | Single temporary summon, timer, owner, pet combat and cleanup |
+| `raise_skeleton/permanent/hd_necro_skeleton.c` | No-timer pet, inherited HP/MP, owner reconnect, pet combat and cleanup |
 | `command5.c::attack()` | Safe, nonlethal pet assistance after an owner attack |
 | `command2.c::move()` | Following normal player room movement |
-| `update.c::update_game()` | Expiration and cross-room reconciliation |
-| `creature.c::die()`, `player.c::uninit_ply()` | Cleanup when the owner dies or logs out |
+| `update.c::update_game()` | Cross-room reconciliation without expiration |
+| `creature.c::die()`, `player.c::uninit_ply()` | Capture killed monsters, clean up slain pets, retain pets through owner death/logout in one process |
 | `files1.c::free_crt()` | Prevent dangling pet pointers during entity/room destruction |
 | `Makefile` | Builds the skill only with `NECROMANCER_PLAYTEST=1` |
 
-Detailed tests and design limitations:
-[Raise Skeleton source guide](../tools/necromancer/raise_skeleton/RAISE_SKELETON.md).
+Latest design and limitations:
+[Untimed Raise Skeleton source guide](../tools/necromancer/raise_skeleton/permanent/RAISE_SKELETON_UNTIMED.md).
+The [earlier two-minute prototype](../tools/necromancer/raise_skeleton/RAISE_SKELETON.md) remains available for comparison.
 
 ## Roadmap after the first skill
 
 1. Test Necromancer selection and `raise skeleton` inside a real isolated
    ELF32 MUD session on Linode.
-2. Verify follow, combat, expiry, death, logout/reconnect and restart against
+2. Verify follow, healing spells/items, pet death, logout/reconnect and restart against
    disposable native rooms/player saves, plus previous game regressions.
-3. Tune MP, duration, damage and cooldown based on gameplay results; add a
+3. Tune damage/cooldown, implement durable restart-safe pet persistence, and add a
    controlled `dismiss skeleton` command if desired.
 4. Only then consider additional skeleton orders, minion talents, curses and
    Graveburst as a later rebirth-specific skill.
