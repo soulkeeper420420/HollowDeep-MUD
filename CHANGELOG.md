@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-16 — Corpse native gameplay progress and logout cooldown correction
+
+Operator socket trace confirms real corpse death, 8 MP raise with inherited HP/MP, skeleton combat assistance, deity gate and sacrifice, one-use loot and native help. Combat cooldown prevented immediate quit; corrected the private harness to respect native cooldown, require logout and fresh reconnect evidence. Still awaiting complete replay. Mage fixture title anomaly requires investigation; restart durability remains pending. No production deployment. See [corpse replay notes](tools/necromancer/corpse/README.md).
+
 ## 2026-11-16 — Combined corpse ELF32 PASS; isolated gameplay replay staged
 
 Operator reported the combined private corpse / Necromancer / deity / help build
