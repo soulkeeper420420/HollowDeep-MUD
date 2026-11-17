@@ -134,3 +134,17 @@ healing potion, moves rooms, disconnects/reconnects, kills the pet, and checks
 no XP/loot duplication. Then design durable pet saves so an untimed pet does
 not silently disappear on a graceful restart or crash, without altering
 the native creature ABI or trusting client-supplied state.
+
+## Real-game socket acceptance (new private test)
+
+The focused C tests and operator's private ELF32 build are complete, but the
+[disposable native socket gameplay smoke](gameplay/README.md) is the next
+gate. It compiles a private fixture (Necromancer + a one-HP victim with
+147 maximum HP / 51 maximum MP), starts a loopback-only native game listener
+from the verified private binary, kills the victim through the real player
+command, raises its skeleton, denies a duplicate summon and checks that the
+pet remains visible after logging out and back into the **same** process.
+**This gameplay script is published but not yet run on Linode.** It does not
+prove healing spells/items via player commands, following into a second room,
+monster-vs-pet damage, or restart durability. Its result must not be used
+as authorization to deploy. Production remains unchanged.
