@@ -95,3 +95,27 @@ production**, pending durable corpse/pet state and rollback.
 ### Socket launcher correction
 
 The operator's first socket replay successfully wrote the native three-monster/two-player fixture, then raised `FileNotFoundError: chroot` because the restricted listener PATH omitted `/usr/sbin`. Commit `1f1375d` resolves the absolute system chroot executable before launch, refuses missing isolation, and pins the operator-reported accepted executable SHA-256 `26c806cf59b159555f8c0ec73f5daa0c0b0516d99bced49487c30cde0397bde7`. This changes the test harness only. The corrected real gameplay replay remains unexecuted; no production deployment.
+
+### Operator-reported real gameplay progress; combat logout correction
+
+The third socket attempt used the pinned combined ELF32 candidate and passed
+the unprivileged loader preflight, three real in-game help pages, three
+native monster kills and visible corpse IDs, unassigned sacrifice denial,
+a successful 147 HP / 51 MP raise (110 to 102 MP), actual pet combat assist,
+second-summon denial without corpse consumption, ordinary loot release,
+non-Necromancer raise denial, assigned-deity sacrifice, and repeated ID
+denial. These are operator-reported socket observations. The replay stopped
+when native quit returned "Please wait 15 more seconds." This is not a
+completed logout/reconnect or a final gameplay PASS.
+
+Harness commit `3f8be61` respects the native cooldown with bounded retries,
+requires original socket EOF and a surviving listener, checks the other
+player's room view after logout, and requires a fresh room display of the
+skeleton after reconnect. Combat retries are bounded by elapsed time to
+accommodate randomized native attacks. The correction has not been executed
+on Linode yet. No game binary or live world change. One display anomaly
+requires follow-up: the ordinary Mage fixture was announced as Necromancer
+even though its raise command correctly denied the class privilege. Verify
+saved identities and title generation separately; actual title bug cause is
+not established. The help headings also show legacy client encoding
+artifacts. Restart/room-unload persistence and rollback remain NO-GO gates.
