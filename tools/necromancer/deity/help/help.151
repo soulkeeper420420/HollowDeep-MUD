@@ -1,0 +1,14 @@
+DEITY ASSIGNMENT — DM/STAFF ADMIN (PRIVATE PLAYTEST)
+Syntax:
+  *deity list
+  *deity <player>
+  *deity <player> <1-16>
+  *deity <player> 0
+
+List valid slots, inspect allegiance, assign a deity, or clear allegiance.
+Example: *deity Playername 3
+Requires native DM class and staff administrator authority. Target must
+be an existing saved character (online or offline). Changes are audited
+and recorded in the protected deity database. Invalid or corrupt records
+fail closed. Names of deities and favor rewards are not yet configured.
+See also: help deity | help corpse
