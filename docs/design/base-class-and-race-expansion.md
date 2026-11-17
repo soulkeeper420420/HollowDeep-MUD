@@ -86,3 +86,9 @@ Consider one modest stat adjustment and one clear utility trait per race after r
 ## Proposed first playtest
 
 Start with Alchemist and Deepkin. Build an isolated ELF32 candidate, create characters with the new options, exercise each new mechanic, and verify help, training, save and reload, and legacy-character compatibility. Check existing ID mappings, serialization, class and race bounds, NPCs, equipment restrictions, and display tables before extending the roster. Review the remaining proposals after the first pair is playable. Production deployment requires separate approval.
+
+### First implementation milestone
+
+Necromancer is the first class selected for an isolated playtest. Start with character creation, a visible class title, and save/reload, then playtest Raise Skeleton before expanding the toolkit. Limit the first skill to one temporary companion per Necromancer. Decide its targeting, duration, and combat balance against the native follower lifecycle. Graveburst remains a proposed rebirth unlock.
+
+The creation prototype uses the existing Mage combat and training rules and stores a distinct Necromancer identity in the atomic player-save trailer. The current native class number is also used in staff authority comparisons, so the prototype leaves numeric class and race IDs alone. The prototype is opt-in for the private build. Local ELF64 compilation and native persistence checks passed. The ELF32 build and interactive creation replay still require Linode. See [build-and-check.sh](../../tools/necromancer/build-and-check.sh).
