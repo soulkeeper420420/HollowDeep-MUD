@@ -1,5 +1,18 @@
 # HollowDeep release notes
 
+## 2026-11-16 — Combined corpse ELF32 PASS; isolated gameplay replay staged
+
+Operator reported the combined private corpse / Necromancer / deity / help build
+PASS from milestone `60a8f7e`, including focused ownership and duplicate-use
+tests, healing, permission and help checks; production service PID unchanged.
+Published a new chroot and network-isolated real-game socket harness for three
+monster corpses and two fixture characters, exercising native help, an
+unassigned sacrifice rejection, Necromancer raising, ordinary loot, assigned
+deity sacrifice, repeated ID denial and same-process reconnect. **Harness not
+yet executed**; actual gameplay, corpse/pet durability, capacity and safe
+rollback remain blocked pending further verification. No live deployment.
+See [corpse guide](tools/necromancer/corpse/README.md).
+
 ## 2026-11-16 — Combined private corpse, raise, deity sacrifice and help replay
 
 Operator-reported private deity and native help ELF32 PASS at `57f4eba`.
