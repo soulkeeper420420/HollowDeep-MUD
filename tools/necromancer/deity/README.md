@@ -56,8 +56,8 @@ These corpse commands and their safe release/consume transaction are
 
 ## Source file map
 
-- `global.c`: register `*deity` as native command ID 150 (private only).
-- `hollowdeep_help.c`: allow native command ID 150 only for true `DM` class.
+- `global.c`: register `*deity` as native command ID 151 (private only).
+- `hollowdeep_help.c`: allow native command ID 151 only for true `DM` class and authorized staff admin role.
 - `hd_deity.c` + `hd_deity.h`: strict command parser, ID registry, persistent
   assignment storage, audited admin authorization, fail-closed reader.
 - `hollowdeep_staff.c`: add `deities.db` to protected sidecar allowlist only
@@ -79,3 +79,45 @@ These corpse commands and their safe release/consume transaction are
 **Local evidence:** C command/persistence unit PASS; sanitizer PASS;
 private and legacy native syntax PASS; SHA drift rejected; duplicate patch
 rejected. A full Linode ELF32 build is pending.
+
+## Round 74B integrated-source repair and in-game help
+
+The exact `global.c` and `Makefile` checksums reported by the operator were
+independently reconstructed from the known Round 74B progression and
+Necromancer patches. Both complete source profiles are accepted; mixed or
+unknown inputs are refused before writes. The staff and help source checksums
+are unchanged. Command 151 is reserved for `*deity`: 150 already belongs to
+`raiseskeleton`. The patch rejects any occupied ID 151. The runner rebuilds
+all private objects with `make -B` to prevent stale compile-flag reuse.
+
+Five real native help files are packaged under `help/`, with the actual
+`hollowdeep_help.c` dispatcher supporting the following syntax:
+
+| In-game command | Help file |
+|---|---|
+| `help necromancer` | `help/necromancer` |
+| `help raise skeleton`, `help raiseskeleton` | `help/help.150` |
+| `help deity` | `help/deity` |
+| `help *deity` (authorized DM) | `help/help.151` |
+| `help corpse`, `help sacrifice`, `help raise corpse`, `help sacrifice corpse`, `help loot corpse` | `help/corpses-pending` |
+
+The main help menu, `dmcommands`, and `skills` / `skills all` are updated.
+The public deity guide does not expose DM powers, and the staff help page
+requires both native DM class and staff administrator-level authority.
+The corpse page is explicitly marked planned: the physical corpse, sacrifice,
+and loot transactions have not been implemented.
+
+`stage_help.py PRIVATE_WORLD` installs the five files into a new isolated
+world's `help/` directory (the actual native `DOCPATH`). It refuses live
+paths, symlinks, and conflicting existing help pages. The private test runner
+installs the pages in its own fixture and tests the actual native dispatcher
+with a file-opening test double. It is not an interactive telnet gameplay
+replay. For the final approved production deployment, include these exact
+files in the live world's help directory, back up any existing pages first,
+and verify each page from a real player and authorized DM session. No live
+help files are changed by this package.
+
+Local tests passed against both exact source profiles, including native
+DM persistence, help routing, skill eligibility, duplicate command ID and
+permission safeguards, legacy/private syntax, and refusal of conflicting
+help files. ELF32 compilation and interactive gameplay remain pending.
