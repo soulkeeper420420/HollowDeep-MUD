@@ -121,3 +121,7 @@ Local tests passed against both exact source profiles, including native
 DM persistence, help routing, skill eligibility, duplicate command ID and
 permission safeguards, legacy/private syntax, and refusal of conflicting
 help files. ELF32 compilation and interactive gameplay remain pending.
+
+## Operator-reported integrated ELF32 validation — 2026-11-16
+
+At pinned commit `57f4eba8ac518e1166ad4577256bffb4fdcd1ca0`, the maintainer reported PASS for the coupled Round74B source profile, command ID 151, deity assignment/persistence and authorization, real help files and help routing, legacy/private syntax, and the private ELF32 build. The accepted private workspace is `necromancer-playtest-deity-CkReDa0Q`. Production deployment: NONE. These are operator-supplied focused C and compiler results, not independent live access or a socket gameplay/crash/restart test. Keep release private. Next: integrate physical monster corpses, exactly-once loot release, deity-only sacrifice, Necromancer raising and matching native help, then run combined isolated gameplay and persistence tests. Favor and durable pet state remain separate release gates.
