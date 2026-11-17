@@ -71,3 +71,13 @@ prototype does not change the live MUD or silently deploy new game mechanics.
 
 No website, Discord or player-facing "live feature" announcement should
 claim the class/skill is enabled before the real game is deployed and tested.
+
+## Isolated interactive verification
+
+A new [private socket gameplay replay](../tools/necromancer/raise_skeleton/permanent/gameplay/README.md)
+seeds a disposable native Necromancer and monster, performs real commands
+and verifies an untimed 8-MP summon inheriting 147 HP / 51 MP and a
+same-process reconnect. The script is ready for Linode; actual gameplay
+results are still pending. Pet healing handlers have passed private C tests,
+but interactive spells/items and restart-safe pet persistence remain separate
+NO-GO gates before production.
