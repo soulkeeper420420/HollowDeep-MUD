@@ -91,3 +91,7 @@ Those remain gates; the focused C tests previously cover many of them.
 The socket harness and fixture have not been compiled/executed in this turn.
 If it fails, inspect private logs before modifying any source. **NO-GO for
 production**, pending durable corpse/pet state and rollback.
+
+### Socket launcher correction
+
+The operator's first socket replay successfully wrote the native three-monster/two-player fixture, then raised `FileNotFoundError: chroot` because the restricted listener PATH omitted `/usr/sbin`. Commit `1f1375d` resolves the absolute system chroot executable before launch, refuses missing isolation, and pins the operator-reported accepted executable SHA-256 `26c806cf59b159555f8c0ec73f5daa0c0b0516d99bced49487c30cde0397bde7`. This changes the test harness only. The corrected real gameplay replay remains unexecuted; no production deployment.
