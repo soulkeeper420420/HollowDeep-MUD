@@ -1,5 +1,22 @@
 # HollowDeep release notes
 
+## 2026-11-16 — Necromancer corpse groundwork: DM deity assignment (private)
+
+Implemented a guarded `*deity <saved player> <1-16>` native DM command,
+`*deity <player>` lookup, `*deity <player> 0` clear, and `*deity list`
+using a strict, versioned `hollowdeep-data/deities.db` sidecar. Legacy
+`worship` remains a social command. Authorization requires the actual DM
+class, staff admin/owner role, and a successful audited `powertry` record;
+validated offline saved characters are supported. Modified the sidecar
+allowlist, command registry, native permission check and Makefile only under
+`HD_DEITY_PLAYTEST` / `DEITY_PLAYTEST=1`. Local C persist/clear/deny tests,
+ASan/UBSan, private+legacy syntax, duplicate patch rejection and checksum
+mismatch refusal all passed. **No ELF32 Linode execution or production
+rollout yet.** Corpse creation, loot escrow, `sacrifice corpse`, `raise corpse`
+and favor award are not implemented by this package; they need exactly-once
+inventory transfer and crash/replay tests before game enablement. See
+[Deity DM command guide](tools/necromancer/deity/README.md).
+
 ## 2026-11-16 — Necromancer real-game socket acceptance staged (awaiting Linode)
 
 Following operator-reported `82a3c3c` private ELF32 PASS for an **untimed** summon inheriting a slain monster's HP and MP and supporting native healing, added [one-shot disposable real-game replay](tools/necromancer/raise_skeleton/permanent/gameplay/README.md). It compiles an ELF32 native fixture from the accepted source, seeds one private Necromancer and a 147 HP/51 MP victim, runs the **actual** isolated socket combat/raise command, verifies one-skeleton limit, and checks logout/login with the *same* private process. The socket parser and fixture C syntax passed locally; **the new native listener replay has not yet run on Linode**. The test operates only in newly-created private directories, uses a random loopback port and leaves live player files/world/service untouched. Remaining release gates: full room movement/healing/PvP/loot live regression, crash-safe pet save/restart and backwards-compatible rollback for true `until killed` behavior.
