@@ -68,3 +68,7 @@ stages three help files in a disposable fixture, runs direct native ELF32
 storage tests and forces a full private build with all prior flags plus
 `PET_STORE_PLAYTEST=1`. The failure-injection macro is present only in the
 standalone test executable. Production service PID checked before/after.
+
+## Operator-reported ELF32 PASS and runtime integration
+
+The maintainer reported the complete private ELF32 foundation PASS at `581473e`, including exact source and output fingerprints, atomic mana and state, concurrent CAS, inventory/receipt preservation, uncertain-write recovery evidence, death tombstone and recreated identity rejection. No production deployment and unchanged service PID. Next stage: [private pet runtime persistence](../petruntime/README.md), with actual runtime hooks and a three-listener restart replay. Local native64 focused tests passed; Linode ELF32 and socket validation pending.
