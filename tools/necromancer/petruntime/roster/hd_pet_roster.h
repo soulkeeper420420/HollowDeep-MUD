@@ -5,14 +5,17 @@
 #include <stdint.h>
 
 #define HD_ROSTER_CAP 12
-#define HD_ROSTER_WIRE_MAX (32 + 28 * HD_ROSTER_CAP)
+#define HD_ROSTER_NAME_MAX 80
+#define HD_ROSTER_WIRE_MAX (32 + (32 + HD_ROSTER_NAME_MAX) * HD_ROSTER_CAP)
 #define HD_ROSTER_LEGACY_SKELETON 0
 
 /* Template zero identifies the skeleton preserved from a legacy save. */
 typedef struct {
     uint32_t id, template_id, experience;
     uint16_t level, room, hpmax, hpcur, mpmax, mpcur;
-    uint8_t stay;
+    uint8_t stay, unique;
+    uint8_t strength, dexterity, constitution, intelligence, piety;
+    char name[HD_ROSTER_NAME_MAX];
 } hd_roster_pet;
 
 typedef struct {

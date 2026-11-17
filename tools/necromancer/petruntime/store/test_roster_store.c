@@ -67,6 +67,15 @@ int main(int argc, char **argv)
     summon.room = 1;
     summon.hpmax = summon.hpcur = 42;
     summon.template_id = 123;
+    summon.unique = 1;
+    summon.hpmax = summon.hpcur = 84;
+    summon.mpmax = summon.mpcur = 20;
+    summon.strength = 20;
+    summon.dexterity = 22;
+    summon.constitution = 24;
+    summon.intelligence = 26;
+    summon.piety = 28;
+    strcpy(summon.name, "crypt rat");
     setenv("HD_ATOMIC_FAIL", "before_rename", 1);
     assert(hd_roster_store_raise(name, &next, &summon, owner, 200, &xp, &check) == HD_PET_ERROR);
     unsetenv("HD_ATOMIC_FAIL");
@@ -89,6 +98,23 @@ int main(int argc, char **argv)
     native_player(85);
     assert(hd_store_read_claim(name, claim, digest) == 1);
     assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 3);
+    assert(old.pets[0].unique && !strcmp(old.pets[0].name, "crypt rat"));
+    assert(old.pets[0].hpmax == 84 && old.pets[0].mpmax == 20 &&
+           old.pets[0].strength == 20 && old.pets[0].dexterity == 22 &&
+           old.pets[0].constitution == 24 && old.pets[0].intelligence == 26 &&
+           old.pets[0].piety == 28);
+    next = old;
+    next.pets[0].unique = 0;
+    assert(hd_roster_store_checkpoint(name, &old, &next, &check) == HD_PET_ERROR);
+    next = old;
+    ++next.pets[0].piety;
+    assert(hd_roster_store_checkpoint(name, &old, &next, &check) == HD_PET_ERROR);
+    next = old;
+    --next.pets[0].hpcur;
+    assert(hd_roster_store_checkpoint(name, &old, &next, &check) == HD_PET_OK);
+    assert(hd_roster_store_read(name, &next) == HD_PET_OK && next.pets[0].unique &&
+           next.pets[0].piety == 28 && next.pets[0].hpcur == 83);
+    puts("PASS: unique identity and boosted stats survive native save and reload");
     puts("PASS: three durable summons, bounded XP, exact mana debit, stale retry and capacity");
     return 0;
 }

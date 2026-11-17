@@ -103,6 +103,13 @@ static int roster_transaction(const char *name, const hd_pet_roster *expected,
         if (j == old.count || old.pets[j].id != pet->id ||
             old.pets[j].template_id != pet->template_id ||
             old.pets[j].level != pet->level ||
+            old.pets[j].unique != pet->unique ||
+            strcmp(old.pets[j].name, pet->name) ||
+            old.pets[j].strength != pet->strength ||
+            old.pets[j].dexterity != pet->dexterity ||
+            old.pets[j].constitution != pet->constitution ||
+            old.pets[j].intelligence != pet->intelligence ||
+            old.pets[j].piety != pet->piety ||
             old.pets[j].hpmax != pet->hpmax || old.pets[j].mpmax != pet->mpmax ||
             old.pets[j].experience > pet->experience)
             goto done;

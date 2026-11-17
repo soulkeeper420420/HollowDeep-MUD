@@ -5,10 +5,11 @@ The current single-pet store remains the gameplay entry point.
 
 The payload preserves the character epoch and revision and records each
 living pet's stable ID, monster template, level, room, HP, MP, XP and stay
-flag. The allocator's next ID is persisted separately so a later save can
+flag. Version 2 adds the captured name, unique flag and five base attributes.
+Version 1 records still decode with empty names and unset attributes. The allocator's next ID is persisted separately so a later save can
 remove a pet without recycling its ID. Records are ordered by increasing
 pet ID. The versioned payload uses big-endian integers and has a maximum
-size of 368 bytes. Decoding requires the exact length and validates the
+size of 1,376 bytes. Decoding requires the exact length and validates the
 roster before replacing the caller's state.
 
 Migration reads the existing 64-character single-skeleton receipt. A live
@@ -23,12 +24,9 @@ cc -std=gnu89 -Wall -Wextra -Werror hd_pet_roster.c test_pet_roster.c -o /tmp/hd
 /tmp/hd-test-pet-roster
 ```
 
-Next, integrate the payload with the locked native player transaction. The
-save reader and ordinary saves will need to preserve an optional roster
-section alongside existing treasure receipts. Validate revision changes,
-never reuse a pet ID after deletion, and preserve the original receipt
-until the first successful roster commit. Carry variable-sized pet
-inventory through the native bounded serializer. Commit resources, rewards
-and roster state together before making their effects visible. Verify the
-existing ELF32 socket replay and add multi-pet end-to-end cases before
-using the new section in gameplay.
+The private native player transaction keeps the roster alongside treasure
+receipts, migrates the original receipt on first commit, and preserves
+unique identity and stats on ordinary saves and checkpoints. The gameplay
+registry still needs to build native pets from those records and test
+combat, movement, and restart. Pet inventory requires a separate bounded
+serialization path.

@@ -49,6 +49,13 @@ static void serialization(void)
         state.pets[i].stay = i % 2;
         ++state.count;
     }
+    state.pets[11].unique = 1;
+    state.pets[11].strength = 30;
+    state.pets[11].dexterity = 24;
+    state.pets[11].constitution = 26;
+    state.pets[11].intelligence = 18;
+    state.pets[11].piety = 14;
+    strcpy(state.pets[11].name, "crypt rat");
     assert(hd_roster_encode(&state, wire, HD_ROSTER_WIRE_MAX - 1) == 0);
     size = hd_roster_encode(&state, wire, sizeof wire);
     assert(size == HD_ROSTER_WIRE_MAX);
@@ -56,15 +63,19 @@ static void serialization(void)
     assert(loaded.count == 12 && loaded.next_id == 13);
     assert(loaded.pets[11].id == 12 && loaded.pets[11].experience == 2200);
     assert(loaded.pets[11].template_id == 212 && loaded.pets[11].stay);
+    assert(loaded.pets[11].unique && !strcmp(loaded.pets[11].name, "crypt rat"));
+    assert(loaded.pets[11].strength == 30 && loaded.pets[11].dexterity == 24 &&
+           loaded.pets[11].constitution == 26 && loaded.pets[11].intelligence == 18 &&
+           loaded.pets[11].piety == 14);
     assert(hd_roster_encode(&loaded, again, sizeof again) == size);
     assert(memcmp(wire, again, size) == 0);
     for (i = 0; i < size; ++i)
         assert(hd_roster_decode(wire, i, &loaded) == -1);
     assert(hd_roster_decode(wire, size + 1, &loaded) == -1);
-    wire[7] = 2;
+    wire[7] = 3;
     assert(hd_roster_decode(wire, size, &loaded) == -1);
-    wire[7] = 1;
-    wire[57] = 1;
+    wire[7] = 2;
+    wire[63] = 1;
     assert(hd_roster_decode(wire, size, &loaded) == -1);
     assert(loaded.count == 12 && loaded.next_id == 13);
     state.pets[2].id = state.pets[1].id;
@@ -74,6 +85,24 @@ static void serialization(void)
     size = hd_roster_encode(&state, wire, sizeof wire);
     assert(size && hd_roster_decode(wire, size, &loaded) == 0);
     assert(loaded.count == 0 && loaded.next_id == 2 && loaded.revision == 8);
+}
+
+static void version_one(void)
+{
+    unsigned char wire[60] = {
+        'H', 'D', 'P', 'R', 0, 0, 0, 1,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+        0, 0, 0, 7, 0, 0, 0, 2, 0, 0, 0, 1,
+        0, 0, 0, 1, 0, 0, 0, 23, 0, 0, 0, 0,
+        0, 10, 0, 2, 0, 200, 0, 147, 0, 64, 0, 51, 1, 0, 0, 0
+    };
+    hd_pet_roster roster;
+    assert(hd_roster_decode(wire, sizeof wire, &roster) == 0);
+    assert(roster.revision == 7 && roster.count == 1);
+    assert(roster.pets[0].template_id == 23 && roster.pets[0].hpcur == 147);
+    assert(roster.pets[0].stay == 1 && !roster.pets[0].unique && !roster.pets[0].name[0]);
+    wire[57] = 1;
+    assert(hd_roster_decode(wire, sizeof wire, &roster) == -1);
 }
 
 static void balance(void)
@@ -99,6 +128,7 @@ int main(void)
 {
     migration();
     serialization();
+    version_one();
     balance();
     puts("PASS: roster migration, serialization, and balance");
     return 0;
