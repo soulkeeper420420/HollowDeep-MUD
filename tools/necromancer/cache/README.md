@@ -69,3 +69,7 @@ current HP/MP, death tombstones, name reuse, room reassignment, ordinary
 loot collection, rollback compatibility, and capacity limits. Do not claim
 crash-safe exactly-once behavior from process-local tests. No production
 restart or deployment authorized.
+
+## Operator-reported Linode ELF32 acceptance
+
+At pinned commit `afbe9da970a8e1493706776f663dfebc5ef908f1`, the maintainer reported PASS for the exact private input/output fingerprints, seven ASCII native help pages, native free/serialization, suspended pet stats, corpse ID and escrow retention, 1100 simultaneous corpses, no duplicate or resurrected pets, actual LRU/reload paths, class title identity, corpse/healing/help regressions, both native syntax modes, and the full ELF32 build. Accepted private candidate: `necromancer-playtest-cache-jyf14lkl/src`. The service PID was reported unchanged; production deployment NONE. This confirms the focused native room-cache tests on Linode; it does not establish disk/restart persistence or a real socket pass for the new executable. Keep production NO-GO.
