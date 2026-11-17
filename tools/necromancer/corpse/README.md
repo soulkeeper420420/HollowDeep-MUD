@@ -66,3 +66,28 @@ checks the eight exact fingerprints, stages only in that workspace, runs the
 focused tests, stages help in a private fixture, and forces a complete ELF32
 build. It checks the existing production PID before and after. Any unexpected
 source or help conflict is a hard stop. Never force-apply to the live world.
+
+## Operator-reported combined ELF32 acceptance
+
+The maintainer reported all focused corpse ownership, deity gate, failed raise,
+ID selection, single consumption, inherited HP/MP, merchant and room cleanup,
+native healing, seven help pages and legacy/private syntax checks PASS. The
+combined ELF32 candidate is `necromancer-playtest-corpse-3nl5y8b7/src`, built
+from the milestone at `60a8f7e`; production service PID reportedly unchanged.
+
+Next gate: [gameplay_smoke.py](gameplay_smoke.py), at `cdfbc5f`, is a staged,
+**not yet executed** real socket replay derived from the prior summon smoke
+and published combined corpse source. It checks the exact corpse module
+against the pinned bundle, verifies compile hooks and ELF32 header, records
+the executable SHA, creates a new world, two synthetic saved players and
+three distinct loot-bearing monsters, installs native help, seeds a test-only
+deity record, and runs the private binary inside an unprivileged chroot.
+Launch it in a fresh network namespace (enable loopback; do not use a PID
+namespace with its own /proc, because the guard compares the caller's network
+namespace to host PID 1). This verifies commands and visible loot, not exact
+item-count multiplicity in the game display, actual staff assignment by socket,
+interactive healing, room traversal, gold release, or restart durability.
+Those remain gates; the focused C tests previously cover many of them.
+The socket harness and fixture have not been compiled/executed in this turn.
+If it fails, inspect private logs before modifying any source. **NO-GO for
+production**, pending durable corpse/pet state and rollback.
