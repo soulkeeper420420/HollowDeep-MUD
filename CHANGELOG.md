@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-16 — Native corpse socket PASS; private room-cache persistence stage
+
+Operator supplied complete native socket PASS at `4b959e7` (8 MP raise, inherited 147 HP/51 MP, corpse escrow/loot, deity gate and sacrifice, combat assist, duplicate denial, native help, logout and reconnect). Published [private room-cache patch and tests](tools/necromancer/cache/README.md) preserving corpses by room number, retaining living summoned skeletons during in-process native room eviction/replacement, excluding pets from ordinary room serialization, removing the old fixed 1024-corpse ceiling, reserving Necromancer titles for verified identities, and updating seven ASCII native help pages. Local native LRU/reload tests, focused regressions, sanitizer checks (global data instrumentation disabled for the native fixture), syntax and six-file checksum-guarded 64-bit bundle replay passed on reconstructed source. Linode ELF32 and new-candidate sockets pending. Restart durability, crash-safe loot/mana state, memory bounds, room/owner identity lifecycle and rollback remain release blockers. No production deployment.
+
 ## 2026-11-16 — Corpse native gameplay progress and logout cooldown correction
 
 Operator socket trace confirms real corpse death, 8 MP raise with inherited HP/MP, skeleton combat assistance, deity gate and sacrifice, one-use loot and native help. Combat cooldown prevented immediate quit; corrected the private harness to respect native cooldown, require logout and fresh reconnect evidence. Still awaiting complete replay. Mage fixture title anomaly requires investigation; restart durability remains pending. No production deployment. See [corpse replay notes](tools/necromancer/corpse/README.md).
