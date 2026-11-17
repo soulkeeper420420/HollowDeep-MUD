@@ -37,7 +37,7 @@ def main():
                '-Wl,--gc-sections', '-I', str(source), '-I', str(work)]
     components = [str(source / (name + '.c')) for name in
                   ('files1', 'files3', 'compress', 'hd_player_store',
-                   'treasure_receipt', 'atomic_player_snapshot')]
+                   'treasure_receipt', 'atomic_player_snapshot', 'hd74_xp', 'hd74_progression')]
     env = dict(os.environ)
     env.pop('HD_ATOMIC_FAIL', None)
     for test, path in [('legacy', fixture_source), ('roster', here / 'test_roster_store.c')]:
