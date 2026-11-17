@@ -8,6 +8,7 @@ case "$SRC" in */necromancer-playtest-*/src) ;; *) echo 'Private source director
 case "$SRC" in /srv/*|/var/www/*|/usr/*|/etc/*|/opt/*) echo 'Production path refused' >&2; exit 2;; esac
 [[ -z $(find "$SRC" -maxdepth 1 -type l -print -quit) ]] || { echo 'Symlinks refused' >&2;exit 2; }
 P=$(cd "$(dirname "$0")" && pwd -P)
+python3 "$P/test_source_profiles.py"
 python3 "$P/apply_permanent_private.py" "$SRC" "$P"
 OUT=$(mktemp -d "$SRC/../permanent-tests-XXXXXXXX")
 FLAGS=(-std=gnu89 -O1 -g -fcommon -DHD_NECROMANCER_PLAYTEST -ffunction-sections -fdata-sections -Wl,--gc-sections)
