@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-16 — Deity Round 74B checksum repair and native help (private)
+
+The operator's exact `global.c` SHA `529df2a11ee11dc4e691e7e9ede051b13f608aecd8bbc8b48d2e54852a7410f3` and `Makefile` SHA `cc586e180179c353444891e0adba223e697b2570890f846ad9e0448daa2072d5` were independently reconstructed from the known progression and Necromancer patches. Accept both complete source profiles; reject mixed/drifted combinations. Avoided the existing command-150 collision by assigning `*deity` ID 151, with native DM class plus staff-admin authorization. Added five native help files, real help dispatcher routes, staff visibility and class-specific skill listing, and a private help installer that refuses conflicting content. Local C deity and native help-dispatch/file-opening tests, both source profiles, legacy/private compiler syntax, and help conflict refusal passed. The private runner forces a full ELF32 object rebuild on Linode and installs the help files in its disposable test fixture. **Linode ELF32 and interactive gameplay pending; no live help files, game code or service altered.** Corpse consumption/sacrifice and durable pet state remain pending. See [deity and in-game help guide](tools/necromancer/deity/README.md).
+
 ## 2026-11-16 — Necromancer corpse groundwork: DM deity assignment (private)
 
 Implemented a guarded `*deity <saved player> <1-16>` native DM command,
