@@ -228,7 +228,33 @@ def after_release(client, corpse, treasure):
 def prepare_chroot(exe, stage):
     if os.geteuid() != 0:
         raise RuntimeError("Run from the private root console")
+    # A restrictive umask is desirable for fixtures, but root-owned runtime
+    # directories MUST be traversable by the unprivileged game user.
+    # Change only directories created inside this new private chroot.
+    def runtime_dir(directory):
+        if not directory.is_relative_to(stage) or directory == stage:
+            raise RuntimeError("Invalid private runtime directory")
+        directory.mkdir(parents=True, exist_ok=True)
+        while directory != stage:
+            if directory.is_symlink() or not directory.is_dir():
+                raise RuntimeError("Unsafe private runtime directory: " + str(directory))
+            os.chown(directory, 0, 0)
+            directory.chmod(0o755)
+            directory = directory.parent
+
+    def copy_library(lib):
+        if not lib.is_absolute() or ".." in lib.parts:
+            raise RuntimeError("Invalid system library path")
+        dest = stage / str(lib).lstrip("/")
+        runtime_dir(dest.parent)
+        shutil.copyfile(lib.resolve(strict=True), dest)
+        os.chown(dest, 0, 0)
+        dest.chmod(0o755)
+
+    if os.statvfs(stage).f_flag & getattr(os, "ST_NOEXEC", 0):
+        raise RuntimeError("Private fixture filesystem is mounted noexec; cannot launch here")
     target = stage / "bin/hollowdeep"
+    runtime_dir(target.parent)
     shutil.copyfile(exe, target)
     target.chmod(0o755)
     report = subprocess.check_output(["ldd", str(exe)], text=True)
@@ -236,19 +262,23 @@ def prepare_chroot(exe, stage):
         if "not found" in line:
             raise RuntimeError("Missing executable dependency: " + line)
         match = re.search(r"(?:=>\s*|^\s*)(/[^ \t]+)\s+\(", line)
-        if not match:
-            continue
-        lib = Path(match.group(1))
-        dest = stage / str(lib).lstrip("/")
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(lib.resolve(strict=True), dest)
-        dest.chmod(0o755)
-    (stage/"dev").mkdir()
+        if match:
+            copy_library(Path(match.group(1)))
+    # The interpreter path in PT_INTERP is authoritative even if ldd prints
+    # a different resolved location. Copy it at its exact in-chroot path.
+    headers = subprocess.check_output(["readelf", "-lW", str(exe)], text=True)
+    match = re.search(r"Requesting program interpreter:\s*(/[^\]\r\n]+)\]", headers)
+    if not match:
+        raise RuntimeError("Cannot determine the ELF32 interpreter")
+    interpreter = Path(match.group(1))
+    copy_library(interpreter)
+    runtime_dir(stage / "dev")
     os.mknod(stage/"dev/urandom", stat.S_IFCHR | 0o444, os.makedev(1,9))
     (stage/"dev/urandom").chmod(0o444)
-    (stage/"etc").mkdir()
+    runtime_dir(stage / "etc")
     (stage/"etc/hosts").write_text("127.0.0.1 localhost\n")
-    # Only the private fixture is writable by the unprivileged listener.
+    (stage/"etc/hosts").chmod(0o644)
+    # Only the disposable fixture is writable by the unprivileged listener.
     os.chown(stage, 65534, 65534)
     stage.chmod(0o700)
     for folder in ("rooms", "player", "log", "objmon", "post", "help", "hollowdeep-data"):
@@ -256,6 +286,7 @@ def prepare_chroot(exe, stage):
         for path in [directory, *directory.rglob("*")]:
             os.chown(path, 65534, 65534)
             path.chmod(0o700 if path.is_dir() else 0o600)
+    return str(interpreter)
 
 
 def run_socket_replay(exe: Path, stage: Path) -> None:
@@ -265,17 +296,27 @@ def run_socket_replay(exe: Path, stage: Path) -> None:
     if not chroot:
         raise RuntimeError("Required system chroot executable not found; do not run without isolation")
     print("Private chroot launcher: " + chroot, flush=True)
-    prepare_chroot(exe, stage)
+    interpreter = prepare_chroot(exe, stage)
+    launcher = [chroot, "--userspec=65534:65534", "--groups=65534", str(stage)]
+    listener_env = {"PATH": "/usr/bin:/bin", "HOLLOWDEEP_BIND": "127.0.0.1"}
+    # Same UID/GID, chroot and environment as the actual listener, but only
+    # inspect the ELF dependencies; do not start the MUD in the preflight.
+    preflight = subprocess.run(
+        launcher + [interpreter, "--list", "/bin/hollowdeep"],
+        cwd=stage, env=listener_env, capture_output=True, text=True, timeout=15)
+    if preflight.returncode != 0:
+        raise RuntimeError("Unprivileged chroot ELF32 loader preflight failed:\n" +
+                           preflight.stdout + preflight.stderr)
+    print("PASS: unprivileged chroot ELF32 loader and library access", flush=True)
     with socket.socket() as probe:
         probe.bind(("127.0.0.1", 0))
         port = probe.getsockname()[1]
     log_path = stage / "isolated-game.log"
     with log_path.open("wb") as log:
-        process = subprocess.Popen([chroot, "--userspec=65534:65534", "--groups=65534",
-                                    str(stage), "/bin/hollowdeep", str(port)],
+        process = subprocess.Popen(launcher + ["/bin/hollowdeep", str(port)],
                                    cwd=stage, stdin=subprocess.DEVNULL,
                                    stdout=log, stderr=subprocess.STDOUT,
-                                   env={"PATH": "/usr/bin:/bin", "HOLLOWDEEP_BIND": "127.0.0.1"})
+                                   env=listener_env)
         try:
             with connect_game(port, process) as sock:
                 login(sock)
