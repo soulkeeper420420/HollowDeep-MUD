@@ -116,6 +116,15 @@ three durable summons, exact mana debit, bounded XP and stale retry tests.
 Recreating the saved pets as native creatures after a full game restart
 remains a private gameplay acceptance case.
 
+## Roster-backed private game build verified
+
+On November 17, 2026, the Linode operator confirmed the private ELF32
+Undead Army game built successfully from `3a3d7961f10f3743465155ce625b95b246de8506`.
+The storage and lifecycle fixtures reconstructed three native creatures
+from disk and restored only the surviving pets on a fresh login. The
+binary is a private build candidate. End-to-end socket gameplay and pet
+orders remain open before gameplay acceptance.
+
 ## Future class development
 
 Graveburst remains the proposed rebirth unlock for a completed Necromancer
