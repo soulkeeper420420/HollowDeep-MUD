@@ -259,13 +259,19 @@ def prepare_chroot(exe, stage):
 
 
 def run_socket_replay(exe: Path, stage: Path) -> None:
+    # Ubuntu coreutils installs chroot under /usr/sbin; do not depend on
+    # the restricted PATH passed to the private listener.
+    chroot = shutil.which("chroot", path="/usr/sbin:/usr/bin:/sbin:/bin")
+    if not chroot:
+        raise RuntimeError("Required system chroot executable not found; do not run without isolation")
+    print("Private chroot launcher: " + chroot, flush=True)
     prepare_chroot(exe, stage)
     with socket.socket() as probe:
         probe.bind(("127.0.0.1", 0))
         port = probe.getsockname()[1]
     log_path = stage / "isolated-game.log"
     with log_path.open("wb") as log:
-        process = subprocess.Popen(["chroot", "--userspec=65534:65534", "--groups=65534",
+        process = subprocess.Popen([chroot, "--userspec=65534:65534", "--groups=65534",
                                     str(stage), "/bin/hollowdeep", str(port)],
                                    cwd=stage, stdin=subprocess.DEVNULL,
                                    stdout=log, stderr=subprocess.STDOUT,
@@ -365,7 +371,10 @@ def main():
     print(f"Private disposable world: {stage}", flush=True)
     for dirname in ("rooms", "player", "log", "objmon", "post", "help", "bin", "hollowdeep-data"):
         (stage / dirname).mkdir(mode=0o700)
-    print("Accepted executable SHA256: " + hashlib.sha256(exe.read_bytes()).hexdigest(), flush=True)
+    executable_sha = hashlib.sha256(exe.read_bytes()).hexdigest()
+    if executable_sha != "26c806cf59b159555f8c0ec73f5daa0c0b0516d99bced49487c30cde0397bde7":
+        raise SystemExit("Executable differs from the operator-verified combined ELF32 candidate")
+    print("Accepted executable SHA256: " + executable_sha, flush=True)
     for name, body in payload.items():
         if name.startswith("help/") and "/" not in name[5:]:
             (stage / name).write_bytes(body.encode("utf-8"))
