@@ -119,3 +119,7 @@ even though its raise command correctly denied the class privilege. Verify
 saved identities and title generation separately; actual title bug cause is
 not established. The help headings also show legacy client encoding
 artifacts. Restart/room-unload persistence and rollback remain NO-GO gates.
+
+### Operator-reported complete native socket PASS
+
+At harness commit `4b959e7bee0108d4a3b050b1192e0d73818e8ef2`, the maintainer supplied the full real network-isolated/chroot replay. It confirmed the pinned ELF32 executable, real native help, monster kills, corpse IDs, failed sacrifice for unassigned characters, 147 HP / 51 MP summon and exactly 8 MP (110 to 102), pet combat assistance, one-pet denial, ordinary loot, non-Necromancer raise denial, deity sacrifice, no repeated corpse use, native quit respecting a 13-second cooldown, disappearance of the owner in a witness room view, and fresh login with the same skeleton still present. Final marker: `CORPSE: REAL NATIVE SOCKET RAISE/SACRIFICE/LOOT/HELP PASS`. Production deployment: NONE. This establishes same-process behavior, not restart durability, interactive healing, exact item multiplicity after crashes, or live deployment. The legacy level 7-9 Mage title and non-ASCII help headings are separate display issues; full durable storage remains a release gate.
