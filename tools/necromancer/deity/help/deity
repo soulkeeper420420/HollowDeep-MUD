@@ -1,0 +1,9 @@
+DEITIES AND ALLEGIANCE (PRIVATE PLAYTEST)
+A DM can assign an existing saved character to a numbered deity (1-16).
+ID 0 means no assigned deity. Worship is currently a social action and
+cannot change your allegiance. Deity names have not been configured.
+
+Planned: characters with a confirmed deity may sacrifice a monster corpse.
+Sacrifice will release its loot to the room, consuming the corpse once.
+This action and deity favor rewards are NOT available in this build.
+See help corpse for current development status.
