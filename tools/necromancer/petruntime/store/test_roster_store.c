@@ -7,13 +7,20 @@ int hd_roster_store_read(const char *, hd_pet_roster *);
 int hd_roster_store_checkpoint(const char *, const hd_pet_roster *,
                                const hd_pet_roster *, hd_pet_roster *);
 
+int hd_roster_store_raise(const char *, const hd_pet_roster *,
+                          const hd_roster_pet *, creature *, uint32_t,
+                          long *, hd_pet_roster *);
+
 int main(int argc, char **argv)
 {
     char *seed[] = {argv[0], "seed", NULL};
     char *raise[] = {argv[0], "raise", NULL};
     hd_pet_roster old, next, check;
     hd_pet_state legacy;
-    creature *owner;
+    creature *owner, *disk;
+    hd_roster_pet summon = {0};
+    long xp;
+    size_t i;
     (void)argc;
 
     assert(legacy_main(2, seed) == 0);
@@ -53,5 +60,35 @@ int main(int argc, char **argv)
     native_player(109);
     assert(hd_store_read_claim(name, claim, digest) == 1);
     puts("PASS: atomic roster migration, save preservation, failure recovery, and removal");
+    assert(hd_store_load_player(name, &owner) == 0);
+    owner->level = 1;
+    owner->experience = 100;
+    summon.level = 2;
+    summon.room = 1;
+    summon.hpmax = summon.hpcur = 42;
+    summon.template_id = 123;
+    setenv("HD_ATOMIC_FAIL", "before_rename", 1);
+    assert(hd_roster_store_raise(name, &next, &summon, owner, 200, &xp, &check) == HD_PET_ERROR);
+    unsetenv("HD_ATOMIC_FAIL");
+    assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 0);
+    native_player(109);
+    for (i = 0; i < 3; ++i) {
+        assert(hd_roster_store_raise(name, &next, &summon, owner, 200, &xp, &check) == HD_PET_OK);
+        assert(check.count == i + 1 && check.pets[i].id == i + 2);
+        assert(check.pets[i].template_id == summon.template_id && xp == 120 + 20 * (long)i);
+        assert(hd_roster_store_raise(name, &next, &summon, owner, 200, &xp, &old) == HD_PET_CONFLICT);
+        assert(hd_store_load_player(name, &disk) == 0);
+        assert(disk->mpcur == owner->mpcur - 8 && disk->experience == xp);
+        free_crt(owner);
+        owner = disk;
+        next = check;
+        ++summon.template_id;
+    }
+    assert(hd_roster_store_raise(name, &next, &summon, owner, 200, &xp, &check) == HD_PET_ERROR);
+    free_crt(owner);
+    native_player(85);
+    assert(hd_store_read_claim(name, claim, digest) == 1);
+    assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 3);
+    puts("PASS: three durable summons, bounded XP, exact mana debit, stale retry and capacity");
     return 0;
 }
