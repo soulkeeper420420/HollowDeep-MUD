@@ -41,6 +41,37 @@ def seed(src, world, prior, cache):
         mage.mpcur += 8;
     }
 ''' + anchor)
+    main = 'int main(void)\n{'
+    end_declarations = '    int i, fd;'
+    if body.count(main) != 1 or body.count(end_declarations) != 1:
+        raise ValueError('Private fixture probe anchor changed')
+    body = body.replace(main, r'''static int probe_room(const char *expected)
+{
+    static char compressed[100001], native[100000];
+    creature player;
+    size_t bytes;
+    int decoded;
+    FILE *save = fopen("player/Hdnecroqa", "rb");
+    extern int hd_uncompress_bounded(char *, char *, int, int);
+    if (!save) return 2;
+    bytes = fread(compressed, 1, sizeof compressed, save);
+    if (ferror(save) || !feof(save)) {
+        fclose(save);
+        return 2;
+    }
+    fclose(save);
+    decoded = hd_uncompress_bounded(compressed, native, (int)bytes, sizeof native);
+    if (decoded < (int)sizeof player) return 2;
+    memcpy(&player, native, sizeof player);
+    if (memcmp(player.name, "Hdnecroqa", sizeof "Hdnecroqa")) return 2;
+    printf("DURABLE OWNER ROOM: %d\n", (int)player.rom_num);
+    return player.rom_num == atoi(expected) ? 0 : 1;
+}
+
+int main(int argc, char **argv)
+{''')
+    body = body.replace(end_declarations, end_declarations +
+                        '\n    if (argc == 2) return probe_room(argv[1]);')
     fixture = world / 'seed.c'
     fixture.write_text(body)
     components = ['files1', 'files3', 'compress', 'hd_player_store', 'treasure_receipt',
@@ -54,6 +85,7 @@ def seed(src, world, prior, cache):
                     *(str(src / (name + '.c')) for name in components),
                     '-o', str(executable)], check=True, cwd=world)
     subprocess.run([str(executable)], check=True, cwd=world)
+    return executable
 
 
 def replay(src, world):
@@ -63,7 +95,7 @@ def replay(src, world):
     for name in ('rooms', 'player', 'log', 'objmon', 'post', 'help', 'bin', 'hollowdeep-data'):
         (world / name).mkdir(mode=0o700)
     (world / 'hollowdeep-data/deities.db').write_text('HOLLOWDEEP_DEITIES 1 1\nHdfaithqa 3\n')
-    seed(src, world, prior, cache)
+    probe = seed(src, world, prior, cache)
     chroot = shutil.which('chroot', path='/usr/sbin:/usr/bin:/sbin:/bin')
     if not chroot:
         raise RuntimeError('Required chroot missing')
@@ -102,6 +134,23 @@ def replay(src, world):
             time.sleep(int(match[1]) + 0.2)
         raise RuntimeError('Movement cooldown exceeded replay limit')
 
+    def quit_owner(client, process, expected_room):
+        save = world / 'player/Hdnecroqa'
+        previous_inode = save.stat().st_ino
+        prior['quit_with_cooldown'](client, process)
+        deadline = time.monotonic() + 10
+        result = None
+        while time.monotonic() < deadline and process.poll() is None:
+            if save.stat().st_ino != previous_inode:
+                result = subprocess.run([str(probe), str(expected_room)], cwd=world,
+                                        text=True, capture_output=True, timeout=3)
+                if result.returncode == 0:
+                    print(result.stdout.rstrip(), flush=True)
+                    return
+            time.sleep(0.1)
+        detail = result.stdout.strip() if result else 'no replacement save observed'
+        raise RuntimeError(f'Owner logout save did not reach room {expected_room}: {detail}')
+
     def stop(process):
         if process.poll() is None:
             process.terminate()
@@ -124,7 +173,7 @@ def replay(src, world):
                 raise RuntimeError('Staying pet followed its owner')
             require(command(owner, 'pet follow 2'), 'Pet order: follow')
             require(view(owner), 'cryptsentinel')
-            prior['quit_with_cooldown'](owner, process)
+            quit_owner(owner, process, 2)
     finally:
         stop(process)
     print('PASS: native pet orders and durable logout', flush=True)
@@ -152,7 +201,7 @@ def replay(src, world):
                     raise RuntimeError('Native combat never removed bonehound')
                 require(status, 'Pet 2: Unique cryptsentinel')
                 prior['quit_with_cooldown'](faithful, process)
-            prior['quit_with_cooldown'](owner, process)
+            quit_owner(owner, process, 2)
     finally:
         stop(process)
 
@@ -166,7 +215,7 @@ def replay(src, world):
                 raise RuntimeError('Dead pet returned after restart')
             require(command(owner, 'pet dismiss 2'), 'You dismiss')
             require(command(owner, 'pets'), 'Pets: 0/')
-            prior['quit_with_cooldown'](owner, process)
+            quit_owner(owner, process, 2)
     finally:
         stop(process)
     print('PASS: private Undead Army socket orders, unique restore and combat death', flush=True)
