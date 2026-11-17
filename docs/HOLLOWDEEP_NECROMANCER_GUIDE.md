@@ -104,3 +104,20 @@ no-loot rules and favor-credit durability are still separate release gates.
 ### Native in-game help (private deity and Necromancer build)
 
 The corrected private patch accepts the complete, independently reconstructed Round 74B source fingerprint and gives `*deity` command ID 151 (150 remains `raiseskeleton`). Every feature milestone must supply its native in-game help pages, its relevant help index/skill/staff visibility updates, and a regression that opens those pages before release. The new [native help files](../tools/necromancer/deity/help) cover `help necromancer`, `help raise skeleton`, `help raiseskeleton`, `help deity`, authorized `help *deity`, and a clearly labeled development-status `help corpse` / `help sacrifice` page. `skills` lists Raise Skeleton only for verified eligible Necromancers, while `skills all` shows the class requirement. `dmcommands` lists deity administration only for an authorized DM. The private [help installer](../tools/necromancer/deity/stage_help.py) installs these pages into the native `help/` directory of an isolated world; conflicts are refused. For a future approved live deployment, back up existing help files, install the reviewed runtime pages, and test through player and DM sessions. **Nothing has been installed in the production game yet.**
+
+## Corpse consumption and deity sacrifice — newest private milestone
+
+The operator reported ELF32 deity and native help PASS at `57f4eba`.
+The new [corpse playtest package and source map](../tools/necromancer/corpse/README.md)
+adds room-visible corpse IDs, transfer of actual inventory tags and gold, shared
+one-use `loot corpse [id]`, `sacrifice corpse [id]` (valid deity), and
+`raise corpse [id]` (Necromancer, 8 MP). `raise skeleton` remains an alias.
+The same corpse cannot feed two actions in a single process. Failed actions
+leave loot intact. The older last-kill snapshot path is disabled under
+`CORPSE_PLAYTEST=1`, and native help routes now open the bundled active
+private-feature pages rather than the historical pending page. Seven runtime
+help files are staged in the test world. Local C, sanitizer, native healer,
+help and reconstructed-source syntax tests passed. The operator has not yet
+run this new ELF32 build or a real socket replay. Room-local corpse escrow is
+not yet durable; room unload/restart, registry capacity fallback, pet state,
+crash-safe exactly-once transactions and rollback are explicit release blockers.
