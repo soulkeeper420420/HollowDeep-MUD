@@ -1,5 +1,7 @@
 # HollowDeep — Necromancer: Raise Skeleton (first skill)
 
+**Historical two-minute prototype:** superseded by [the untimed HP/MP inheritance and healing revision](permanent/RAISE_SKELETON_UNTIMED.md). The 120-second values below describe the older private test only, not the current intended rules.
+
 **Private playtest only. Not deployed to the production MUD.** Built on the
 Codex Necromancer identity prototype at commit
 `3324e24c7ab2fa8fb60dae9965385fa4a41f9533`.
