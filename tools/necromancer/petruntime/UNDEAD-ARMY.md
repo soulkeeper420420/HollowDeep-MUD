@@ -35,6 +35,13 @@ and loot for the original kill and award successful raises an additional
 their own XP from eligible kills and drop their own loot once on combat
 death. Track each award independently so it cannot repeat on replay.
 
+## Raise Corpse cooldown and unique summons
+
+- `rc` and `rc <id>` are aliases for `raise corpse` and `raise corpse <id>`. All forms share one 120-second cooldown per Necromancer.
+- Start the cooldown when an eligible revival rolls, whether it succeeds or fails. Rejected commands such as a missing corpse, insufficient mana, or a full roster do not start it.
+- On successful revival, roll independently for a 5% chance to raise a unique undead variant. Double its base attributes and maximum HP and MP, capped by the native field limits. The unique still occupies one slot and uses the usual mana cost, bonus XP, and loot rules.
+- Persist the unique identity and resulting stats with the pet. Restore those values as saved on relog or restart. Private acceptance must cover both alias forms, the shared timer, and unique persistence.
+
 ## Proposed commands
 
 | Command | Behavior |
