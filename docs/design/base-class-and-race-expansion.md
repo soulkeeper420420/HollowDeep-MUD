@@ -10,6 +10,20 @@ Expand the starting roster before implementing special-class remort recipes. The
 | Warden | Route control and protection | Establish a temporary camp ward that protects resting allies. Placement and timing matter. |
 | Runecaller | Deliberate spellcasting | Inscribe a rune on a room or an object, then trigger it later for a ward, light, or detection effect. |
 
+### Additional base-class candidates
+
+| Class | Role | First distinctive mechanic |
+|---|---|---|
+| Pugilist | Close-range control | Choose one hold at a time to pin, disarm, or shove an opponent. A heavy opponent can break loose. |
+| Hexbinder | Reactive spellcasting | Place a hex that triggers when an enemy casts, flees, or strikes an ally. Choosing the right trigger matters. |
+| Spiritcaller | Single-companion tactics | Bind one spirit and give it an explicit order such as guard, distract, or scout. It performs one role at a time. |
+| Beastkeeper | Combat with a trained animal | Use a living companion that learns commands through play. Choose a companion for pursuit, defense, or support. |
+| Siege Engineer | Deployable tools | Set up a brace that holds a doorway or a winch that moves a heavy obstacle. Devices take time to deploy. |
+| Spellbreaker | Anti-magic melee | Study an enemy cast and choose whether to interrupt it or briefly shield an ally from its effect. |
+| Wayfarer | Party travel and logistics | Mark a safe return point and lead allies back along routes the party has already opened. |
+
+Spiritcaller and Beastkeeper are distinct proposals. Spiritcaller issues short-lived tactical orders to a bound spirit. Beastkeeper invests in training a persistent animal companion. Check for overlap with the current playable roster before selecting either.
+
 ## Proposed races
 
 | Race | Connection to HollowDeep | First racial feature |
