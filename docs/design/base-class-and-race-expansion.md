@@ -43,7 +43,7 @@ For an early Monster Scholar playtest, give one creature a readable tell and a s
 
 | Class | First distinctive mechanic |
 |---|---|
-| Necromancer | Raise one skeleton from a defeated foe. Order it to attack or guard an ally. |
+| Necromancer | Reanimate a defeated monster as an undead pet. Higher-level Necromancers raise more reliably and can command more pets. |
 | Warlock | Borrow power from a patron. Cast a stronger spell by spending a limited pact charge. |
 | Vampire | Drain health from a foe to build a blood reserve. Spend it to heal yourself or power an ability. |
 | Witch | Curse enemies or brew remedies. Switch between curses that weaken a foe's attacks, defenses, or healing. |
@@ -62,7 +62,7 @@ Each class starts with its first skill at level 1. Completing a life in the clas
 
 | Class | Level 1 | Earned on rebirth |
 |---|---|---|
-| Necromancer | **Raise Skeleton** — Raise one skeleton from a defeated foe and order it to attack or guard. | **Graveburst** — Channel a pulse of grave energy that damages enemies already fighting your party in the room. |
+| Necromancer | **Raise Corpse** — Reanimate a defeated monster as an undead pet. Raise additional corpses up to your active pet limit. | **Graveburst** — Channel a pulse of grave energy that damages enemies already fighting your party in the room. |
 | Warlock | **Pact Bolt** — Fire a bolt and spend an optional pact charge to empower it. | **Pactbrand** — Enchant your weapon so its next landed hit releases a burst of pact damage. |
 | Vampire | **Blood Drain** — Drain a foe to fill your blood reserve and spend some of it to heal yourself. | **Crimson Veil** — Surround yourself with a short aura that drains a small amount of health from enemies who strike you. |
 | Witch | **Wither** — Curse one foe to weaken its attacks briefly. | **Witchfire** — Enchant an ally’s weapon so its next landed hit reduces the target’s healing received. |
@@ -89,6 +89,15 @@ Start with Alchemist and Deepkin. Build an isolated ELF32 candidate, create char
 
 ### First implementation milestone
 
-Necromancer is the first class selected for an isolated playtest. Start with character creation, a visible class title, and save/reload, then playtest Raise Skeleton before expanding the toolkit. Limit the first skill to one temporary companion per Necromancer. Decide its targeting, duration, and combat balance against the native follower lifecycle. Graveburst remains a proposed rebirth unlock.
+Necromancer is the first class selected for an isolated playtest. Start with character creation, a visible class title, and save/reload, then playtest Raise Corpse before expanding the toolkit. Reuse the native pet and follower lifecycle where it supports multiple controlled monsters. Graveburst remains a proposed rebirth unlock.
+
+#### Raise Corpse playtest design
+
+- `raise corpse` selects an eligible monster corpse in the room. `raise corpse <monster>` selects a particular corpse when several are present. Each successful cast adds one undead pet up to the active limit.
+- The pet keeps the monster's name and basic combat role, such as an undead wolf that bites or an undead troll that hits hard. First-pass pets use capped stats and ordinary attacks. Player corpses, boss corpses, and summoned creatures are excluded. A raised pet yields no XP, loot, or raisable corpse when destroyed.
+- Initial pet limits are 1 at levels 1–19, 2 at 20–39, 3 at 40–59, and 4 at 60. Reaching the cap rejects the command before a revival roll. Use the existing pet orders where possible and support selecting a particular pet for dismissal or orders.
+- Proposed revival chance is 50% + 1 percentage point per Necromancer level above 1 + 5 percentage points per level the Necromancer is above the monster. Monsters above the Necromancer's level subtract 5 points per level. Clamp the result to 10–95%. A level-10 Necromancer gets 59% against a level-10 monster, 84% against a level-5 monster, and 34% against a level-15 monster.
+- Give each eligible corpse one actual revival roll so repeated casts cannot guarantee success. A failed roll leaves the corpse lootable but spent for revival. Validation failures, including a full pet roster, do not spend a corpse. Preserve corpse loot and ownership through revival. Pets are temporary and disappear on dismissal, death, logout, or restart.
+- In an isolated gameplay replay, exercise qualifying and rejected corpses, chance boundaries, multiple active pets, cap and dismissal, loot preservation, and cleanup across movement and logout. Review the corpse lifetime and follower code before wiring it into the private build.
 
 The creation prototype uses the existing Mage combat and training rules and stores a distinct Necromancer identity in the atomic player-save trailer. The current native class number is also used in staff authority comparisons, so the prototype leaves numeric class and race IDs alone. The prototype is opt-in for the private build. Local ELF64 compilation and native persistence checks passed. The ELF32 build and interactive creation replay still require Linode. See [build-and-check.sh](../../tools/necromancer/build-and-check.sh).
