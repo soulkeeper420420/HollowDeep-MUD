@@ -1,5 +1,6 @@
 #include "mstruct.h"
 #include "hd_army_restore.h"
+#include "hd_army_corpse.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,11 +41,11 @@ int hd_army_restore(const hd_pet_roster *roster, creature *pets[HD_ROSTER_CAP])
         pet->hpcur = (short)saved->hpcur;
         pet->mpmax = (short)saved->mpmax;
         pet->mpcur = (short)saved->mpcur;
-        pet->strength = has_identity ? (char)saved->strength : 10;
-        pet->dexterity = has_identity ? (char)saved->dexterity : 10;
-        pet->constitution = (char)saved->constitution;
-        pet->intelligence = (char)saved->intelligence;
-        pet->piety = (char)saved->piety;
+        pet->strength = has_identity ? (char)MIN(saved->strength, HD_ARMY_NATIVE_ATTRIBUTE_MAX) : 10;
+        pet->dexterity = has_identity ? (char)MIN(saved->dexterity, HD_ARMY_NATIVE_ATTRIBUTE_MAX) : 10;
+        pet->constitution = (char)MIN(saved->constitution, HD_ARMY_NATIVE_ATTRIBUTE_MAX);
+        pet->intelligence = (char)MIN(saved->intelligence, HD_ARMY_NATIVE_ATTRIBUTE_MAX);
+        pet->piety = (char)MIN(saved->piety, HD_ARMY_NATIVE_ATTRIBUTE_MAX);
         pet->ndice = 1;
         pet->sdice = 2;
         /* Pet XP is kept in the roster. Native creature XP is kill value. */

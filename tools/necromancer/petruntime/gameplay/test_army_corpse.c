@@ -26,7 +26,7 @@ int hd_army_raise_commit(creature *owner, const hd_army_corpse *corpse)
     assert(corpse->unique == persisted);
     assert(corpse->hp == (persisted ? 294U : 147U));
     assert(corpse->mp == (persisted ? 102U : 51U));
-    assert(corpse->strength == (persisted ? 20U : 10U));
+    assert(corpse->strength == (persisted ? 34U : 20U));
     assert(corpse->dexterity == (persisted ? 22U : 11U));
     assert(corpse->constitution == (persisted ? 24U : 12U));
     assert(corpse->intelligence == (persisted ? 26U : 13U));
@@ -46,7 +46,7 @@ static void capture(creature *victim, room *where)
 {
     dead(victim, where, "crypt rat", 147, 51);
     victim->experience = 250;
-    victim->strength = 10;
+    victim->strength = 20;
     victim->dexterity = 11;
     victim->constitution = 12;
     victim->intelligence = 13;

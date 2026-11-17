@@ -7,6 +7,8 @@ struct creature;
 
 #define HD_ARMY_RAISE_TIMER 40
 #define HD_ARMY_RAISE_COOLDOWN 120L
+/* Base attributes index the native 35-entry bonus table. */
+#define HD_ARMY_NATIVE_ATTRIBUTE_MAX 34U
 
 /* Captured before the native monster is freed. No live pointers or loot. */
 typedef struct {

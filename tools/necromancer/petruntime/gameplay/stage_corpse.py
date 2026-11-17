@@ -36,11 +36,11 @@ def stage(src):
     c->army.level = c->level;
     c->army.hp = c->hp > 0 ? (unsigned)c->hp : 0;
     c->army.mp = c->mp > 0 ? (unsigned)c->mp : 0;
-    c->army.strength = MAX(0, victim->strength);
-    c->army.dexterity = MAX(0, victim->dexterity);
-    c->army.constitution = MAX(0, victim->constitution);
-    c->army.intelligence = MAX(0, victim->intelligence);
-    c->army.piety = MAX(0, victim->piety);
+    c->army.strength = MIN((unsigned)MAX(0, victim->strength), HD_ARMY_NATIVE_ATTRIBUTE_MAX);
+    c->army.dexterity = MIN((unsigned)MAX(0, victim->dexterity), HD_ARMY_NATIVE_ATTRIBUTE_MAX);
+    c->army.constitution = MIN((unsigned)MAX(0, victim->constitution), HD_ARMY_NATIVE_ATTRIBUTE_MAX);
+    c->army.intelligence = MIN((unsigned)MAX(0, victim->intelligence), HD_ARMY_NATIVE_ATTRIBUTE_MAX);
+    c->army.piety = MIN((unsigned)MAX(0, victim->piety), HD_ARMY_NATIVE_ATTRIBUTE_MAX);
     if (victim->experience > 0)
         c->army.experience = (unsigned long)victim->experience > UINT32_MAX ?
                             UINT32_MAX : (uint32_t)victim->experience;
@@ -103,11 +103,11 @@ def stage(src):
                 raised.unique = 1;
                 raised.hp = MIN(2 * raised.hp, (unsigned)SHRT_MAX);
                 raised.mp = MIN(2 * raised.mp, (unsigned)SHRT_MAX);
-                raised.strength = MIN(2 * raised.strength, (unsigned)CHAR_MAX);
-                raised.dexterity = MIN(2 * raised.dexterity, (unsigned)CHAR_MAX);
-                raised.constitution = MIN(2 * raised.constitution, (unsigned)CHAR_MAX);
-                raised.intelligence = MIN(2 * raised.intelligence, (unsigned)CHAR_MAX);
-                raised.piety = MIN(2 * raised.piety, (unsigned)CHAR_MAX);
+                raised.strength = MIN(2 * raised.strength, HD_ARMY_NATIVE_ATTRIBUTE_MAX);
+                raised.dexterity = MIN(2 * raised.dexterity, HD_ARMY_NATIVE_ATTRIBUTE_MAX);
+                raised.constitution = MIN(2 * raised.constitution, HD_ARMY_NATIVE_ATTRIBUTE_MAX);
+                raised.intelligence = MIN(2 * raised.intelligence, HD_ARMY_NATIVE_ATTRIBUTE_MAX);
+                raised.piety = MIN(2 * raised.piety, HD_ARMY_NATIVE_ATTRIBUTE_MAX);
             }
             if (hd_army_raise_commit(player, &raised)) {
                 if (raised.unique)
