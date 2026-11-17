@@ -45,7 +45,8 @@ def main():
         executable = work / ('test-' + test)
         test_command = command
         if test == 'roster':
-            test_command = command + ['-I', str(gameplay), str(gameplay / 'hd_army_restore.c')]
+            test_command = command + ['-I', str(gameplay), str(gameplay / 'hd_army_restore.c'),
+                                      str(gameplay / 'hd_army_runtime.c')]
         subprocess.run(test_command + [str(path)] + components + ['-o', str(executable)],
                        check=True)
         with executable.open('rb') as binary:

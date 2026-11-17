@@ -1,8 +1,22 @@
 #define main legacy_main
+#define hd_necro_skeleton_on_free legacy_free_hook
+#define del_active legacy_del_active
 #include "test_pet_store.c"
 #undef main
+#undef hd_necro_skeleton_on_free
+#undef del_active
 #include "hd_pet_roster.h"
 #include "hd_army_restore.h"
+#include "hd_army_corpse.h"
+#include "hd_necro_skeleton.h"
+
+void hd_necro_skeleton_death(creature *);
+void print(int fd, char *format, ...) { (void)fd; (void)format; }
+void del_active(creature *pet) { (void)pet; }
+void add_crt_rom(creature *pet, room *where, int announce)
+{ (void)announce; assert(!pet->parent_rom); pet->parent_rom = where; pet->rom_num = where->rom_num; }
+void del_crt_rom(creature *pet, room *where)
+{ assert(pet->parent_rom == where); pet->parent_rom = NULL; pet->rom_num = 0; }
 
 int hd_roster_store_read(const char *, hd_pet_roster *);
 int hd_roster_store_checkpoint(const char *, const hd_pet_roster *,
@@ -38,10 +52,65 @@ int main(int argc, char **argv)
                pets[0]->piety == 28);
         for (i = 0; i < old.count; ++i)
             free(pets[i]);
+        {
+            room before = {0}, after = {0};
+            creature *first;
+            before.rom_num = 1;
+            after.rom_num = 2;
+            assert(hd_store_load_player(name, &owner) == 0);
+            owner->parent_rom = &before;
+            hd_necro_skeleton_reconnect(owner);
+            first = hd_necro_skeleton_probe(owner);
+            assert(first && first->parent_rom == &before && first->hpcur == 83);
+            assert(hd_necro_skeleton_is_pet(first));
+            owner->parent_rom = &after;
+            owner->rom_num = 2;
+            hd_necro_skeleton_follow(owner, &before, &after);
+            assert(first->parent_rom == &after);
+            hd_necro_skeleton_death(first);
+            del_crt_rom(first, &after);
+            free_crt(first);
+            hd_necro_skeleton_logout(owner);
+            assert(!hd_necro_skeleton_probe(owner));
+            free_crt(owner);
+        }
         puts("PASS: fresh process reconstructed three native pets from saved roster");
         return 0;
     }
 
+    if (argc == 2 && !strcmp(argv[1], "after-death")) {
+        room start = {0};
+        hd_army_corpse corpse = {0};
+        int mana;
+        long experience;
+        assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 2);
+        assert(old.pets[0].id == 3 && old.pets[1].id == 4);
+        assert(old.pets[0].room == 2 && old.pets[1].room == 2);
+        assert(hd_store_load_player(name, &owner) == 0);
+        start.rom_num = owner->rom_num;
+        owner->parent_rom = &start;
+        hd_necro_skeleton_reconnect(owner);
+        assert(hd_necro_skeleton_probe(owner));
+        strcpy(corpse.name, "cave ghoul");
+        corpse.level = 3;
+        corpse.hp = 50;
+        corpse.mp = 10;
+        corpse.experience = 200;
+        corpse.strength = 20;
+        corpse.unique = 1;
+        mana = owner->mpcur;
+        experience = owner->experience;
+        assert(hd_army_raise_commit(owner, &corpse));
+        assert(owner->mpcur == mana - 8 && owner->experience == experience + 20);
+        assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 3);
+        assert(old.pets[2].id == 5 && old.pets[2].unique && old.pets[2].strength == 20 &&
+               !strcmp(old.pets[2].name, "cave ghoul"));
+        assert(!hd_army_raise_ready(owner, &corpse));
+        hd_necro_skeleton_logout(owner);
+        free_crt(owner);
+        puts("PASS: fresh login restores survivors and excludes the dead pet");
+        return 0;
+    }
     assert(legacy_main(2, seed) == 0);
     assert(legacy_main(2, raise) == 0);
     assert(hd_roster_store_read(name, &old) == HD_PET_OK);
@@ -134,6 +203,7 @@ int main(int argc, char **argv)
     assert(hd_roster_store_read(name, &next) == HD_PET_OK && next.pets[0].unique &&
            next.pets[0].piety == 28 && next.pets[0].hpcur == 83);
     phase(argv[0], "restore-unique");
+    phase(argv[0], "after-death");
     puts("PASS: unique identity and boosted stats survive native save and reload");
     puts("PASS: three durable summons, bounded XP, exact mana debit, stale retry and capacity");
     return 0;
