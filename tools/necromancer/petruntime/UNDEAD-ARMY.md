@@ -82,6 +82,16 @@ checks the production service MainPID before and after. Collect the
 native combat death result, the final restart result, and the durable
 logout and direct disk inventory assertions before accepting the candidate.
 
+## Private ELF32 baseline verified
+
+On November 17, 2026, the operator confirmed that both private ELF32
+storage suites passed on Linode. The isolated single-pet gameplay replay
+then reported `REAL NATIVE SOCKET RESTART/DEATH PASS` and exited zero.
+The final durable save retained 1,013 gold and one fixture ruby, with
+zero pet HP and MP after death and restart. The production service PID
+was unchanged. The successful run brought up loopback inside the private
+network namespace before launching the replay.
+
 ## Future class development
 
 Graveburst remains the proposed rebirth unlock for a completed Necromancer
