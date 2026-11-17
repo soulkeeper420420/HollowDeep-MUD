@@ -96,3 +96,41 @@ no-op rejection on repeat invocation; native gnu89 syntax for integrated
 builds. **The user's exact `command1.c` bytes are not yet uploaded;** the
 real Linode run is still required to confirm all its anchors and complete
 the combined 32-bit build. There was no production deployment/restart.
+
+## Operator-reported Linode Round74B-integrated ELF32 validation — 2026-11-16
+
+The maintainer executed the pinned one-pass script against the recognized
+**Round74B-integrated** `creature.c` and `command1.c` pair at
+`82a3c3c6bea8e216a65370a3fbfc06216df44762`. The operator-supplied
+terminal result reports:
+
+```text
+NECROMANCER: coupled Round74B creature/creation SHA allowlist; mixed and drifted profiles refused PASS
+NECROMANCER: accepted exact private input profile: round74b-integrated
+NECROMANCER: no-timer corpse HP/MP and healing patch staged privately
+NECROMANCER: verified kill HP/MP, mana charge, unlimited duration, reconnect, death cleanup PASS
+NECROMANCER: actual native Vigor/Mend/Restore + targeted healing potions PASS
+NECROMANCER: legacy branch syntax PASS
+NECROMANCER: private branch syntax PASS
+NECROMANCER: corpse-derived no-timer healing ELF32 build PASS
+NECROMANCER: PRIVATE CORPSE SKELETON AND HEALING PASS
+NECROMANCER: UNTIMED CORPSE HP/MP + NATIVE HEALING ELF32 PASS
+PRODUCTION DEPLOYMENT: NONE
+PINNED COMMIT: 82a3c3c6bea8e216a65370a3fbfc06216df44762
+```
+
+**Evidence scope:** SHA-guarded patch staging, focused native C lifecycle,
+healing functions and ELF32 compile. These markers are **operator-provided**,
+not independently fetched Linode logs. Do not claim any actual player socket,
+monster kill, in-game room follower, save/restart or cross-process pet
+persistence test has passed. The pet is process-memory-only and can be lost
+on server restart; this **does not yet satisfy** the full rule "stays until it
+dies" across outages. Keep the feature **private / NO-GO** until real
+isolated gameplay and a crash-safe pet-state restore/rollback pass.
+
+Next focus: a disposable **real MUD player session** that kills a monster,
+runs `raise skeleton`, confirms HP/MP, casts Vigor/Mend/Restore and feeds a
+healing potion, moves rooms, disconnects/reconnects, kills the pet, and checks
+no XP/loot duplication. Then design durable pet saves so an untimed pet does
+not silently disappear on a graceful restart or crash, without altering
+the native creature ABI or trusting client-supplied state.
