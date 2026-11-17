@@ -68,3 +68,27 @@ must remain off the public GitHub repository.
 Only a restricted private source build is permitted by this milestone: no
 live `hollowdeep.service` restart, player data mutation, public website update,
 Discord announcement or game-world replacement.
+
+## SHA mismatch diagnostics
+
+The private SHA guard in `apply_permanent_private.py` expects the original
+first-skill `creature.c` SHA-256
+`9a1c158811a1c96d4f0190f4c88876afb9dc16d1edba12e08a4dcc18c7f21243`.
+The operator reported `Source SHA mismatch or missing: creature.c` during the
+one-pass Linode validation. **No live deployment occurred.** This means a
+private source differs from the pinned first-skill stage; it does not establish
+which edits are present. Do not remove the checksum check, replace the C file
+from production, or run `patch --force`.
+
+A read-only diagnostic is at
+[`diagnose_creature_sha.sh`](diagnose_creature_sha.sh). It verifies the pinned
+source archive, locates the newest private untimed build, reconstructs the
+exact expected first-skill `creature.c`, reports the actual SHA-256, and prints
+at most 100 diff lines. It refuses a production source path and never writes to
+existing source, player files, or game services. The helper was locally tested
+against both exact-baseline and pre-modified source copies. The patch now also
+prints expected/actual SHA hashes on failure while still refusing drift.
+
+**Current status:** needs the Linode diagnostic output before a safe rebase or
+fresh candidate correction; the untimed skill has *not* passed Linode ELF32
+validation. Preserve the older private test workspace for comparison.
