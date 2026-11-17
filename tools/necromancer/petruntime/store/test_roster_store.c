@@ -2,6 +2,7 @@
 #include "test_pet_store.c"
 #undef main
 #include "hd_pet_roster.h"
+#include "hd_army_restore.h"
 
 int hd_roster_store_read(const char *, hd_pet_roster *);
 int hd_roster_store_checkpoint(const char *, const hd_pet_roster *,
@@ -21,7 +22,25 @@ int main(int argc, char **argv)
     hd_roster_pet summon = {0};
     long xp;
     size_t i;
-    (void)argc;
+    if (argc == 2 && !strcmp(argv[1], "restore-unique")) {
+        creature *pets[HD_ROSTER_CAP] = {0};
+        assert(hd_roster_store_read(name, &old) == HD_PET_OK);
+        assert(hd_army_restore(&old, pets) == 0);
+        assert(old.count == 3 && !pets[3]);
+        assert(!strcmp(pets[0]->name, "crypt rat") &&
+               strstr(pets[0]->description, "unique"));
+        assert(pets[0]->type == MONSTER && pets[0]->fd == -1 &&
+               !pets[0]->parent_rom && !pets[0]->experience && !pets[0]->gold);
+        assert(pets[0]->hpmax == 84 && pets[0]->hpcur == 83 &&
+               pets[0]->mpmax == 20 && pets[0]->mpcur == 20);
+        assert(pets[0]->strength == 20 && pets[0]->dexterity == 22 &&
+               pets[0]->constitution == 24 && pets[0]->intelligence == 26 &&
+               pets[0]->piety == 28);
+        for (i = 0; i < old.count; ++i)
+            free(pets[i]);
+        puts("PASS: fresh process reconstructed three native pets from saved roster");
+        return 0;
+    }
 
     assert(legacy_main(2, seed) == 0);
     assert(legacy_main(2, raise) == 0);
@@ -114,6 +133,7 @@ int main(int argc, char **argv)
     assert(hd_roster_store_checkpoint(name, &old, &next, &check) == HD_PET_OK);
     assert(hd_roster_store_read(name, &next) == HD_PET_OK && next.pets[0].unique &&
            next.pets[0].piety == 28 && next.pets[0].hpcur == 83);
+    phase(argv[0], "restore-unique");
     puts("PASS: unique identity and boosted stats survive native save and reload");
     puts("PASS: three durable summons, bounded XP, exact mana debit, stale retry and capacity");
     return 0;

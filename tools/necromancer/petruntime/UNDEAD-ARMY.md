@@ -128,3 +128,9 @@ Guardian. Special classes have their own masteries and can qualify for a
 challenging quest that unlocks a unique class with upgrades and hidden
 features. Track these as future mechanics alongside base class and race
 expansion.
+
+### Follow-up tooling
+
+After Necromancer gameplay acceptance, build editable race and class templates.
+Support creating a new entry and editing an existing entry through the same
+workflow, with validation and a preview before source changes are generated.

@@ -38,11 +38,16 @@ def main():
     components = [str(source / (name + '.c')) for name in
                   ('files1', 'files3', 'compress', 'hd_player_store',
                    'treasure_receipt', 'atomic_player_snapshot', 'hd74_xp', 'hd74_progression')]
+    gameplay = here.parent / 'gameplay'
     env = dict(os.environ)
     env.pop('HD_ATOMIC_FAIL', None)
     for test, path in [('legacy', fixture_source), ('roster', here / 'test_roster_store.c')]:
         executable = work / ('test-' + test)
-        subprocess.run(command + [str(path)] + components + ['-o', str(executable)], check=True)
+        test_command = command
+        if test == 'roster':
+            test_command = command + ['-I', str(gameplay), str(gameplay / 'hd_army_restore.c')]
+        subprocess.run(test_command + [str(path)] + components + ['-o', str(executable)],
+                       check=True)
         with executable.open('rb') as binary:
             if binary.read(5) != (b'\x7fELF\x02' if args.native64 else b'\x7fELF\x01'):
                 raise RuntimeError('Unexpected test executable architecture')
