@@ -81,3 +81,22 @@ same-process reconnect. The script is ready for Linode; actual gameplay
 results are still pending. Pet healing handlers have passed private C tests,
 but interactive spells/items and restart-safe pet persistence remain separate
 NO-GO gates before production.
+
+## Deity allegiance and corpse sacrifice (private development)
+
+The DM-only `*deity <saved-player> <0-16>` assignment system is in the
+[private deity package](../tools/necromancer/deity/README.md).
+`*deity <player>` reads the stored assignment, `*deity list` shows ID slots,
+and ID **0** clears allegiance. The game has no legacy `deity` field;
+`worship` was only a social emote. The guarded new module stores a versioned,
+strictly validated record in `hollowdeep-data/deities.db` and demands both
+native DM class and audited staff-admin authority. It never changes class IDs
+or the player binary serializer.
+
+The corpse/loot stage is **next, not implemented by this patch**. A monster
+corpse must own its original inventory and gold until a single server-side
+consume operation releases them exactly once. Ordinary players will use
+`loot corpse`; deity followers can `sacrifice corpse`; a Necromancer can
+`raise corpse`. If allegiance storage is unreadable, sacrifice must be
+denied. Death auto-drop, room serialization, crash rollback, summoned-pet
+no-loot rules and favor-credit durability are still separate release gates.
