@@ -1,9 +1,15 @@
 DRAIN MANA
 
 Shadow Wraith companion ability.
-20 percent activation chance per successful hit.
-Drains 10 percent of target maximum mana, limited
-to available mana. Split between owner and companion.
-Cannot exceed maximum mana. Three-second cooldown.
 
-Private ability calculations: live combat hook pending.
+Activation chance: 20 percent per successful strike.
+Internal cooldown: 3 seconds.
+
+Drains 10 percent of enemy maximum mana,
+limited to the enemy's available mana.
+
+Restores half to the owner and half to the companion.
+The owner receives the extra point on an odd split.
+Restoration cannot exceed maximum mana.
+
+Protected permanent monsters are unaffected.

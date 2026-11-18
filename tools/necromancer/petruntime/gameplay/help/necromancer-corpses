@@ -1,12 +1,23 @@
 NECROMANCER
 
-Role: Summoner and offensive spellcaster.
-Planned prime attributes: Intelligence and Piety.
-Native Mage training remains in use during this playtest.
+Role: Undead summoner and offensive spellcaster.
 
-Raise Corpse is the exclusive Necromancer skill.
-Raised undead fight alongside their master.
-Their kills award experience to the character, not the pet.
-Raised undead disappear on death, dismissal or logout.
+Prime attributes: Intelligence and Piety.
 
-See HELP RAISE CORPSE and HELP PETS.
+Random base attributes before racial adjustments:
+  Strength       8-14
+  Dexterity      9-15
+  Constitution  10-16
+  Intelligence  14-18
+  Piety         14-18
+
+Class skill: Raise Corpse.
+Universal skill: Conjure.
+
+Raised undead disappear on logout, dismissal or death.
+Conjured companions retain experience and levels
+unless permanently killed or released.
+
+Native Mage spellcasting and training remain available.
+
+See HELP RAISE CORPSE, HELP CONJURE and HELP PETS.

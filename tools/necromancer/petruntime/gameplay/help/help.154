@@ -1,11 +1,23 @@
-PETS
+PETS AND COMPANIONS
 
 pets
-pet status
-pet attack <monster>
-pet follow [id]
-pet stay [id]
-pet dismiss <id|all>
+  Show your summons and companion.
 
-Dismissed raised undead are permanently removed.
-Raised undead do not gain experience.
+Undead army orders (Necromancer only):
+  pet follow [id]
+  pet stay [id]
+  pet dismiss <id|all>
+  pet attack <monster>
+
+Universal companion commands:
+  conjure list
+  conjure status
+  conjure attack <monster>
+  conjure dismiss
+  conjure recall
+  conjure release confirm
+
+Raised undead and conjured companions have separate limits.
+Only attack monsters you are already fighting.
+
+See HELP CONJURE and HELP PET EXPERIENCE.

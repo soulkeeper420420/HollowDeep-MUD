@@ -1,18 +1,22 @@
-RAISE CORPSE
+MONSTER CORPSES
 
-Necromancer only.
-Usage: raise corpse [id] or rc [id]
-Mana: 8
-Cooldown: 120 seconds
-Capacity: 3 to 12 raised creatures by level.
+Defeated eligible monsters leave a corpse.
+LOOK displays available corpse IDs.
 
-Eligible corpses can be raised with a level-based chance.
-Successful raises have a 5 percent unique variant chance.
-Unique summons receive doubled stats, HP and MP, within limits.
+loot corpse [id]
+  Release ordinary corpse loot.
 
-Raised undead earn no pet experience.
-Their kills award normal experience to their owner.
-Death, dismissal, logout and restart end the summon.
+sacrifice corpse [id]
+  Offer an eligible corpse to your assigned deity.
 
-Use loot corpse [id] to release ordinary corpse loot.
-Each eligible corpse allows one revival attempt.
+raise corpse [id]
+rc [id]
+  Necromancers can attempt to animate an eligible corpse.
+  Mana cost: 8 on success. Cooldown: 120 seconds.
+  Successful raising releases the original corpse loot.
+  Successful raises have a 5 percent unique chance.
+
+A failed revival does not consume the original loot.
+Each eligible corpse permits one revival attempt.
+
+See HELP RAISE CORPSE and HELP DEITY.

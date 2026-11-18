@@ -1,0 +1,21 @@
+PET EXPERIENCE
+
+Raised undead earn no experience or levels.
+Their final blows award normal character experience.
+
+Conjured companions begin at level 1.
+A companion final blow awards its own base monster XP,
+alongside native experience credited to its owner.
+
+Cumulative pet experience requirement:
+  100 * (level - 1) * (level - 1)
+
+Level 2:   100 XP
+Level 10:  8100 XP
+Level 20:  36100 XP
+Level 40:  152100 XP
+Level 60:  348100 XP
+
+Companion level cannot exceed the owner's level.
+Experience and levels survive logout, dismissal and restart.
+Combat death or permanent release destroys that companion.

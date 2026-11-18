@@ -80,6 +80,8 @@ def main():
 
     from stage_companion_combat import stage as stage_combat
     stage_combat(source)
+    from stage_creation_help import stage as stage_creation
+    stage_creation(source)
 
     makefile = source / 'Makefile'
     content = makefile.read_text(encoding='latin-1')
