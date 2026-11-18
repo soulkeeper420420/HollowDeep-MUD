@@ -41,7 +41,7 @@ def main():
     gameplay = here.parent / 'gameplay'
     env = dict(os.environ)
     env.pop('HD_ATOMIC_FAIL', None)
-    for test, path in [('legacy', fixture_source), ('roster', here / 'test_roster_store.c')]:
+    for test, path in [('legacy', fixture_source), ('roster', here / 'test_roster_store.c'), ('conjure', here.parent / 'conjure/test_conjure.c')]:
         executable = work / ('test-' + test)
         test_command = command
         if test == 'roster':

@@ -76,6 +76,19 @@ def stage(source, target):
          '|| !pet_check_owner(raw,&set) || set.roster_size) goto done;'),
     ])
     here = Path(__file__).resolve().parent
+    patch('hd_player_store.c', [
+        ('static int reserved_receipt(const char *claim)',
+         'static const char conjure_id[] = '
+         '"ffffffffffffffffffffffffffffff77";\n\n'
+         'static int reserved_receipt(const char *claim)'),
+        ('|| !strcmp(claim, pet_id);',
+         '|| !strcmp(claim, pet_id) || !strcmp(claim, conjure_id);'),
+        ('#include "hd_roster_store.inc"',
+         '#include "hd_roster_store.inc"\n#include "hd_conjure_store.inc"'),
+    ])
+    for name in ('hd_conjure.h', 'hd_conjure.c', 'hd_conjure_store.inc'):
+        shutil.copyfile(here.parent / 'conjure' / name, target / name)
+
     for name in ('hd_pet_roster.h', 'hd_pet_roster.c'):
         shutil.copyfile(here.parent / 'roster' / name, target / name)
     shutil.copyfile(here / 'hd_roster_store.inc', target / 'hd_roster_store.inc')

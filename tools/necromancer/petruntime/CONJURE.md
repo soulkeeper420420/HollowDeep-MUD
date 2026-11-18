@@ -27,3 +27,15 @@ Dragon: 15% breath attack chance.
 
 Implementation and native validation pending.
 Necromancer rebirth skill remains undecided.
+
+## Round 75B foundation
+
+Dedicated atomic native player-save record.
+Independent of the Necromancer roster and class identity.
+Cumulative leveling threshold: 100 * (level - 1)^2.
+XP can bank at the owner level cap.
+One stored companion. Safe dismissal retains its record.
+Releasing a dismissed companion removes it permanently.
+Cooldown applies to summon and manual recall.
+Species stats and growth are initial private balance values.
+Native command dispatch and combat integration remain pending.
