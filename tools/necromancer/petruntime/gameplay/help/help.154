@@ -21,3 +21,8 @@ Raised undead and conjured companions have separate limits.
 Only attack monsters you are already fighting.
 
 See HELP CONJURE and HELP PET EXPERIENCE.
+
+Combat death releases the pet's own carried items
+and a small independent gold reward.
+Original monster loot is never copied.
+Safe dismissal and logout produce no pet loot.

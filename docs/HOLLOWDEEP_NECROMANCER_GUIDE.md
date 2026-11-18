@@ -1,3 +1,27 @@
+# HollowDeep: Rise of the Necromancer
+
+## Private acceptance release
+
+Round 75F gameplay acceptance passed.
+
+- Necromancer character creation and randomized stats.
+- Prime attributes: Intelligence and Piety.
+- Raise Corpse and RC alias.
+- 120-second cooldown and 5% unique revival chance.
+- Capacity of 3-12 raised undead.
+- Universal Conjure with six companion species.
+- One persistent companion with a 300-second cooldown.
+- Persistent companion XP and levels.
+- Independent combat-death loot.
+- Native help and skill catalog.
+
+Production compatibility and deployment remain pending.
+Rebirth skill remains deferred.
+
+## Historical development notes
+
+Earlier descriptions below are superseded.
+
 # HollowDeep Necromancer — Developer and Player Guide
 
 **Private playtest only. Not available in the live game.**

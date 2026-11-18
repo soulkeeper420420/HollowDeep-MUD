@@ -82,6 +82,8 @@ def main():
     stage_combat(source)
     from stage_creation_help import stage as stage_creation
     stage_creation(source)
+    from stage_pet_death_loot import stage as stage_loot
+    stage_loot(source)
 
     makefile = source / 'Makefile'
     content = makefile.read_text(encoding='latin-1')

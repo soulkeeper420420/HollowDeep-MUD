@@ -34,3 +34,8 @@ Release permanently removes a dismissed companion.
 Combat death permanently destroys the companion.
 
 See HELP PET EXPERIENCE and HELP DRAIN MANA.
+
+Combat death releases the pet's own carried items
+and a small independent gold reward.
+Original monster loot is never copied.
+Safe dismissal and logout produce no pet loot.

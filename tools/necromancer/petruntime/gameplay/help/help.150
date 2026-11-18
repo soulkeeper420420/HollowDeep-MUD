@@ -28,3 +28,8 @@ Raised undead receive no pet experience.
 Death, dismissal, logout or restart ends the summon.
 
 See HELP PETS and HELP CORPSE.
+
+Combat death releases the pet's own carried items
+and a small independent gold reward.
+Original monster loot is never copied.
+Safe dismissal and logout produce no pet loot.

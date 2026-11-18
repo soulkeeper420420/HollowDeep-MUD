@@ -173,6 +173,10 @@ try:
                 raise RuntimeError('Companion combat death not observed')
 
             assert 'spectral wolf' not in view(owner)
+            require(view(fighter),'gold coin')
+            require(command(fighter,'get gold'),'1001 gold')
+            print('PASS: Independent companion combat-death loot',flush=True)
+
             logout(fighter,p,port)
 
         logout(owner,p,port)
