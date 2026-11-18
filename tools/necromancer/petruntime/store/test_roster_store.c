@@ -14,6 +14,16 @@ void hd_necro_skeleton_death(creature *);
 int hd_army_pet_command(creature *, cmd *);
 static creature target;
 static int enemy;
+static int kills;
+
+void die(creature *victim, creature *killer)
+{
+    assert(victim == &target);
+    assert(victim->hpcur == 0);
+    assert(killer && killer->type == PLAYER);
+    ++kills;
+    victim->parent_rom = NULL;
+}
 creature *find_crt(creature *viewer, ctag *list, char *query, int number)
 {
     (void)viewer;
@@ -71,85 +81,137 @@ int main(int argc, char **argv)
                pets[0]->piety == 28);
         for (i = 0; i < old.count; ++i)
             free(pets[i]);
+
         {
             room before = {0}, after = {0};
+            hd_army_corpse corpse = {0};
             creature *first;
+            int mana;
+            long experience;
+
             before.rom_num = 1;
             after.rom_num = 2;
+
             assert(hd_store_load_player(name, &owner) == 0);
             owner->parent_rom = &before;
+            owner->rom_num = 1;
+
             hd_necro_skeleton_reconnect(owner);
+            assert(!hd_necro_skeleton_probe(owner));
+            assert(hd_roster_store_read(name, &old) == HD_PET_OK);
+            assert(old.count == 0);
+
+            strcpy(corpse.name, "crypt rat");
+            corpse.level = 8;
+            corpse.hp = 84;
+            corpse.mp = 20;
+            corpse.unique = 1;
+            corpse.strength = 20;
+            corpse.experience = 200;
+
+            mana = owner->mpcur;
+            experience = owner->experience;
+
+            assert(hd_army_raise_commit(owner, &corpse));
+            assert(hd_army_raise_commit(owner, &corpse));
+            assert(owner->mpcur == mana - 16);
+            assert(owner->experience == experience + 40);
+
             first = hd_necro_skeleton_probe(owner);
-            assert(first && first->parent_rom == &before && first->hpcur == 83);
-            assert(hd_necro_skeleton_is_pet(first));
-            pet_order(owner, "pets");
-            pet_order(owner, "pet stay 2");
-            assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.pets[0].stay);
+            assert(first && first->parent_rom == &before);
+
+            memset(&target, 0, sizeof target);
+            strcpy(target.name, "trialghoul");
             target.type = MONSTER;
             target.parent_rom = &before;
-            target.hpcur = 12;
+            target.hpcur = target.hpmax = 1;
+            target.experience = 250;
+
             pet_order(owner, "pet attack trialghoul");
-            assert(target.hpcur == 12);
+            assert(target.hpcur == 1 && kills == 0);
+
             enemy = 1;
             pet_order(owner, "pet attack trialghoul");
-            assert(target.hpcur < 12 && target.hpcur >= 1);
+            assert(target.hpcur == 0 && kills == 1);
+
+            pet_order(owner, "pet attack trialghoul");
+            assert(kills == 1);
+
+            assert(hd_roster_store_read(name, &old) == HD_PET_OK);
+            assert(old.count == 2);
+            assert(!old.pets[0].experience);
+            assert(!old.pets[1].experience);
+
+            pet_order(owner, "pet stay");
             owner->parent_rom = &after;
             owner->rom_num = 2;
             hd_necro_skeleton_follow(owner, &before, &after);
             assert(first->parent_rom == &before);
-            pet_order(owner, "pet follow 2");
+
+            pet_order(owner, "pet follow");
             assert(first->parent_rom == &after);
+
             hd_necro_skeleton_death(first);
             del_crt_rom(first, &after);
             free_crt(first);
+
+            assert(hd_roster_store_read(name, &old) == HD_PET_OK);
+            assert(old.count == 1);
+
+            pet_order(owner, "pet dismiss all");
+            assert(hd_roster_store_read(name, &old) == HD_PET_OK);
+            assert(old.count == 0);
+
+            assert(hd_army_raise_commit(owner, &corpse));
             hd_necro_skeleton_logout(owner);
+
             assert(!hd_necro_skeleton_probe(owner));
-            free_crt(owner);
+            assert(hd_roster_store_read(name, &old) == HD_PET_OK);
+            assert(old.count == 0);
+
+            hd_necro_skeleton_reconnect(owner);
+            assert(!hd_necro_skeleton_probe(owner));
+            assert(hd_army_raise_commit(owner, &corpse));
+
+            puts("PASS: raised-pet finishing blow and zero pet XP");
+            puts("PASS: combat death, dismissal and logout expiration");
+
+            /* Exit with an active summon to simulate a stale
+               record after an unexpected process stop. */
         }
-        puts("PASS: fresh process reconstructed three native pets from saved roster");
         return 0;
     }
 
     if (argc == 2 && !strcmp(argv[1], "after-death")) {
-        room start = {0};
-        hd_army_corpse corpse = {0};
+        room where = {0};
         int mana;
         long experience;
-        assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 2);
-        assert(old.pets[0].id == 3 && old.pets[1].id == 4);
-        assert(old.pets[0].room == 2 && old.pets[1].room == 2);
+
+        assert(hd_roster_store_read(name, &old) == HD_PET_OK);
+        assert(old.count == 1);
+
         assert(hd_store_load_player(name, &owner) == 0);
-        start.rom_num = owner->rom_num;
-        owner->parent_rom = &start;
-        hd_necro_skeleton_reconnect(owner);
-        assert(hd_necro_skeleton_probe(owner));
-        strcpy(corpse.name, "cave ghoul");
-        corpse.level = 3;
-        corpse.hp = 50;
-        corpse.mp = 10;
-        corpse.experience = 200;
-        corpse.strength = 20;
-        corpse.unique = 1;
+        where.rom_num = owner->rom_num;
+        owner->parent_rom = &where;
+
         mana = owner->mpcur;
         experience = owner->experience;
-        assert(hd_army_raise_commit(owner, &corpse));
-        assert(owner->mpcur == mana - 8 && owner->experience == experience + 20);
-        assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 3);
-        assert(old.pets[2].id == 5 && old.pets[2].unique && old.pets[2].strength == 20 &&
-               !strcmp(old.pets[2].name, "cave ghoul"));
-        assert(!hd_army_raise_ready(owner, &corpse));
-        pet_order(owner, "pet dismiss 4294967296");
-        assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 3);
-        pet_order(owner, "pet dismiss 3");
-        assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 2 &&
-               old.pets[0].id == 4 && old.pets[1].id == 5);
-        pet_order(owner, "pet dismiss all");
-        assert(hd_roster_store_read(name, &old) == HD_PET_OK && old.count == 0 &&
-               old.next_id == 6);
-        puts("PASS: pet status, stay, follow, combat assist, and durable dismissal");
+
+        hd_necro_skeleton_reconnect(owner);
+
+        assert(!hd_necro_skeleton_probe(owner));
+        assert(hd_roster_store_read(name, &old) == HD_PET_OK);
+        assert(old.count == 0);
+
+        assert(hd_store_load_player(name, &disk) == 0);
+        assert(disk->mpcur == mana);
+        assert(disk->experience == experience);
+        free_crt(disk);
+
         hd_necro_skeleton_logout(owner);
         free_crt(owner);
-        puts("PASS: fresh login restores survivors and excludes the dead pet");
+
+        puts("PASS: stale raised pets never return after restart");
         return 0;
     }
     assert(legacy_main(2, seed) == 0);

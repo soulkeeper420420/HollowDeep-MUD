@@ -1,0 +1,11 @@
+PETS
+
+pets
+pet status
+pet attack <monster>
+pet follow [id]
+pet stay [id]
+pet dismiss <id|all>
+
+Dismissed raised undead are permanently removed.
+Raised undead do not gain experience.

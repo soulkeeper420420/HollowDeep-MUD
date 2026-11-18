@@ -111,6 +111,7 @@ void hd_necro_skeleton_reconnect(creature *owner)
 {
     size_t i;
     army_session *session;
+    hd_pet_roster expired;
     hd_pet_state legacy;
     int rc;
     if (!owner || owner->type != PLAYER || owner->class != MAGE ||
@@ -124,15 +125,17 @@ void hd_necro_skeleton_reconnect(creature *owner)
     rc = hd_roster_store_read(owner->name, &session->saved);
     if (rc == HD_PET_ABSENT && hd_pet_store_init(owner->name, &legacy) == HD_PET_OK)
         rc = hd_roster_store_read(owner->name, &session->saved);
-    if (rc != HD_PET_OK || hd_army_restore(&session->saved, session->pets))
+    if (rc != HD_PET_OK)
         storage_stop("login", rc);
     session->owner = owner;
-    for (i = 0; i < session->saved.count; ++i) {
-        const hd_roster_pet *saved = &session->saved.pets[i];
-        if (!saved->stay || saved->room == (unsigned)owner->rom_num)
-            add_crt_rom(session->pets[i], owner->parent_rom, 0);
+
+    /* Raised undead belong to a single login session.
+       Expire stale records before materializing any creature. */
+    if (session->saved.count) {
+        expired = session->saved;
+        expired.count = 0;
+        checkpoint(session, &expired);
     }
-    save_vitals(session);
 }
 
 static void detach(creature *pet)
@@ -146,12 +149,18 @@ static void detach(creature *pet)
 void hd_necro_skeleton_logout(creature *owner)
 {
     army_session *session = find_session(owner);
-    size_t i;
+    size_t i, count;
+    hd_pet_roster expired;
     if (!session)
         return;
-    save_vitals(session);
+    count = session->saved.count;
+    if (count) {
+        expired = session->saved;
+        expired.count = 0;
+        checkpoint(session, &expired);
+    }
     session->owner = NULL;
-    for (i = 0; i < session->saved.count; ++i) {
+    for (i = 0; i < count; ++i) {
         detach(session->pets[i]);
         free_crt(session->pets[i]);
     }
@@ -272,16 +281,37 @@ void hd_necro_skeleton_assist(creature *owner, creature *target)
         !is_enm_crt(owner->name, target))
         return;
     now = (long)time(NULL);
-    for (i = 0; i < session->saved.count && target->hpcur > 1; ++i) {
+    for (i = 0; i < session->saved.count && target->hpcur > 0; ++i) {
         creature *pet = session->pets[i];
         int damage;
         if (pet->parent_rom != owner->parent_rom ||
             (session->last_hit[i] && now - session->last_hit[i] < 3))
             continue;
         session->last_hit[i] = now;
-        damage = MIN(1 + pet->level / 8, target->hpcur - 1);
+        if (F_ISSET(target, MPERMT) ||
+            F_ISSET(target, MTRADE) ||
+            F_ISSET(target, MDMFOL))
+            damage = MIN(1 + pet->level / 8, target->hpcur - 1);
+        else
+            damage = MIN(1 + pet->level / 8, target->hpcur);
+
+        if (damage <= 0)
+            continue;
+
         target->hpcur -= (short)damage;
         add_enm_dmg(owner->name, target, damage);
+
+        if (target->hpcur == 0) {
+            char message[220];
+            snprintf(message, sizeof message,
+                     "%s finishes %s.\\n",
+                     pet->name, target->name);
+            print(owner->fd, "%s", message);
+
+            /* Native player XP and loot. No raised-pet XP. */
+            die(target, owner);
+            return;
+        }
     }
 }
 

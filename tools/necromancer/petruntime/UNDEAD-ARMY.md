@@ -154,3 +154,12 @@ expansion.
 After Necromancer gameplay acceptance, build editable race and class templates.
 Support creating a new entry and editing an existing entry through the same
 workflow, with validation and a preview before source changes are generated.
+
+## Round 75A: revised summon policy
+
+Supersedes the historical permanent raised-army policy.
+Raised undead expire on logout, dismissal, death and restart.
+Eligible final blows use native owner XP and original corpse loot.
+Raised creatures never earn pet XP.
+
+Universal Conjure is a separate planned persistent companion system.

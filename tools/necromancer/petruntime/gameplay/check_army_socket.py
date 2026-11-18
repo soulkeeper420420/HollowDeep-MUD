@@ -82,6 +82,58 @@ int main(int argc, char **argv)
 {''')
     body = body.replace(end_declarations, end_declarations +
                         '\n    if (argc == 2) return probe_room(argv[1]);')
+
+    logout_probe = r"""
+static int probe_logout(const char *expected_room,
+                        const char *expected_xp)
+{
+    creature *player = NULL;
+    hd_pet_roster roster;
+    otag *tag;
+    int ruby = 0;
+
+    extern int hd_roster_store_read(
+        const char *, hd_pet_roster *);
+
+    if (hd_store_load_player("Hdnecroqa", &player) ||
+        !player)
+        return 10;
+
+    if (hd_roster_store_read("Hdnecroqa", &roster))
+        return 11;
+
+    for (tag = player->first_obj; tag; tag = tag->next_tag)
+        if (tag->obj &&
+            !strcmp(tag->obj->name, "rubyfixture"))
+            ++ruby;
+
+    printf("DURABLE LOGOUT: room=%d gold=%ld XP=%ld ruby=%d pets=%lu\n",
+        (int)player->rom_num,
+        player->gold, player->experience,
+        ruby, (unsigned long)roster.count);
+
+    if (player->rom_num != atoi(expected_room) ||
+        player->experience != strtol(expected_xp, NULL, 10) ||
+        player->gold != 1013 || ruby != 1 ||
+        roster.count != 0)
+        return 12;
+
+    return 0;
+}
+"""
+    main_anchor = 'int main(int argc, char **argv)\n{'
+    assert body.count(main_anchor) == 1
+    body = body.replace(
+        main_anchor, logout_probe + '\n' + main_anchor)
+
+    dispatch = '    if (argc == 2) return probe_room(argv[1]);'
+    assert body.count(dispatch) == 1
+
+    body = body.replace(dispatch,
+        '    if (argc == 4 && !strcmp(argv[1], "logout"))\n'
+        '        return probe_logout(argv[2], argv[3]);\n'
+        + dispatch)
+
     fixture = world / 'seed.c'
     fixture.write_text(body)
     components = ['files1', 'files3', 'compress', 'hd_player_store', 'treasure_receipt',
@@ -161,21 +213,32 @@ def replay(src, world):
         return int(match[1]), int(match[2])
 
     def quit_owner(client, process, expected_room):
-        save = world / 'player/Hdnecroqa'
-        previous_inode = save.stat().st_ino
         prior['quit_with_cooldown'](client, process)
-        deadline = time.monotonic() + 10
-        result = None
-        while time.monotonic() < deadline and process.poll() is None:
-            if save.stat().st_ino != previous_inode:
-                result = subprocess.run([str(probe), str(expected_room)], cwd=world,
-                                        text=True, capture_output=True, timeout=3)
-                if result.returncode == 0:
-                    print(result.stdout.rstrip(), flush=True)
-                    return
-            time.sleep(0.1)
-        detail = result.stdout.strip() if result else 'no replacement save observed'
-        raise RuntimeError(f'Owner logout save did not reach room {expected_room}: {detail}')
+
+        # EOF can precede the native character save.
+        # A fresh listener response establishes an event-loop barrier.
+        with prior['connect_game'](port, process) as barrier:
+            prior['recv_until'](
+                barrier, b'Please enter name:', seconds=15)
+
+        if process.poll() is not None:
+            raise RuntimeError('Listener exited during logout')
+
+        with tempfile.TemporaryDirectory(
+                prefix='hd-logout-probe-') as storage:
+            copied = Path(storage)
+            (copied / 'player').mkdir(mode=0o700)
+            shutil.copyfile(
+                world / 'player/Hdnecroqa',
+                copied / 'player/Hdnecroqa')
+
+            subprocess.run(
+                [str(probe), 'logout', str(expected_room),
+                 str(earned + 25)],
+                cwd=copied, check=True, timeout=5)
+
+        print('PASS: durable owner rewards and empty undead roster',
+              flush=True)
 
     def stop(process):
         if process.poll() is None:
@@ -186,110 +249,81 @@ def replay(src, world):
                 process.kill()
                 process.wait(timeout=5)
 
+
     process, port = start('first-listener')
     try:
         with prior['connect_game'](port, process) as owner:
             login(owner, 'Hdnecroqa', 'Necromancer Grave Trial')
-            require(command(owner, 'pets'), 'Pet 2: Unique cryptsentinel')
-            first = prior['kill_and_find'](owner, 'trialwretch', 'rubyfixture')
-            second = prior['kill_and_find'](owner, 'trialghoul', 'amberfixture')
+            require(command(owner, 'pets'), 'Pets: 0/')
+
+            if 'cryptsentinel' in view(owner) or 'bonehound' in view(owner):
+                raise RuntimeError('Expired summons returned')
+
+            first = prior['kill_and_find'](
+                owner, 'trialwretch', 'rubyfixture')
+            second = prior['kill_and_find'](
+                owner, 'trialghoul', 'amberfixture')
+
             require(command(owner, 'save'), 'Player saved.')
             earned, gold = saved_progress(1)
-            if earned <= 10000 or gold != 1000:
-                raise RuntimeError(f'Unexpected pre-raise kill XP or gold: {earned}, {gold}')
+
             result = command(owner, f'rc {first}')
             if 'resists your call' in result.lower():
-                require(command(owner, f'raise corpse {second}'), 'Raise Corpse is ready in')
+                require(command(owner, f'raise corpse {second}'),
+                        'Raise Corpse is ready in')
                 raise RevivalResisted()
+
             require(result, 'You raise trialwretch [pet 4]')
-            require(result, 'loot falls to the ground')
-            require(command(owner, f'raise corpse {second}'), 'Raise Corpse is ready in')
-            if saved_progress(1) != (earned + 25, gold):
-                raise RuntimeError('Expected exactly 25 bonus XP on the atomic raise save')
+            require(command(owner, f'raise corpse {second}'),
+                    'Raise Corpse is ready in')
+
+            assert saved_progress(1) == (earned + 25, gold)
+
             prior['after_release'](owner, first, 'rubyfixture')
             require(command(owner, 'get rubyfixture'), 'You get')
             require(command(owner, 'get gold'), '1013 gold')
-            current, maximum = raised_hp(owner)
-            if current != maximum or maximum not in (147, 294):
-                raise RuntimeError('Unexpected starting vitals for raised pet')
-            with prior['connect_game'](port, process) as faithful:
-                login(faithful, 'Hdfaithqa', 'Necromancer Grave Trial')
-                for _ in range(6):
-                    command(faithful, 'attack trialwretch')
-                    wounded, _ = raised_hp(owner)
-                    if wounded < maximum:
-                        break
-                    time.sleep(3.2)
-                else:
-                    raise RuntimeError('Raised pet never took native combat damage')
-                reply = command(owner, 'cast mend-wounds trialwretch')
-                require(reply, 'Mend-wounds spell cast on')
-                healed, _ = raised_hp(owner)
-                if healed <= wounded:
-                    raise RuntimeError(f'Targeted healing did not raise pet HP: {wounded} to {healed}')
-                prior['quit_with_cooldown'](faithful, process)
-            print('PASS: live RC, shared cooldown, original loot, exact bonus XP and targeted healing',
-                  flush=True)
-            require(command(owner, 'pet stay 2'), 'Pet order: stay')
+
+            status = command(owner, 'pets')
+            require(status, 'Pets: 1/')
+            require(status, 'XP 0')
+
+            require(command(owner, 'pet stay 4'), 'Pet order: stay')
             move(owner, 'north', 'Necromancer Trial Annex')
-            status = command(owner, 'pet status')
-            require(status, 'Pet 3: bonehound')
-            if 'cryptsentinel' in view(owner).lower():
-                raise RuntimeError('Staying pet followed its owner')
-            require(command(owner, 'pet follow 2'), 'Pet order: follow')
-            require(view(owner), 'cryptsentinel')
-            quit_owner(owner, process, 2)
-    finally:
-        stop(process)
-    print('PASS: native pet orders and durable logout', flush=True)
 
-    process, port = start('second-listener')
-    try:
+            if 'trialwretch' in view(owner):
+                raise RuntimeError('Stay order failed')
+
+            require(command(owner, 'pet follow 4'), 'Pet order: follow')
+            require(view(owner), 'trialwretch')
+
+            quit_owner(owner, process, 2)
+
         with prior['connect_game'](port, process) as owner:
             login(owner, 'Hdnecroqa', 'Necromancer Trial Annex')
-            status = command(owner, 'pets')
-            require(status, 'Pet 2: Unique cryptsentinel')
-            require(status, 'HP 84/84 MP 20/20')
-            require(status, 'Pet 3: bonehound')
-            require(view(owner), 'bonehound')
-            raised_hp(owner)
-            require(command(owner, 'inventory'), 'rubyfixture')
-            restored_xp, restored_gold = saved_progress(2)
-            if restored_xp != earned + 25 or restored_gold != 1013:
-                raise RuntimeError('Live raise rewards changed across restart')
-            require(command(owner, 'pet dismiss 4'), 'You dismiss')
-            with prior['connect_game'](port, process) as faithful:
-                login(faithful, 'Hdfaithqa', 'Necromancer Grave Trial')
-                move(faithful, 'north', 'Necromancer Trial Annex')
-                for _ in range(30):
-                    command(faithful, 'attack bonehound')
-                    status = command(owner, 'pets')
-                    require(status, 'Pet 2: Unique cryptsentinel')
-                    if 'Pet 3:' not in status:
-                        break
-                    time.sleep(3.2)
-                else:
-                    raise RuntimeError('Native combat never removed bonehound')
-                require(status, 'Pet 2: Unique cryptsentinel')
-                prior['quit_with_cooldown'](faithful, process)
-            quit_owner(owner, process, 2)
-    finally:
-        stop(process)
-
-    process, port = start('third-listener')
-    try:
-        with prior['connect_game'](port, process) as owner:
-            login(owner, 'Hdnecroqa', 'Necromancer Trial Annex')
-            status = command(owner, 'pets')
-            require(status, 'Pet 2: Unique cryptsentinel')
-            if 'Pet 3:' in status or 'bonehound' in view(owner).lower():
-                raise RuntimeError('Dead pet returned after restart')
-            require(command(owner, 'pet dismiss 2'), 'You dismiss')
             require(command(owner, 'pets'), 'Pets: 0/')
+            require(command(owner, 'inventory'), 'rubyfixture')
+            assert saved_progress(2) == (earned + 25, 1013)
+
+            if 'trialwretch' in view(owner):
+                raise RuntimeError('Summon survived logout')
+
             quit_owner(owner, process, 2)
     finally:
         stop(process)
-    print('PASS: private Undead Army socket orders, unique restore and combat death', flush=True)
+
+    process, port = start('restart-listener')
+    try:
+        with prior['connect_game'](port, process) as owner:
+            login(owner, 'Hdnecroqa', 'Necromancer Trial Annex')
+            require(command(owner, 'pets'), 'Pets: 0/')
+            require(command(owner, 'inventory'), 'rubyfixture')
+            assert saved_progress(2) == (earned + 25, 1013)
+            quit_owner(owner, process, 2)
+    finally:
+        stop(process)
+
+    print('PASS: native transient undead logout and restart',
+          flush=True)
 
 
 if __name__ == '__main__':

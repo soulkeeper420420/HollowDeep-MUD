@@ -1,0 +1,18 @@
+RAISE CORPSE
+
+Necromancer only.
+Usage: raise corpse [id] or rc [id]
+Mana: 8
+Cooldown: 120 seconds
+Capacity: 3 to 12 raised creatures by level.
+
+Eligible corpses can be raised with a level-based chance.
+Successful raises have a 5 percent unique variant chance.
+Unique summons receive doubled stats, HP and MP, within limits.
+
+Raised undead earn no pet experience.
+Their kills award normal experience to their owner.
+Death, dismissal, logout and restart end the summon.
+
+Use loot corpse [id] to release ordinary corpse loot.
+Each eligible corpse allows one revival attempt.
