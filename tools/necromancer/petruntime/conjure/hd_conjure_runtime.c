@@ -6,6 +6,7 @@
 #include "hd_conjure_runtime.h"
 
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
@@ -15,10 +16,37 @@
 typedef struct {
     creature *owner, *pet;
     hd_conjure_state saved;
-    uint32_t last_hit, last_drain;
+    uint32_t last_hit, last_drain, venom_until;
+    creature *venom_target;
+    unsigned venom_left;
 } cj_session;
 
 static cj_session slots[PMAX];
+
+#ifdef HD_CJ_TESTING
+extern unsigned hd_cj_test_roll;
+extern uint32_t hd_cj_test_now;
+#endif
+
+static unsigned cj_roll(void)
+{
+#ifdef HD_CJ_TESTING
+    return hd_cj_test_roll;
+#else
+    return mrand(1,100);
+#endif
+}
+
+void hd_cj_forget_target(creature *who)
+{
+    size_t i;
+    for(i=0;i<PMAX;++i)
+        if(slots[i].venom_target==who) {
+            slots[i].venom_target=NULL;
+            slots[i].venom_left=0;
+        }
+}
+
 
 static void cj_stop(const char *where,int result)
 {
@@ -30,6 +58,9 @@ static void cj_stop(const char *where,int result)
 static uint32_t cj_now(void)
 {
     time_t now=time(NULL);
+#ifdef HD_CJ_TESTING
+    return hd_cj_test_now;
+#endif
     if(now<=0 || (uintmax_t)now>UINT32_MAX)
         cj_stop("clock",-1);
     return (uint32_t)now;
@@ -96,6 +127,8 @@ static void destroy(cj_session *s)
 {
     creature *pet=s->pet;
     s->pet=NULL;
+    s->venom_target=NULL;
+    s->venom_left=0;
 
     if(pet) {
         detach(pet);
@@ -230,6 +263,8 @@ int hd_cj_death(creature *pet)
     apply(s,HD_CJ_DEATH,0,0);
     s->pet=NULL;
     s->last_hit=s->last_drain=0;
+    s->venom_target=NULL;
+    s->venom_left=0;
 
     print(s->owner->fd,
           "Your conjured companion has been lost forever.\n");
@@ -308,7 +343,8 @@ int hd_cj_assist(creature *owner,creature *target)
     cj_session *s=by_owner(owner);
     creature *pet;
     uint32_t now;
-    int damage,limit;
+    int damage,limit,base;
+    unsigned roll;
     char line[220];
 
     if(!s || !(pet=s->pet) || !target ||
@@ -338,14 +374,73 @@ int hd_cj_assist(creature *owner,creature *target)
 
     if(limit<1) return 0;
 
-    damage=MIN(4+pet->level/2,limit);
+    base=4+pet->level/2;
+    damage=base;
+    roll=cj_roll();
+
+    if(!F_ISSET(target,MPERMT)) {
+        switch(s->saved.species) {
+        case 2:
+            if(s->venom_target!=target ||
+               now>s->venom_until) {
+                s->venom_target=NULL;
+                s->venom_left=0;
+            }
+
+            if(!s->venom_left && roll<=10) {
+                s->venom_target=target;
+                s->venom_left=3;
+                s->venom_until=now+10;
+                print(owner->fd,
+                      "Your scorpion injects venom.\n");
+            }
+
+            if(s->venom_left &&
+               s->venom_target==target) {
+                damage+=2+pet->level/4;
+                --s->venom_left;
+                if(!s->venom_left)
+                    s->venom_target=NULL;
+            }
+            break;
+
+        case 3:
+            if(roll<=15) {
+                damage+=base;
+                print(owner->fd,
+                      "Your fire elemental unleashes flames.\n");
+            }
+            break;
+
+        case 4:
+            if(roll<=10 && now<(uint32_t)LONG_MAX-3 &&
+               LT(target,LT_ATTCK)<(long)now+3) {
+                target->lasttime[LT_ATTCK].ltime=now;
+                target->lasttime[LT_ATTCK].interval=3;
+                print(owner->fd,
+                      "Your minotaur stuns the enemy.\n");
+            }
+            break;
+
+        case 6:
+            if(roll<=15) {
+                damage+=2*base;
+                print(owner->fd,
+                      "Your dragon unleashes dragon breath.\n");
+            }
+            break;
+        }
+    }
+
+    damage=MIN(damage,limit);
 
     if(s->saved.species==5 &&
+       !F_ISSET(target,MPERMT) &&
        target->mpcur>0 && target->mpmax>0) {
         unsigned a,b,drained;
 
         drained=hd_conjure_drain(
-            mrand(1,100),
+            roll,
             target->mpcur,target->mpmax,
             MAX(0,owner->mpmax-owner->mpcur),
             MAX(0,pet->mpmax-pet->mpcur),

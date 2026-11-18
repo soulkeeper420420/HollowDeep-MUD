@@ -41,12 +41,17 @@ def main():
     gameplay = here.parent / 'gameplay'
     env = dict(os.environ)
     env.pop('HD_ATOMIC_FAIL', None)
-    for test, path in [('legacy', fixture_source), ('roster', here / 'test_roster_store.c'), ('conjure', here.parent / 'conjure/test_conjure.c')]:
+    for test, path in [('legacy', fixture_source), ('roster', here / 'test_roster_store.c'), ('conjure', here.parent / 'conjure/test_conjure.c'), ('combat', here.parent / 'conjure/test_companion_combat.c')]:
         executable = work / ('test-' + test)
         test_command = command
         if test == 'roster':
             test_command = command + ['-I', str(gameplay), str(gameplay / 'hd_army_restore.c'),
                                       str(gameplay / 'hd_army_runtime.c')]
+        if test == 'combat':
+            conjure = here.parent / 'conjure'
+            test_command = command + [
+                '-DHD_CJ_TESTING', '-I', str(conjure),
+                str(conjure / 'hd_conjure_runtime.c')]
         subprocess.run(test_command + [str(path)] + components + ['-o', str(executable)],
                        check=True)
         with executable.open('rb') as binary:

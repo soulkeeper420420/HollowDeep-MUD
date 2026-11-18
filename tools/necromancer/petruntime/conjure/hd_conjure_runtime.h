@@ -6,6 +6,7 @@ int hd_cj_is_pet(creature *);
 int hd_cj_death(creature *);
 int hd_cj_assist(creature *, creature *);
 
+void hd_cj_forget_target(creature *);
 void hd_cj_login(creature *);
 void hd_cj_logout(creature *);
 void hd_cj_follow(creature *, room *);

@@ -78,6 +78,9 @@ def main():
     help_source.write_text(
         body.replace(anchor,routes+anchor,1),encoding='latin-1')
 
+    from stage_companion_combat import stage as stage_combat
+    stage_combat(source)
+
     makefile = source / 'Makefile'
     content = makefile.read_text(encoding='latin-1')
     target = 'frp.new: $(OBJECTS)'

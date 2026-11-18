@@ -210,6 +210,7 @@ void hd_necro_skeleton_death(creature *pet)
 void hd_necro_skeleton_on_free(creature *who)
 {
 #ifdef HD_CONJURE_RUNTIME
+    hd_cj_forget_target(who);
     if (hd_cj_is_pet(who)) storage_stop("unexpected companion free",-1);
 #endif
     size_t index;
@@ -300,10 +301,10 @@ int hd_necro_skeleton_can_heal(creature *owner)
     return 0;
 }
 
-void hd_necro_skeleton_assist(creature *owner, creature *target)
+int hd_army_assist_result(creature *owner, creature *target)
 {
 #ifdef HD_CONJURE_RUNTIME
-    if (hd_cj_assist(owner,target)) return;
+    if (hd_cj_assist(owner,target)) return 1;
 #endif
     army_session *session = find_session(owner);
     size_t i;
@@ -312,7 +313,7 @@ void hd_necro_skeleton_assist(creature *owner, creature *target)
         owner->parent_rom != target->parent_rom || hd_necro_skeleton_is_pet(target) ||
         F_ISSET(target, MUNKIL) || F_ISSET(target, MMGONL) ||
         !is_enm_crt(owner->name, target))
-        return;
+        return 0;
     now = (long)time(NULL);
     for (i = 0; i < session->saved.count && target->hpcur > 0; ++i) {
         creature *pet = session->pets[i];
@@ -343,9 +344,15 @@ void hd_necro_skeleton_assist(creature *owner, creature *target)
 
             /* Native player XP and loot. No raised-pet XP. */
             die(target, owner);
-            return;
+            return 1;
         }
     }
+    return 0;
+}
+
+void hd_necro_skeleton_assist(creature *owner, creature *target)
+{
+    (void)hd_army_assist_result(owner,target);
 }
 
 int hd_necro_raise(creature *owner, cmd *command)

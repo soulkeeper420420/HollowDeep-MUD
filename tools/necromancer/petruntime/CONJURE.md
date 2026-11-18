@@ -39,3 +39,20 @@ Releasing a dismissed companion removes it permanently.
 Cooldown applies to summon and manual recall.
 Species stats and growth are initial private balance values.
 Native command dispatch and combat integration remain pending.
+
+## Round 75D combat rules
+
+Native ordinary attack rounds trigger companion assistance.
+Companion final blows credit native damage and player XP to the owner.
+The companion receives separate base monster XP.
+Raised undead never gain companion XP.
+
+Special effects:
+- Scorpion: 10% non-stacking venom for three companion strikes.
+- Fire elemental: 15% double damage.
+- Minotaur: 10% three-second attack timer delay.
+- Shadow wraith: 20% mana drain, split with owner.
+- Dragon: 15% triple-damage breath.
+
+Special effects do not apply to protected permanent monsters.
+Special-effect balance is provisional.
