@@ -393,162 +393,240 @@ PAYLOAD={'help/corpses': 'MONSTER CORPSES - PRIVATE PLAYTEST\n'
              'PET_RUNTIME_PLAYTEST requires PET_STORE_PLAYTEST=1)\\nendif\\nCFLAGS += '
              "-DHD_PET_RUNTIME_PLAYTEST\\nendif\\n\\nfrp.new: $(OBJECTS)')\n"
              "    for n,body in out.items(): (src/n).write_text(body,'latin-1')\n",
- 'runtime_gameplay.py': '"""Private real listener restart replay. Called only by guarded onepass runner."""\n'
-                        'import os\n'
-                        'import re\n'
-                        'import runpy\n'
-                        'import shutil\n'
-                        'import socket\n'
-                        'import subprocess\n'
-                        'import tempfile\n'
-                        'import time\n'
-                        'from pathlib import Path\n'
-                        '\n'
-                        '\n'
-                        'def replay(src, help_pages, prior_gameplay, cache_gameplay, work):\n'
-                        '    if os.geteuid()!=0 or '
-                        "os.readlink('/proc/self/ns/net')==os.readlink('/proc/1/ns/net'):\n"
-                        "        raise RuntimeError('Separate network namespace and root required')\n"
-                        "    if not work.is_relative_to(Path('/root/hollowdeep-dev')) or not "
-                        "work.name.startswith('necromancer-playtest-runtime-') or src!=work/'src':\n"
-                        "        raise RuntimeError('Refusing non-disposable gameplay root')\n"
-                        '    old=runpy.run_path(str(prior_gameplay))\n'
-                        '    cache=runpy.run_path(str(cache_gameplay))\n'
-                        "    stage=work/'socket-world';stage.mkdir(mode=0o700)\n"
-                        "    print('PETRUNTIME: PRIVATE SOCKET WORLD: '+str(stage),flush=True)\n"
-                        '    for name in '
-                        "('rooms','player','log','objmon','post','help','bin','hollowdeep-data'):\n"
-                        '        (stage/name).mkdir(mode=0o700)\n'
-                        '    for name,body in help_pages.items():\n'
-                        "        if '/' in name or not name: raise RuntimeError('Invalid help page')\n"
-                        "        (stage/'help'/name).write_text(body,encoding='ascii')\n"
-                        "    (stage/'hollowdeep-data/deities.db').write_text('HOLLOWDEEP_DEITIES 1 "
-                        "1\\nHdfaithqa 3\\n')\n"
-                        "    compile_fixture=old['compile_fixture']\n"
-                        "    compile_fixture.__globals__['SOURCE']=cache['fixture_source'](old['SOURCE'])\n"
-                        "    fixture=compile_fixture(src,stage,'-m32')\n"
-                        '    subprocess.run([str(fixture)],cwd=stage,check=True)\n'
-                        "    chroot=shutil.which('chroot',path='/usr/sbin:/usr/bin:/sbin:/bin')\n"
-                        "    if not chroot:raise RuntimeError('Required chroot missing')\n"
-                        "    exe=src/'frp.new'\n"
-                        "    interpreter=old['prepare_chroot'](exe,stage)\n"
-                        "    launcher=[chroot,'--userspec=65534:65534','--groups=65534',str(stage)]\n"
-                        "    env={'PATH':'/usr/bin:/bin','HOLLOWDEEP_BIND':'127.0.0.1'}\n"
-                        '    '
-                        "subprocess.run(launcher+[interpreter,'--list','/bin/hollowdeep'],cwd=stage,env=env,check=True,timeout=15)\n"
-                        '    '
-                        "connect=old['connect_game'];command=old['command'];require=old['require'];view=old['room_view'];collect=old['collect'];quit_game=old['quit_with_cooldown'];kill=old['kill_and_find']\n"
-                        '    def start(label):\n'
-                        '        with socket.socket() as probe:\n'
-                        "            probe.bind(('127.0.0.1',0));port=probe.getsockname()[1]\n"
-                        "        logpath=work/(label+'.log')\n"
-                        "        with logpath.open('wb') as log:\n"
-                        '            '
-                        "process=subprocess.Popen(launcher+['/bin/hollowdeep',str(port)],cwd=stage,env=env,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT)\n"
-                        "        print(f'PETRUNTIME: private listener {label} PID "
-                        "{process.pid}',flush=True)\n"
-                        '        return process,port,logpath\n'
-                        '    def stop(process, abrupt=False):\n'
-                        '        if process is None:return\n'
-                        '        if process.poll() is None:\n'
-                        '            if abrupt:process.kill()\n'
-                        '            else:process.terminate()\n'
-                        '            try:process.wait(timeout=5)\n'
-                        '            except '
-                        'subprocess.TimeoutExpired:process.kill();process.wait(timeout=5)\n'
-                        '    def login(client,name,room_name,restored=False):\n'
-                        "        old['recv_until'](client,b'Please enter name:');old['send'](client,name)\n"
-                        "        old['recv_until'](client,b'Please enter "
-                        "password:');old['send'](client,'Fixturepass')\n"
-                        "        wanted=b'Your saved skeleton returns (147 HP / 51 MP).' if restored else "
-                        "room_name.encode('ascii')\n"
-                        '        '
-                        "reply=old['recv_until'](client,wanted,seconds=15).decode('latin-1',errors='replace')+collect(client,quiet=0.4,limit=2)\n"
-                        "        print('LOGIN: '+name+'\\n'+reply,flush=True)\n"
-                        "        if not restored and 'Your saved skeleton returns' in reply:\n"
-                        "            raise RuntimeError('Unexpected saved skeleton restoration')\n"
-                        '        require(view(client),room_name)\n'
-                        '    def one_pet(client,room_name):\n'
-                        '        text=view(client);require(text,room_name)\n'
-                        "        rows=[x for x in text.splitlines() if x.strip().startswith('you see') and "
-                        "'skeleton servant' in x]\n"
-                        "        if len(rows)!=1 or not re.search(r'\\ba skeleton servant\\b',rows[0]) or "
-                        "re.search(r'\\b[2-9]\\d* skeleton servants?\\b',rows[0]):\n"
-                        "            raise RuntimeError('Expected exactly one visible skeleton: "
-                        "'+repr(text[-1500:]))\n"
-                        '    def absent_pet(client):\n'
-                        '        text=view(client)\n'
-                        "        if any('skeleton servant' in x for x in text.splitlines() if "
-                        "x.strip().startswith('you see')) or 'corpse of skeleton servant' in text:\n"
-                        "            raise RuntimeError('Unexpected skeleton or corpse: "
-                        "'+repr(text[-1500:]))\n"
-                        '    def defeat_pet(client):\n'
-                        '        death=False;deadline=time.monotonic()+150\n'
-                        '        while time.monotonic()<deadline:\n'
-                        "            text=command(client,'attack skeleton');death=death or "
-                        "bool(re.search(r'you killed (?:the|a) skeleton servant',text,re.I))\n"
-                        '            time.sleep(3.2)\n'
-                        "            text=view(client);death=death or bool(re.search(r'you killed (?:the|a) "
-                        "skeleton servant',text,re.I))\n"
-                        '            if death:\n'
-                        '                absent_pet(client);return\n'
-                        "        raise RuntimeError('Native pet death not confirmed within combat "
-                        "deadline')\n"
-                        '    process=None;logpath=None\n'
-                        '    try:\n'
-                        "        process,port,logpath=start('listener-1')\n"
-                        '        with connect(port,process) as owner:\n'
-                        "            login(owner,'Hdnecroqa','Necromancer Grave Trial')\n"
-                        "            require(command(owner,'help raise skeleton'),'saved skeleton')\n"
-                        "            cid=kill(owner,'trialwretch','rubyfixture')\n"
-                        "            result=command(owner,f'raise corpse {cid}')\n"
-                        "            require(result,'You raise a skeleton (147 HP / 51 "
-                        "MP).');require(result,'loot falls to the ground')\n"
-                        "            old['after_release'](owner,cid,'rubyfixture')\n"
-                        "            require(command(owner,'get rubyfixture'),'You "
-                        "get');require(command(owner,'get gold'),'You now have 1013 gold pieces.')\n"
-                        "            time.sleep(4);command(owner,'north');one_pet(owner,'Necromancer Trial "
-                        "Annex')\n"
-                        '            quit_game(owner,process)\n'
-                        "        print('PETRUNTIME: native raise, loot pickup, follow and saved logout "
-                        "PASS',flush=True)\n"
-                        '        # Kill ONLY the stopped-from-play private process after a completed '
-                        'logout.\n'
-                        '        # This tests a process restart, not a disk power-loss/rename crash window.\n'
-                        '        stop(process,abrupt=True);oldpid=process.pid\n'
-                        "        process,port,logpath=start('listener-2')\n"
-                        "        if process.pid==oldpid:raise RuntimeError('Expected distinct private "
-                        "listener PID')\n"
-                        '        with connect(port,process) as owner:\n'
-                        "            login(owner,'Hdnecroqa','Necromancer Trial Annex',restored=True)\n"
-                        "            one_pet(owner,'Necromancer Trial Annex')\n"
-                        "            require(command(owner,'inventory'),'rubyfixture')\n"
-                        "            print('PETRUNTIME: real fresh game process restored one saved pet and "
-                        "collected item PASS',flush=True)\n"
-                        '            with connect(port,process) as faithful:\n'
-                        "                login(faithful,'Hdfaithqa','Necromancer Grave Trial')\n"
-                        "                command(faithful,'north');one_pet(faithful,'Necromancer Trial "
-                        "Annex')\n"
-                        '                defeat_pet(faithful);absent_pet(owner)\n'
-                        "                print('PETRUNTIME: native combat killed restored pet; no pet corpse "
-                        "PASS',flush=True)\n"
-                        '                quit_game(faithful,process)\n'
-                        '            quit_game(owner,process)\n'
-                        '        stop(process,abrupt=True);oldpid=process.pid\n'
-                        "        process,port,logpath=start('listener-3')\n"
-                        "        if process.pid==oldpid:raise RuntimeError('Expected distinct private "
-                        "listener PID')\n"
-                        '        with connect(port,process) as owner:\n'
-                        "            login(owner,'Hdnecroqa','Necromancer Trial Annex');absent_pet(owner)\n"
-                        "            require(command(owner,'inventory'),'rubyfixture')\n"
-                        '            quit_game(owner,process)\n'
-                        "        print('PETRUNTIME: REAL NATIVE SOCKET RESTART/DEATH PASS',flush=True)\n"
-                        '    except Exception:\n'
-                        "        if logpath and logpath.exists():print('PRIVATE LISTENER "
-                        "LOG:\\n'+logpath.read_text(errors='replace')[-5000:],flush=True)\n"
-                        '        raise\n'
-                        '    finally:\n'
-                        '        stop(process)\n',
+ 'runtime_gameplay.py': ('"""Private real listener restart replay. Called only by guarded onepass runner."""\n'
+ 'import os\n'
+ 'import re\n'
+ 'import runpy\n'
+ 'import shutil\n'
+ 'import socket\n'
+ 'import subprocess\n'
+ 'import tempfile\n'
+ 'import time\n'
+ 'from pathlib import Path\n'
+ '\n'
+ '\n'
+ 'def replay(src, help_pages, prior_gameplay, cache_gameplay, work):\n'
+ "    if os.geteuid()!=0 or os.readlink('/proc/self/ns/net')==os.readlink('/proc/1/ns/net'):\n"
+ "        raise RuntimeError('Separate network namespace and root required')\n"
+ "    if not work.is_relative_to(Path('/root/hollowdeep-dev')) or not "
+ "work.name.startswith('necromancer-playtest-runtime-') or src!=work/'src':\n"
+ "        raise RuntimeError('Refusing non-disposable gameplay root')\n"
+ '    old=runpy.run_path(str(prior_gameplay))\n'
+ '    cache=runpy.run_path(str(cache_gameplay))\n'
+ "    stage=work/'socket-world';stage.mkdir(mode=0o700)\n"
+ "    print('PETRUNTIME: PRIVATE SOCKET WORLD: '+str(stage),flush=True)\n"
+ "    for name in ('rooms','player','log','objmon','post','help','bin','hollowdeep-data'):\n"
+ '        (stage/name).mkdir(mode=0o700)\n'
+ '    for name,body in help_pages.items():\n'
+ "        if '/' in name or not name: raise RuntimeError('Invalid help page')\n"
+ "        (stage/'help'/name).write_text(body,encoding='ascii')\n"
+ "    (stage/'hollowdeep-data/deities.db').write_text('HOLLOWDEEP_DEITIES 1 1\\nHdfaithqa 3\\n')\n"
+ "    compile_fixture=old['compile_fixture']\n"
+ "    compile_fixture.__globals__['SOURCE']=cache['fixture_source'](old['SOURCE'])\n"
+ "    fixture=compile_fixture(src,stage,'-m32')\n"
+ '    subprocess.run([str(fixture)],cwd=stage,check=True)\n'
+ "    chroot=shutil.which('chroot',path='/usr/sbin:/usr/bin:/sbin:/bin')\n"
+ "    if not chroot:raise RuntimeError('Required chroot missing')\n"
+ "    exe=src/'frp.new'\n"
+ "    interpreter=old['prepare_chroot'](exe,stage)\n"
+ "    launcher=[chroot,'--userspec=65534:65534','--groups=65534',str(stage)]\n"
+ "    env={'PATH':'/usr/bin:/bin','HOLLOWDEEP_BIND':'127.0.0.1'}\n"
+ '    '
+ "subprocess.run(launcher+[interpreter,'--list','/bin/hollowdeep'],cwd=stage,env=env,check=True,timeout=15)\n"
+ '    '
+ "connect=old['connect_game'];command=old['command'];require=old['require'];view=old['room_view'];collect=old['collect'];quit_game=old['quit_with_cooldown'];kill=old['kill_and_find']\n"
+ '    def start(label):\n'
+ '        with socket.socket() as probe:\n'
+ "            probe.bind(('127.0.0.1',0));port=probe.getsockname()[1]\n"
+ "        logpath=work/(label+'.log')\n"
+ "        with logpath.open('wb') as log:\n"
+ '            '
+ "process=subprocess.Popen(launcher+['/bin/hollowdeep',str(port)],cwd=stage,env=env,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT)\n"
+ "        print(f'PETRUNTIME: private listener {label} PID {process.pid}',flush=True)\n"
+ '        return process,port,logpath\n'
+ '    def stop(process, abrupt=False):\n'
+ '        if process is None:return\n'
+ '        if process.poll() is None:\n'
+ '            if abrupt:process.kill()\n'
+ '            else:process.terminate()\n'
+ '            try:process.wait(timeout=5)\n'
+ '            except subprocess.TimeoutExpired:process.kill();process.wait(timeout=5)\n'
+ '    def login(client,name,room_name,restored=False):\n'
+ "        old['recv_until'](client,b'Please enter name:');old['send'](client,name)\n"
+ "        old['recv_until'](client,b'Please enter password:');old['send'](client,'Fixturepass')\n"
+ "        wanted=b'Your saved skeleton returns (147 HP / 51 MP).' if restored else "
+ "(room_name.encode('ascii') if room_name else b'Obvious exits:')\n"
+ '        '
+ "reply=old['recv_until'](client,wanted,seconds=15).decode('latin-1',errors='replace')+collect(client,quiet=0.4,limit=2)\n"
+ "        print('LOGIN: '+name+'\\n'+reply,flush=True)\n"
+ "        if not restored and 'Your saved skeleton returns' in reply:\n"
+ "            raise RuntimeError('Unexpected saved skeleton restoration')\n"
+ '        location=view(client)\n'
+ '        if room_name:\n'
+ '            require(location,room_name)\n'
+ "        elif 'necromancer grave trial' in location:\n"
+ "            room_name='Necromancer Grave Trial'\n"
+ "        elif 'necromancer trial annex' in location:\n"
+ "            room_name='Necromancer Trial Annex'\n"
+ '        else:\n'
+ "            raise RuntimeError('Unexpected native login room')\n"
+ '        return room_name\n'
+ '\n'
+ '    def move(client,direction,destination):\n'
+ '        deadline=time.monotonic()+60\n'
+ '        for attempt in range(12):\n'
+ '            if time.monotonic()>=deadline:\n'
+ '                break\n'
+ '            reply=command(client,direction)\n'
+ '            delay=re.search(\n'
+ "                r'Please wait\\s+(\\d+)\\s+more seconds?',\n"
+ '                reply,re.I\n'
+ '            )\n'
+ '            if delay:\n'
+ '                time.sleep(int(delay.group(1))+1)\n'
+ '                continue\n'
+ '            require(view(client),destination)\n'
+ "            print('PASS: Native movement to '+destination,\n"
+ '                  flush=True)\n'
+ '            return\n'
+ "        raise RuntimeError('Movement cooldown deadline exceeded')\n"
+ '\n'
+ '    def one_pet(client,room_name):\n'
+ '        text=view(client);require(text,room_name)\n'
+ "        rows=[x for x in text.splitlines() if x.strip().startswith('you see') and 'skeleton servant' "
+ 'in x]\n'
+ "        if len(rows)!=1 or not re.search(r'\\ba skeleton servant\\b',rows[0]) or "
+ "re.search(r'\\b[2-9]\\d* skeleton servants?\\b',rows[0]):\n"
+ "            raise RuntimeError('Expected exactly one visible skeleton: '+repr(text[-1500:]))\n"
+ '    def absent_pet(client):\n'
+ '        text=view(client)\n'
+ "        if any('skeleton servant' in x for x in text.splitlines() if x.strip().startswith('you see')) "
+ "or 'corpse of skeleton servant' in text:\n"
+ "            raise RuntimeError('Unexpected skeleton or corpse: '+repr(text[-1500:]))\n"
+ '    def defeat_pet(client):\n'
+ '        death=False;deadline=time.monotonic()+150\n'
+ '        while time.monotonic()<deadline:\n'
+ "            text=command(client,'attack skeleton');death=death or bool(re.search(r'you killed "
+ "(?:the|a) skeleton servant',text,re.I))\n"
+ '            time.sleep(3.2)\n'
+ "            text=view(client);death=death or bool(re.search(r'you killed (?:the|a) skeleton "
+ "servant',text,re.I))\n"
+ '            if death:\n'
+ '                absent_pet(client);return\n'
+ "        raise RuntimeError('Native pet death not confirmed within combat deadline')\n"
+ '\n'
+ "    probe_root=work/'logout-probe'\n"
+ '    probe_root.mkdir(mode=0o700)\n'
+ "    (probe_root/'player').mkdir(mode=0o700)\n"
+ "    probe_source=probe_root/'probe.c'\n"
+ '    probe_source.write_text(\'\\n#define main original_test_main\\n#include "test_runtime.c"\\n#undef '
+ 'main\\n\\nint main(int argc, char **argv)\\n{\\n    creature *p = NULL;\\n    otag *tag;\\n    '
+ 'hd_pet_state pet;\\n    int ruby = 0;\\n\\n    if (argc != 2) return 2;\\n    if '
+ '(hd_store_load_player("Hdnecroqa", &p) != 0 || !p)\\n        return 3;\\n\\n    for '
+ '(tag=p->first_obj; tag; tag=tag->next_tag)\\n        if (tag->obj &&\\n            '
+ '!strcmp(tag->obj->name,"rubyfixture"))\\n            ruby++;\\n\\n    if '
+ '(hd_pet_store_read("Hdnecroqa", &pet) != 0)\\n        return 4;\\n\\n    printf("DURABLE SAVE: '
+ 'gold=%ld ruby=%d room=%d petHP=%u petMP=%u\\\\n",\\n           (long)p->gold, ruby, '
+ '(int)p->rom_num,\\n           (unsigned)pet.hpcur, (unsigned)pet.mpcur);\\n\\n    if (p->gold != 1013 '
+ '|| ruby != 1) return 5;\\n\\n    if (atoi(argv[1])) {\\n        if (pet.hpcur != 147 || pet.mpcur != '
+ '51)\\n            return 6;\\n    } else if (pet.hpcur != 0) {\\n        return 7;\\n    }\\n\\n    '
+ "return 0;\\n}\\n',encoding='ascii')\n"
+ "    probe=probe_root/'probe'\n"
+ "    components=('files1','files3','compress','hd_player_store',\n"
+ "                'treasure_receipt','atomic_player_snapshot',\n"
+ "                'hd_necro_skeleton','hd_corpse','room')\n"
+ '    flags=[\n'
+ "        '-DHD_NECROMANCER_PLAYTEST',\n"
+ "        '-DHD_DEITY_PLAYTEST',\n"
+ "        '-DHD_CORPSE_PLAYTEST',\n"
+ "        '-DHD_PET_STORE_PLAYTEST',\n"
+ "        '-DHD_PET_RUNTIME_PLAYTEST',\n"
+ "        '-DHD_ATOMIC_TESTING'\n"
+ '    ]\n'
+ '    subprocess.run([\n'
+ "        os.environ.get('CC','cc'),'-m32','-std=gnu89',\n"
+ "        '-O1','-g','-fcommon','-DCOMPRESS',\n"
+ "        '-ffunction-sections','-fdata-sections',\n"
+ "        '-Wl,--gc-sections','-Wl,--wrap=load_obj',\n"
+ "        '-I',str(src),'-I',str(work/'pkg')\n"
+ '    ]+flags+[str(probe_source)]+[\n'
+ "        str(src/(n+'.c')) for n in components\n"
+ "    ]+['-o',str(probe)],check=True)\n"
+ '\n'
+ '    def durable_logout(process,port,alive):\n'
+ '        # EOF alone does not prove disconnect/save has finished.\n'
+ '        # Wait for a subsequent native listener response.\n'
+ '        with connect(port,process) as barrier:\n'
+ "            old['recv_until'](barrier,b'Please enter name:',seconds=15)\n"
+ '\n'
+ '        assert process.poll() is None\n'
+ "        saved=stage/'player'/'Hdnecroqa'\n"
+ '        assert saved.is_file() and not saved.is_symlink()\n'
+ "        shutil.copyfile(saved,probe_root/'player'/'Hdnecroqa')\n"
+ '        subprocess.run(\n'
+ "            [str(probe),'1' if alive else '0'],\n"
+ '            cwd=probe_root,check=True\n'
+ '        )\n'
+ "        print('PETRUNTIME: durable logout inventory, gold and pet state PASS',\n"
+ '              flush=True)\n'
+ '\n'
+ '    process=None;logpath=None\n'
+ '    try:\n'
+ "        process,port,logpath=start('listener-1')\n"
+ '        with connect(port,process) as owner:\n'
+ "            login(owner,'Hdnecroqa','Necromancer Grave Trial')\n"
+ "            require(command(owner,'help raise skeleton'),'saved skeleton')\n"
+ "            cid=kill(owner,'trialwretch','rubyfixture')\n"
+ "            result=command(owner,f'raise corpse {cid}')\n"
+ "            require(result,'You raise a skeleton (147 HP / 51 MP).');require(result,'loot falls to "
+ "the ground')\n"
+ "            old['after_release'](owner,cid,'rubyfixture')\n"
+ "            require(command(owner,'get rubyfixture'),'You get');require(command(owner,'get "
+ "gold'),'You now have 1013 gold pieces.')\n"
+ "            move(owner,'north','Necromancer Trial Annex');one_pet(owner,'Necromancer Trial Annex')\n"
+ "            require(command(owner,'inventory'),'rubyfixture')\n"
+ '            quit_game(owner,process)\n'
+ '        durable_logout(process,port,True)\n'
+ "        print('PETRUNTIME: native raise, loot pickup, follow and saved logout PASS',flush=True)\n"
+ '        # Kill ONLY the stopped-from-play private process after a completed logout.\n'
+ '        # This tests a process restart, not a disk power-loss/rename crash window.\n'
+ '        stop(process,abrupt=True);oldpid=process.pid\n'
+ "        process,port,logpath=start('listener-2')\n"
+ "        if process.pid==oldpid:raise RuntimeError('Expected distinct private listener PID')\n"
+ '        with connect(port,process) as owner:\n'
+ "            login(owner,'Hdnecroqa','Necromancer Trial Annex',restored=True)\n"
+ "            one_pet(owner,'Necromancer Trial Annex')\n"
+ "            require(command(owner,'inventory'),'rubyfixture')\n"
+ "            print('PETRUNTIME: real fresh game process restored one saved pet and collected item "
+ "PASS',flush=True)\n"
+ '            with connect(port,process) as faithful:\n'
+ "                login(faithful,'Hdfaithqa','Necromancer Grave Trial')\n"
+ "                move(faithful,'north','Necromancer Trial Annex');one_pet(faithful,'Necromancer Trial "
+ "Annex')\n"
+ '                defeat_pet(faithful);absent_pet(owner)\n'
+ "                print('PETRUNTIME: native combat killed restored pet; no pet corpse "
+ "PASS',flush=True)\n"
+ '                quit_game(faithful,process)\n'
+ '            quit_game(owner,process)\n'
+ '        durable_logout(process,port,False)\n'
+ '        stop(process,abrupt=True);oldpid=process.pid\n'
+ "        process,port,logpath=start('listener-3')\n"
+ "        if process.pid==oldpid:raise RuntimeError('Expected distinct private listener PID')\n"
+ '        with connect(port,process) as owner:\n'
+ "            login(owner,'Hdnecroqa','Necromancer Trial Annex')\n"
+ '            absent_pet(owner)\n'
+ "            move(owner,'south','Necromancer Grave Trial')\n"
+ '            absent_pet(owner)\n'
+ "            require(command(owner,'inventory'),'rubyfixture')\n"
+ '            quit_game(owner,process)\n'
+ '        durable_logout(process,port,False)\n'
+ "        print('PETRUNTIME: REAL NATIVE SOCKET RESTART/DEATH PASS',flush=True)\n"
+ '    except Exception:\n'
+ "        if logpath and logpath.exists():print('PRIVATE LISTENER "
+ "LOG:\\n'+logpath.read_text(errors='replace')[-5000:],flush=True)\n"
+ '        raise\n'
+ '    finally:\n'
+ '        stop(process)\n'),
  'test_pet_store.c': '#define _GNU_SOURCE\n'
                      '#include "hd_player_store.h"\n'
                      '#include "hd_pet_store.h"\n'
