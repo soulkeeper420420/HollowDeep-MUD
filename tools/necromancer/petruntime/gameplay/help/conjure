@@ -1,17 +1,24 @@
 CONJURE
 
-Available to every class.
-One persistent companion, separate from raised undead.
+Available to all classes.
+One companion per character.
 Cooldown: 300 seconds.
 
-Level 1:  Spectral Wolf
-Level 10: Venom Scorpion
-Level 20: Fire Elemental
-Level 30: Minotaur Guardian
-Level 40: Shadow Wraith
-Level 60: Ancient Dragon
+conjure list
+conjure wolf
+conjure scorpion
+conjure fire
+conjure minotaur
+conjure wraith
+conjure dragon
+conjure status
+conjure attack <monster>
+conjure dismiss
+conjure recall
+conjure release confirm
 
-Companions gain experience and levels through combat.
-Dismissal preserves progress. Combat death destroys it.
+Dismissal preserves companion XP and level.
+Release permanently removes a dismissed companion.
+Combat death destroys the companion permanently.
 
-Private storage foundation: live commands pending.
+See HELP DRAIN MANA and HELP PETS.

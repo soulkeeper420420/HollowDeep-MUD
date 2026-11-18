@@ -46,13 +46,46 @@ def main():
     for name in ('hd_army_restore.c', 'hd_army_restore.h'):
         shutil.copyfile(HERE / name, source / name)
 
+
+    companion = HERE.parent / 'conjure'
+    for name in ('hd_conjure_runtime.c','hd_conjure_runtime.h'):
+        shutil.copyfile(companion/name,source/name)
+
+    commands=table.read_text(encoding='latin-1')
+    anchor='\t{ "pets", 154, hd_army_pet_command },'
+    if commands.count(anchor)!=1 or re.search(
+            r'"conjure"\s*,|,\s*155\s*,',commands):
+        raise ValueError('Conjure command collision')
+
+    commands=commands.replace(
+        anchor,anchor+'\n\t{ "conjure", 155, hd_cj_command },')
+
+    table.write_text(
+        'struct creature; struct cmd;\n'
+        'extern int hd_cj_command(struct creature *, struct cmd *);\n'
+        +commands,encoding='latin-1')
+
+    help_source=source/'hollowdeep_help.c'
+    body=help_source.read_text(encoding='latin-1')
+    anchor='    if (count == 2 && !strcmp(token[1], "raiseskeleton"))'
+    assert body.count(anchor)==1
+
+    routes="""    if (count == 2 && !strcmp(token[1], "conjure")) return show_page(player, "conjure");
+    if (count == 2 && !strcmp(token[1], "rc")) return show_page(player, "raise-corpse");
+    if (count == 2 && !strcmp(token[1], "pets")) return show_page(player, "help.154");
+    if (count == 3 && !strcmp(token[1], "drain") && !strcmp(token[2], "mana")) return show_page(player, "drain-mana");
+"""
+    help_source.write_text(
+        body.replace(anchor,routes+anchor,1),encoding='latin-1')
+
     makefile = source / 'Makefile'
     content = makefile.read_text(encoding='latin-1')
     target = 'frp.new: $(OBJECTS)'
     if content.count(target) != 1:
         raise ValueError('Unexpected private runtime link target')
     content = content.replace(target, 'CFLAGS += -DHD_UNDEAD_ARMY_PLAYTEST\n'
-                              'OBJECTS += hd_army_restore.o\n\n' + target)
+                              'CFLAGS += -DHD_CONJURE_RUNTIME\n'
+                              'OBJECTS += hd_army_restore.o hd_conjure_runtime.o\n\n' + target)
     makefile.write_text(content, encoding='latin-1')
     log = work / 'build.log'
     with log.open('w') as output:

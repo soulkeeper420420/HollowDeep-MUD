@@ -6,6 +6,9 @@
 #include "hd_army_corpse.h"
 #include "hd_army_restore.h"
 #include "hd_corpse.h"
+#ifdef HD_CONJURE_RUNTIME
+#include "hd_conjure_runtime.h"
+#endif
 
 #include <ctype.h>
 #include <stdio.h>
@@ -98,6 +101,9 @@ static void save_vitals(army_session *session)
 int hd_necro_skeleton_is_pet(creature *pet)
 {
     size_t index;
+#ifdef HD_CONJURE_RUNTIME
+    if (hd_cj_is_pet(pet)) return 1;
+#endif
     return find_pet(pet, &index) != NULL;
 }
 
@@ -109,6 +115,9 @@ creature *hd_necro_skeleton_probe(creature *owner)
 
 void hd_necro_skeleton_reconnect(creature *owner)
 {
+#ifdef HD_CONJURE_RUNTIME
+    hd_cj_login(owner);
+#endif
     size_t i;
     army_session *session;
     hd_pet_roster expired;
@@ -148,6 +157,9 @@ static void detach(creature *pet)
 
 void hd_necro_skeleton_logout(creature *owner)
 {
+#ifdef HD_CONJURE_RUNTIME
+    hd_cj_logout(owner);
+#endif
     army_session *session = find_session(owner);
     size_t i, count;
     hd_pet_roster expired;
@@ -185,6 +197,9 @@ static void remove_pet(army_session *session, size_t index)
 
 void hd_necro_skeleton_death(creature *pet)
 {
+#ifdef HD_CONJURE_RUNTIME
+    if (hd_cj_death(pet)) return;
+#endif
     size_t index;
     army_session *session = find_pet(pet, &index);
     if (!session)
@@ -194,6 +209,9 @@ void hd_necro_skeleton_death(creature *pet)
 
 void hd_necro_skeleton_on_free(creature *who)
 {
+#ifdef HD_CONJURE_RUNTIME
+    if (hd_cj_is_pet(who)) storage_stop("unexpected companion free",-1);
+#endif
     size_t index;
     if (find_pet(who, &index))
         storage_stop("unexpected native pet free", HD_PET_ERROR);
@@ -202,6 +220,9 @@ void hd_necro_skeleton_on_free(creature *who)
 
 void hd_necro_skeleton_follow(creature *owner, room *old_room, room *new_room)
 {
+#ifdef HD_CONJURE_RUNTIME
+    hd_cj_follow(owner,new_room);
+#endif
     army_session *session = find_session(owner);
     size_t i;
     (void)old_room;
@@ -220,6 +241,9 @@ void hd_necro_skeleton_follow(creature *owner, room *old_room, room *new_room)
 
 void hd_necro_skeleton_checkpoint_all(void)
 {
+#ifdef HD_CONJURE_RUNTIME
+    hd_cj_checkpoint_all();
+#endif
     size_t i;
     for (i = 0; i < PMAX; ++i)
         if (sessions[i].owner)
@@ -228,6 +252,9 @@ void hd_necro_skeleton_checkpoint_all(void)
 
 void hd_necro_skeleton_tick(long now)
 {
+#ifdef HD_CONJURE_RUNTIME
+    hd_cj_tick();
+#endif
     size_t i;
     (void)now;
     for (i = 0; i < PMAX; ++i)
@@ -237,6 +264,9 @@ void hd_necro_skeleton_tick(long now)
 
 void hd_necro_skeleton_room_unload(room *where)
 {
+#ifdef HD_CONJURE_RUNTIME
+    hd_cj_unload(where);
+#endif
     size_t i, j;
     for (i = 0; i < PMAX; ++i)
         if (sessions[i].owner) {
@@ -272,6 +302,9 @@ int hd_necro_skeleton_can_heal(creature *owner)
 
 void hd_necro_skeleton_assist(creature *owner, creature *target)
 {
+#ifdef HD_CONJURE_RUNTIME
+    if (hd_cj_assist(owner,target)) return;
+#endif
     army_session *session = find_session(owner);
     size_t i;
     long now;
@@ -304,7 +337,7 @@ void hd_necro_skeleton_assist(creature *owner, creature *target)
         if (target->hpcur == 0) {
             char message[220];
             snprintf(message, sizeof message,
-                     "%s finishes %s.\\n",
+                     "%s finishes %s.\n",
                      pet->name, target->name);
             print(owner->fd, "%s", message);
 
@@ -469,13 +502,20 @@ int hd_army_pet_command(creature *owner, cmd *command)
         !memchr(command->fullstr, 0, sizeof command->fullstr))
         return 0;
     if (!session) {
+#ifdef HD_CONJURE_RUNTIME
+        return hd_cj_command(owner,command);
+#else
         print(owner->fd, "Only Necromancers can give undead pet orders.\n");
+#endif
         return 0;
     }
     words = sscanf(command->fullstr, "%15s %15s %79s %1s", verb, order, argument, extra);
     if ((words == 1 && !strcasecmp(verb, "pets")) ||
         (words == 2 && !strcasecmp(order, "status"))) {
         describe_pets(session);
+#ifdef HD_CONJURE_RUNTIME
+        hd_cj_status(owner);
+#endif
         return 0;
     }
     count = session->saved.count;
