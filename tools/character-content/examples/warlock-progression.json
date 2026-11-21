@@ -14,12 +14,12 @@
   },
   "skill_unlocks": [
     {
-      "skill": "hex",
+      "skill": "pact-bolt",
       "level": 1,
       "rebirth": 0
     },
     {
-      "skill": "blood-pact",
+      "skill": "pactbrand",
       "level": 1,
       "rebirth": 1
     }
