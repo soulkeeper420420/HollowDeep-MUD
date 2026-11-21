@@ -54,3 +54,38 @@ directory, review the diff first and then run:
 The source and the live game are not modified. Staging is **not** a gameplay
 build or release. Warlock and Vampire under examples/ are nonselectable
 design drafts, not new playable classes.
+
+
+## Round 78B: Prime attributes, starting stats and rebirth skills
+
+A new class can have a **separate progression JSON** without changing the
+backwards-compatible class definition schema. For example:
+
+    python3 progression.py check examples/warlock.json examples/warlock-progression.json
+    python3 progression.py preview examples/warlock.json examples/warlock-progression.json --level 1 --rebirth 0
+    python3 progression.py preview examples/warlock.json examples/warlock-progression.json --level 1 --rebirth 1
+    python3 progression.py check examples/vampire.json examples/vampire-progression.json
+
+Generate a new plan for a class definition:
+
+    python3 progression.py new MY_CLASS.json /tmp/MY_CLASS-progression.json --prime intelligence --prime piety
+
+Then edit the plan. The current schema supports two distinct native prime
+attributes, **65 allocated points** (3–18 per attribute), or explicit random
+base ranges (3–18); level 1–60 skill unlocks and minimum rebirth count 0–60.
+
+Every unlock references an ability key from the matching class JSON. A
+first-life ability uses rebirth 0; a post-rebirth ability uses rebirth 1.
+For example, the Warlock concept unlocks "hex" immediately and "blood-pact"
+after one rebirth. The Vampire concept unlocks "lifedrain" immediately and
+"mist-form" after one rebirth. These are design labels with no native command,
+damage, spell, ID or player-save implementation yet.
+
+Run both suites:
+
+    python3 -m unittest -v test_round78 test_progression
+
+**This is planning and schema validation, not native gameplay implementation.**
+Do not change "selectable" to true or announce these classes as playable
+until their C hooks, numeric/persistent identity, creation, skills, HP/MP
+growth, save/load, and isolated gameplay tests are complete.
