@@ -71,6 +71,52 @@ async function main(){
     await fs.writeFile(path.join(output,'round71-browser.json'),JSON.stringify({plan:draft}));
     assert.equal(errors.length,0,errors.join('\n'));
     console.log('ROUND 71: browser native ZIP export and existing validation PASS');
+    await click('create'); await status('Area created');
+    await field('round71Prefix').fill('Copperreach');
+    await field('wildernessSeed').fill('42');
+    await click('round71MakeGrid'); await status('Wilderness region created: 16 rooms');
+    await field('wildernessPreview').locator('summary').click();
+    assert.match(await field('wildernessGrid').innerText(), /Copperreach · column 1, row 1[\s\S]*@/);
+    await field('wildernessLandmark').fill('Copper Cairn');
+    await field('wildernessTerrain').selectOption('ruins');
+    await click('saveWilderness'); await status('Wilderness metadata validated');
+    assert.match(await field('wildernessGrid').innerText(), /Landmark: Copper Cairn/);
+    await field('draftName').fill('Copperreach draft');
+    const expected = JSON.parse(await field('json').inputValue());
+    const [download] = await Promise.all([page.waitForEvent('download'), click('exportDraft')]);
+    const filename = path.join(output, 'round72-draft.json');
+    await download.saveAs(filename);
+
+    const fresh = await browser.newPage();
+    fresh.setDefaultTimeout(20000);
+    fresh.on('pageerror', error => errors.push(error.message));
+    await fresh.goto(url);
+    const imported = id => fresh.locator('#' + id);
+    await imported('importDraft').setInputFiles(filename);
+    await imported('status').filter({hasText:'Draft imported'}).waitFor();
+    assert.deepEqual(JSON.parse(await imported('json').inputValue()), expected);
+    assert.equal(await imported('draftName').inputValue(), 'Copperreach draft');
+    await imported('wildernessPreview').locator('summary').click();
+    assert.match(await imported('wildernessGrid').innerText(), /Landmark: Copper Cairn/);
+
+    const invalid = JSON.parse(await fs.readFile(filename, 'utf8'));
+    invalid.plan.rooms.find(room => room.room_id === 10001).wilderness.x = 0;
+    await imported('importDraft').setInputFiles({
+      name:'invalid-wilderness.json', mimeType:'application/json',
+      buffer:Buffer.from(JSON.stringify(invalid))
+    });
+    await imported('status').filter({hasText:'Invalid wilderness tile'}).waitFor();
+    assert.deepEqual(JSON.parse(await imported('json').inputValue()), expected);
+    console.log('ROUND 72: wilderness draft round-trip and invalid import protection PASS');
+
+    await imported('export').click();
+    const importedLink = imported('download').locator('a');
+    await importedLink.waitFor();
+    const mapped = await fresh.request.get(url + await importedLink.getAttribute('href'));
+    assert.equal(mapped.status(),200);
+    await fs.writeFile(path.join(output,'round72-browser.zip'),await mapped.body());
+    assert.equal(errors.length,0,errors.join('\n'));
+    console.log('ROUND 72: seeded terrain, map preview, landmark and browser ZIP PASS');
   } finally { await browser.close(); }
 }
 main().catch(error=>{console.error(error);process.exit(1)});

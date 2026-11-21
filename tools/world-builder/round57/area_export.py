@@ -332,8 +332,11 @@ def generate(plan, persist=True, extra_assets=None):
     if extra_assets:
         assets = extra_assets(plan)
         outputs.update(assets)
-        if assets:
-            manifest["template_banks"] = {name: sha(data) for name, data in assets.items()}
+        banks = {name: sha(data) for name, data in assets.items() if name.startswith("objmon/")}
+        if banks:
+            manifest["template_banks"] = banks
+        if "rooms/wilderness.map" in assets:
+            manifest["wilderness_map_sha256"] = sha(assets["rooms/wilderness.map"])
 
     with io.BytesIO() as stream:
         with zipfile.ZipFile(
