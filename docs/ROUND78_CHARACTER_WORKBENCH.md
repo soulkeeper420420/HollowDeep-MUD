@@ -77,3 +77,43 @@ without modifying production until a tested release is explicitly approved.
 
 No secrets, credentials, private player fixtures, server configuration, or
 local build logs belong in GitHub.
+
+
+## Round 78B: reusable progression definitions
+
+The existing content.py schema remains unchanged, so previously authored
+race/class drafts and native-preview workflows keep working. New separate
+class progression JSON files capture design settings that are not yet
+supported by native.py or the MUD engine:
+
+- prime_attributes: exactly two distinct native stats.
+- starting_stats: 65-point allocation (3–18 each), or explicitly bounded
+  pre-race random rolls for STR, DEX, CON, INT, and PIE.
+- skill_unlocks: a declared class ability, a minimum level 1–60, and
+  a minimum number of rebirths 0–60.
+
+The Warlock draft uses INT/PIE with first-life hex and rebirth blood-pact.
+The Vampire draft uses DEX/CON with first-life lifedrain and rebirth
+mist-form. These are **proposal placeholders**, not implemented skills.
+The 65-point allocation rule is modeled in draft form, not installed.
+
+### Editing and checking
+
+    cd tools/character-content
+    python3 -m unittest -v test_round78 test_progression
+    python3 content.py check examples/warlock.json
+    python3 progression.py check examples/warlock.json examples/warlock-progression.json
+    python3 progression.py preview examples/warlock.json examples/warlock-progression.json --level 1 --rebirth 1
+    python3 content.py check examples/vampire.json
+    python3 progression.py check examples/vampire.json examples/vampire-progression.json
+
+To author a new plan, create a class draft with content.py, then run
+progression.py new YOUR-CLASS.json /tmp/your-progression.json --prime
+intelligence --prime piety. Keep production class IDs and native saves
+unchanged. Unrecognized ability references, duplicate unlocks, invalid
+rebirths, unsupported fields and bool-as-integer attacks are denied.
+
+**Round 78C prerequisite:** Examine actual native class creation and save
+identity, establish IDs or durable identity markers, implement and test class
+hooks and commands in an isolated ELF32 build before making new class
+definitions selectable. Schema checks are not playable-class tests.
