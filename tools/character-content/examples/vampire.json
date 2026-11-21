@@ -12,8 +12,8 @@
   },
   "selectable": false,
   "abilities": [
-    "lifedrain",
-    "mist-form"
+    "blood-drain",
+    "crimson-veil"
   ],
   "starting_equipment": [],
   "training": {
