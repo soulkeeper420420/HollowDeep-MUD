@@ -223,3 +223,16 @@ check_new_character.py and check_creation_help.py.
 hollowdeep.service; never point staging or test commands at the live tree.**
 No publication of private test accounts, fixtures or logs. Native compilation
 and socket acceptance must pass before moving on to combat implementation.
+
+
+### Round 78E receipt-test correction
+
+The native fixture initially assumed that the general-purpose
+hd_store_read_claim() interface could read the reserved Warlock class
+identity receipt. The private execution had already passed
+hd_store_is_warlock(), but the direct claim-read assertion failed.
+The fixture now validates durable class identity through the dedicated
+hd_store_is_warlock() API, tests save/reload preservation, and separately
+checks that hd_store_save_claim() denies attempts to grant the reserved
+Warlock class claim. The native game source and the on-disk identity format
+are unchanged by this test correction.
