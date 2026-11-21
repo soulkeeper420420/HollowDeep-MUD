@@ -236,3 +236,56 @@ hd_store_is_warlock() API, tests save/reload preservation, and separately
 checks that hd_store_save_claim() denies attempts to grant the reserved
 Warlock class claim. The native game source and the on-disk identity format
 are unchanged by this test correction.
+
+
+## Round 78E validation from isolated Linode playtest
+
+The private Round 78E retest passed:
+- Native atomic Warlock identity, saved character reload, Mage and
+  Necromancer isolation, guarded non-Mage creation refusal.
+- Real socket creation (Warlock menu), help warlock, save, quit,
+  durable receipt verification and reconnect.
+- Existing Necromancer and Mage native character creation regression.
+- Existing native skill catalog and help regression.
+- Production service PID unchanged; deployment NONE.
+
+Known presentation issue: legacy MUD client rendered a Unicode dash in
+the help page as garbled characters. The Warlock help draft now uses
+plain ASCII "3-18". The current private game binary has not been rebuilt
+with this text correction.
+
+## Round 78F — Pact Bolt combat integration, first phase
+
+New private rules module: hd_pact_bolt_rules.h/.c, plus native test fixture
+test_pact_bolt_rules.c. It evaluates **provisional** playtest values:
+6 MP per successful bolt; 8-second cooldown; base damage
+5 + floor(level/2) + floor(INT/3), with a 50-point normal cap;
+an empowered bolt consumes one available pact charge and doubles the
+result. No resource is consumed by the pure validation function itself;
+native combat integration must apply validated resource changes atomically.
+No pact charge earning, persistence, combat command or target damage is
+implemented yet. These provisional figures can be adjusted after
+isolated gameplay balance testing.
+
+To validate this rules-only module from tools/character-content:
+
+    cc -m32 -std=gnu89 -Wall -Wextra -Werror -DHD_WARLOCK_PLAYTEST \
+       -I. hd_pact_bolt_rules.c test_pact_bolt_rules.c \
+       -o /tmp/hd-pact-bolt-private-rules-test
+    /tmp/hd-pact-bolt-private-rules-test
+
+For correct native combat integration, the read-only
+native_pact_bolt_probe.py scans ONLY the private Round 78E source for
+actual command, spell, target, combat/death and XP-credit APIs. Its
+output is private source excerpts. Never copy private logs or player
+fixtures to public GitHub.
+
+    python3 native_pact_bolt_probe.py /tmp/hd-army-game-round78-VibwvrvC/src
+
+**Do not wire Pact Bolt to raw target->hpcur arithmetic until the native
+damage and death path is verified.** Warlock-only identity gating must
+remain in the command handler, including reconnect, Mage denial and
+Necromancer denial. A real hostile-target socket playtest and damage,
+mana, cooldown, kill-credit, save/reconnect, protected-target, and
+existing class regressions are still REQUIRED before calling it playable.
+Pactbrand remains rebirth-only and unimplemented.
