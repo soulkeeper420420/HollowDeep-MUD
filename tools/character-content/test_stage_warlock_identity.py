@@ -74,7 +74,7 @@ class WarlockStageTests(unittest.TestCase):
         makefile=(self.target/'Makefile').read_text()
         self.assertIn('PLAYER_CREATE_WARLOCK',native)
         self.assertIn('hd_receipt_add(&receipts, warlock_id, warlock_identity)',native)
-        self.assertIn('reserved_receipt',native) if 'reserved_receipt' in original else None
+        self.assertIn('!strcmp(claim, warlock_id)',native)
         self.assertIn('hd_store_is_warlock',native)
         self.assertIn('hd_store_create_warlock',command)
         self.assertIn('WARLOCK_PLAYTEST',makefile)
