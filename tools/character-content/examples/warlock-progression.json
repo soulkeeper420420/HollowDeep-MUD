@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "kind": "class-progression",
+  "class_key": "warlock",
+  "prime_attributes": [
+    "intelligence",
+    "piety"
+  ],
+  "starting_stats": {
+    "mode": "allocated",
+    "points": 65,
+    "minimum": 3,
+    "maximum": 18
+  },
+  "skill_unlocks": [
+    {
+      "skill": "hex",
+      "level": 1,
+      "rebirth": 0
+    },
+    {
+      "skill": "blood-pact",
+      "level": 1,
+      "rebirth": 1
+    }
+  ]
+}
