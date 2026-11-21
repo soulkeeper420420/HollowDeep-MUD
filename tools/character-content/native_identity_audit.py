@@ -57,12 +57,15 @@ def source_dir(raw):
     raw = Path(raw).expanduser()
     if raw.is_symlink():
         raise ValueError('Symlinked input denied')
-    root = raw.resolve(strict=True)
-    if not root.is_dir() or root.parent.parent != Path('/tmp') or (
-            not root.parent.name.startswith('hd-army-game-')):
+    if (raw.name != 'src' or
+            not raw.parent.name.startswith('hd-army-game-') or
+            raw.parent.parent != Path('/tmp')):
         raise ValueError('Only a disposable /tmp/hd-army-game-*/src is accepted')
-    if root.name != 'src':
-        raise ValueError('Expected /src')
+    root = raw.resolve(strict=True)
+    if (not root.is_dir() or root.name != 'src' or
+            root.parent.parent != Path('/tmp') or
+            not root.parent.name.startswith('hd-army-game-')):
+        raise ValueError('Resolved native source must remain in the disposable /tmp tree')
     for name in REQUIRED:
         path = root/name
         if path.is_symlink() or not path.is_file():
