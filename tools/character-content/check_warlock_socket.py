@@ -122,7 +122,10 @@ try:
         scratch=Path(scratch)
         (scratch/'player').mkdir()
         shutil.copyfile(WORLD/'player'/name,scratch/'player'/name)
-        result=subprocess.check_output([str(probe),name],cwd=scratch,text=True)
+        env=dict(os.environ)
+        env['HD_PRIVATE_WARLOCK_TEST_ROOT']=str(scratch)
+        result=subprocess.check_output([str(probe),name],cwd=scratch,
+                                       env=env,text=True)
         print(result.strip(),flush=True)
 
     with prior['connect_game'](port,process) as client:
