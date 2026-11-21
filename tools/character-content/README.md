@@ -76,9 +76,9 @@ base ranges (3–18); level 1–60 skill unlocks and minimum rebirth count 0–6
 
 Every unlock references an ability key from the matching class JSON. A
 first-life ability uses rebirth 0; a post-rebirth ability uses rebirth 1.
-For example, the Warlock concept unlocks "hex" immediately and "blood-pact"
-after one rebirth. The Vampire concept unlocks "lifedrain" immediately and
-"mist-form" after one rebirth. These are design labels with no native command,
+For example, the Warlock concept unlocks "pact-bolt" immediately and "pactbrand"
+after one rebirth. The Vampire concept unlocks "blood-drain" immediately
+and "crimson-veil" after one rebirth. These are design labels with no native command,
 damage, spell, ID or player-save implementation yet.
 
 Run both suites:
@@ -89,3 +89,23 @@ Run both suites:
 Do not change "selectable" to true or announce these classes as playable
 until their C hooks, numeric/persistent identity, creation, skills, HP/MP
 growth, save/load, and isolated gameplay tests are complete.
+
+
+## Round 78C: read-only native identity audit
+
+Run this on Linode, **against the exact verified disposable Round 77 source**:
+
+    python3 -m unittest -v test_round78 test_progression test_native_identity_audit
+    python3 native_identity_audit.py /tmp/hd-army-game-fyrji06g/src
+
+The audit validates the expected 32-bit candidate fingerprint, checks
+creation and persistent Necromancer identity hooks, and prints bounded,
+source-code-only excerpts from native class definitions and save interfaces.
+It never opens player saves, reads the production world, starts or restarts
+the game, or changes native C files.
+
+The Warlock and Vampire examples now use the skill names from
+docs/design/base-class-and-race-expansion.md: Pact Bolt / Pactbrand, and
+Blood Drain / Crimson Veil. Their code and durable class identity are **not**
+implemented by these draft JSON files. Actual native creation and save
+integration must follow this audit in an isolated build.
