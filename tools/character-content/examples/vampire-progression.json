@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "kind": "class-progression",
+  "class_key": "vampire",
+  "prime_attributes": [
+    "dexterity",
+    "constitution"
+  ],
+  "starting_stats": {
+    "mode": "allocated",
+    "points": 65,
+    "minimum": 3,
+    "maximum": 18
+  },
+  "skill_unlocks": [
+    {
+      "skill": "lifedrain",
+      "level": 1,
+      "rebirth": 0
+    },
+    {
+      "skill": "mist-form",
+      "level": 1,
+      "rebirth": 1
+    }
+  ]
+}
