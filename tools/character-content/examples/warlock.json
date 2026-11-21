@@ -1,0 +1,22 @@
+{
+  "kind": "class",
+  "key": "warlock",
+  "name": "Warlock",
+  "description": "Design draft only: Warlock. No native class ID, skills or training have been implemented.",
+  "attributes": {
+    "strength": 0,
+    "dexterity": 0,
+    "constitution": 0,
+    "intelligence": 0,
+    "piety": 0
+  },
+  "selectable": false,
+  "abilities": [
+    "hex"
+  ],
+  "starting_equipment": [],
+  "training": {
+    "hp_per_level": 0,
+    "mp_per_level": 0
+  }
+}
