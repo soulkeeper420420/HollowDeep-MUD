@@ -36,3 +36,21 @@ selectors, adjectival race names, and saved numeric IDs remain the same.
 Class growth edits apply to future level gains and preserve existing saved
 HP/MP. Unsupported field changes and new native keys are rejected.
 The preview prints a unified diff and leaves the source directory alone.
+
+
+## Round 78A safe staging and automated tests
+
+See [Round 78 Workbench Guide](../../docs/ROUND78_CHARACTER_WORKBENCH.md).
+Run the test suite with:
+
+    python3 -m unittest -v test_round78
+
+To stage a **supported edit to an existing native entry** in a new private
+directory, review the diff first and then run:
+
+    python3 native.py preview PRIVATE_SRC EDITED.json
+    python3 stage.py PRIVATE_SRC EDITED.json NEW_PRIVATE_SRC
+
+The source and the live game are not modified. Staging is **not** a gameplay
+build or release. Warlock and Vampire under examples/ are nonselectable
+design drafts, not new playable classes.
