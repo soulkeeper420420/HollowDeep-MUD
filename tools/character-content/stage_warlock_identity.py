@@ -73,7 +73,7 @@ def patch_source(source, target, page):
         '#error "Warlock requires the stable Necromancer receipt format"\n'
         '#endif\n'
         '#endif\n'
-        'enum player_write { PLAYER_SAVE, PLAYER_CREATE, PLAYER_CREATE_NECROMANCER'
+        'enum player_write { PLAYER_SAVE, PLAYER_CREATE, PLAYER_CREATE_NECROMANCER\n'
         '#ifdef HD_WARLOCK_PLAYTEST\n'
         ', PLAYER_CREATE_WARLOCK\n'
         '#endif\n'
@@ -109,13 +109,13 @@ def patch_source(source, target, page):
         '#endif\n'
     )
     s = replace_exact(s,
-        'enum player_write { PLAYER_SAVE, PLAYER_CREATE, PLAYER_CREATE_NECROMANCER'
+        'enum player_write { PLAYER_SAVE, PLAYER_CREATE, PLAYER_CREATE_NECROMANCER\n'
         '#ifdef HD_WARLOCK_PLAYTEST\n'
         ', PLAYER_CREATE_WARLOCK\n'
         '#endif\n'
         ' };',
         query +
-        'enum player_write { PLAYER_SAVE, PLAYER_CREATE, PLAYER_CREATE_NECROMANCER'
+        'enum player_write { PLAYER_SAVE, PLAYER_CREATE, PLAYER_CREATE_NECROMANCER\n'
         '#ifdef HD_WARLOCK_PLAYTEST\n'
         ', PLAYER_CREATE_WARLOCK\n'
         '#endif\n'
@@ -242,6 +242,7 @@ def patch_source(source, target, page):
         for name, body in staged.items():
             (target/name).write_text(body, encoding="latin-1")
         dest = target/"help/warlock"
+        dest.parent.mkdir(parents=True, exist_ok=True)
         if dest.exists() or dest.is_symlink():
             raise ValueError("Warlock help would overwrite native content")
         shutil.copyfile(page, dest)
