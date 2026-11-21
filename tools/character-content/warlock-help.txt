@@ -1,0 +1,16 @@
+WARLOCK — PRIVATE CHARACTER-CREATION TEST
+
+Role: Pact-bound spellcaster.
+Prime attributes: Intelligence and Piety.
+Starting stats: standard 65-point allocation (3–18 each).
+Native training: Mage-compatible during this identity-only test.
+
+This candidate tests the durability and isolation of Warlock identity.
+The first Warlock combat skill, Pact Bolt, is NOT enabled in this build.
+Pactbrand is planned as a rebirth-earned skill and is NOT available yet.
+
+A Warlock must not receive Necromancer-only Raise Corpse abilities.
+Conjure remains available to all classes.
+
+This page describes a private Round 78E test build.
+It does not indicate that Warlock is active on the live game.
