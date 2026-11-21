@@ -140,3 +140,40 @@ a claim that Warlock native gameplay is implemented. The next stage is
 an isolated Warlock creation and durable identity patch, followed by
 actual ELF32 compile, socket login, persistence, skill and regression
 testing. No production deployment or restart is permitted.
+
+
+## Round 78D — Native Warlock save/creation contract (after 78C audit)
+
+The verified private Round 77 candidate has 20/20 passing Round 78C framework
+tests. Exact source audit confirms these native integration points:
+
+- command1.c class selection stores a transient 'n' for Necromancer and uses
+  MAGE for legacy class compatibility. New characters are written by
+  hd_store_create_necromancer() or hd_store_create_player().
+- hd_player_store.c checks Necromancer identity by decoding the existing
+  HDTR1 receipt within the same compressed native character save. A Mage
+  numeric class ID alone is **not** proof of special-class identity.
+- global.c lists fixed legacy class strings, and the creature.class field in
+  mstruct.h remains a byte. Do **not** renumber native class IDs.
+- A second special class must use a distinct identity receipt claim and
+  digest, created **in the first atomic character snapshot**. Never create an
+  ordinary Mage save and then perform an independent identity-grant write.
+- Existing saves must remain byte-format compatible; player-save reads,
+  existing Necromancer identity, Conjure, rebirth receipts, and the live game
+  must stay unchanged while the Warlock is built privately.
+- The new subclass must deny Necromancer-only Raise Corpse, preserve Mage
+  class behavior for ordinary Mages, and expose Pact Bolt only to confirmed
+  Warlocks. Pactbrand remains gated behind a verified rebirth, not just a
+  client-supplied counter.
+
+The planned first Warlock candidate uses the existing Mage native numeric
+class ID with a new durable Warlock receipt. That is a design decision for
+the isolated build, **not** a guarantee of final balance. Before patching,
+inspect the exact store_internal enum/mode receipt insertion, class
+selection/menu, and command/skill dispatch in the private candidate. Source
+inspection is limited to the private source, never production data.
+
+Round 78D is blocked on exact code anchoring, not a failed gameplay test.
+Do not label Warlock playable until native ELF32 compile, creation,
+logout/reconnect, receipt spoof/replay, ordinary Mage and Necromancer
+isolation, real Pact Bolt combat, and regression suite all pass.
