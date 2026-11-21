@@ -12,7 +12,8 @@
   },
   "selectable": false,
   "abilities": [
-    "hex"
+    "hex",
+    "blood-pact"
   ],
   "starting_equipment": [],
   "training": {
