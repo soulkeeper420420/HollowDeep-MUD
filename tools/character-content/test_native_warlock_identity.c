@@ -36,7 +36,7 @@ static void make_player(creature *p, const char *name)
 
 int main(int argc, char **argv)
 {
-    creature warlock, necromancer, mage, *reload = NULL;
+    creature warlock, necromancer, mage, fighter, *reload = NULL;
     if (argc == 2) {
         assert(hd_store_load_player(argv[1], &reload) == 0);
         assert(reload && reload->class == MAGE);
@@ -51,6 +51,11 @@ int main(int argc, char **argv)
     make_player(&warlock, "Hdwarqa");
     make_player(&necromancer, "Hdnecroqa");
     make_player(&mage, "Hdmageqa");
+    make_player(&fighter, "Hdfightqa");
+    fighter.class = FIGHTER;
+    assert(hd_store_create_warlock(fighter.name, &fighter) != HD_STORE_OK);
+    assert(hd_store_is_warlock(fighter.name) == 0);
+    puts("PASS: Wrong native base class cannot create Warlock identity");
 
     assert(hd_store_create_warlock(warlock.name, &warlock) == HD_STORE_OK);
     assert(hd_store_is_warlock(warlock.name) == 1);
