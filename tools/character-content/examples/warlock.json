@@ -12,8 +12,8 @@
   },
   "selectable": false,
   "abilities": [
-    "hex",
-    "blood-pact"
+    "pact-bolt",
+    "pactbrand"
   ],
   "starting_equipment": [],
   "training": {
