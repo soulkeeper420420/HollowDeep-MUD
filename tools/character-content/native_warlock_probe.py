@@ -18,7 +18,7 @@ WINDOWS = {
     'mtype.h': [(18, 68)],
     'Makefile': [(1, 56)],
 }
-MAX_LINES = 520
+MAX_LINES = 650
 MAX_WIDTH = 240
 
 
