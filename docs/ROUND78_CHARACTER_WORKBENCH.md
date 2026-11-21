@@ -177,3 +177,49 @@ Round 78D is blocked on exact code anchoring, not a failed gameplay test.
 Do not label Warlock playable until native ELF32 compile, creation,
 logout/reconnect, receipt spoof/replay, ordinary Mage and Necromancer
 isolation, real Pact Bolt combat, and regression suite all pass.
+
+
+## Round 78E — Atomic Warlock creation candidate (private, not live)
+
+The exact Round 78D source report identified:
+- command1.c class selection and one-shot atomic creation (lines 241–258, 485–488).
+- hd_player_store.c receipt reservation, existing Necromancer query, and
+  store_internal's first-save receipt insertion (lines 25–45, 245–320).
+- The existing native Mage ID and class help/command dispatch.
+- No new native creature fields or numeric class/race IDs are needed.
+
+The stage_warlock_identity.py tool now stages a strict private patch to
+Makefile, command1.c, hd_player_store.c/.h and hollowdeep_help.c, plus the
+private Warlock help page. The distinct Warlock claim is
+ffffffffffffffffffffffffffffff78. It is reserved against normal reward
+grants, is added within **the first atomic character save**, and is verified
+with the original HDTR1 checksum/receipt decoder. An ordinary Mage and an
+existing Necromancer must not acquire Warlock identity. Warlock creation
+uses the original native Mage class ID, so it does not change the serialized
+creature structure or existing class indexes.
+
+This source milestone intentionally exposes only Warlock identity, creation
+and status help. Pact Bolt combat, Warlock-specific visible class labels,
+class-specific progression and the rebirth-earned Pactbrand are **not**
+implemented or announced as playable.
+
+### Private build and acceptance gates
+
+On the Linode private root console, use only the exact Round 77 candidate at
+/tmp/hd-army-game-fyrji06g/src with the pinned SHA256. From the
+character-content directory in a fresh branch checkout:
+
+    python3 -m unittest -v test_round78 test_progression test_native_identity_audit test_stage_warlock_identity
+
+Create a **new** directory under /tmp/hd-army-game-round78-*/src, run
+stage_warlock_identity.py PRIVATE_ROUND77_SRC NEW_PRIVATE_SRC, then build
+the private source with all five accepted Necromancer/Pet flags plus
+WARLOCK_PLAYTEST=1. Run the compiled test_native_warlock_identity.c against
+an empty disposable player directory, followed by check_warlock_socket.py
+inside a separate network namespace, and rerun existing
+check_new_character.py and check_creation_help.py.
+
+**No test touches /srv/hollowdeep/world, existing production saves, or
+hollowdeep.service; never point staging or test commands at the live tree.**
+No publication of private test accounts, fixtures or logs. Native compilation
+and socket acceptance must pass before moving on to combat implementation.
