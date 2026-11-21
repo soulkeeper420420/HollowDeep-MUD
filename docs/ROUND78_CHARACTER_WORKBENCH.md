@@ -92,9 +92,9 @@ supported by native.py or the MUD engine:
 - skill_unlocks: a declared class ability, a minimum level 1–60, and
   a minimum number of rebirths 0–60.
 
-The Warlock draft uses INT/PIE with first-life hex and rebirth blood-pact.
-The Vampire draft uses DEX/CON with first-life lifedrain and rebirth
-mist-form. These are **proposal placeholders**, not implemented skills.
+The Warlock draft uses INT/PIE with first-life Pact Bolt and rebirth
+Pactbrand. The Vampire draft uses DEX/CON with first-life Blood Drain
+and rebirth Crimson Veil. These are **proposal placeholders**, not implemented skills.
 The 65-point allocation rule is modeled in draft form, not installed.
 
 ### Editing and checking
@@ -117,3 +117,26 @@ rebirths, unsupported fields and bool-as-integer attacks are denied.
 identity, establish IDs or durable identity markers, implement and test class
 hooks and commands in an isolated ELF32 build before making new class
 definitions selectable. Schema checks are not playable-class tests.
+
+
+## Round 78C — Native identity and ABI audit
+
+A critical prerequisite for a selectable Warlock is understanding how
+Necromancer stores its **distinct persistent identity** while retaining
+the ordinary native Mage numeric ID. A second class must not falsely
+inherit the Necromancer identity, bypass Necromancer-only skills, or
+invalidate existing character saves.
+
+On Linode in a fresh checkout of round78-character-workbench:
+
+    cd tools/character-content
+    python3 -m unittest -v test_round78 test_progression test_native_identity_audit
+    python3 native_identity_audit.py /tmp/hd-army-game-fyrji06g/src
+
+This diagnostic refuses non-disposable source paths and binary drift,
+prints only selected C creation/identity/serializer source excerpts,
+and never accesses live player data. It is an **inspection gate**, not
+a claim that Warlock native gameplay is implemented. The next stage is
+an isolated Warlock creation and durable identity patch, followed by
+actual ELF32 compile, socket login, persistence, skill and regression
+testing. No production deployment or restart is permitted.
