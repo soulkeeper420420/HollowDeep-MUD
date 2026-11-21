@@ -34,9 +34,20 @@ static void make_player(creature *p, const char *name)
     p->intelligence = p->piety = 16;
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
     creature warlock, necromancer, mage, *reload = NULL;
+    if (argc == 2) {
+        assert(hd_store_load_player(argv[1], &reload) == 0);
+        assert(reload && reload->class == MAGE);
+        assert(hd_store_is_warlock(argv[1]) == 1);
+        assert(hd_store_is_necromancer(argv[1]) == 0);
+        assert(hd_store_read_claim(argv[1], WARLOCK_CLAIM, WARLOCK_DIGEST) == 1);
+        free(reload);
+        puts("PASS: Socket-created Warlock has verified durable identity");
+        return 0;
+    }
+    assert(argc == 1);
     make_player(&warlock, "Hdwarqa");
     make_player(&necromancer, "Hdnecroqa");
     make_player(&mage, "Hdmageqa");
