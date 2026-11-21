@@ -1,4 +1,4 @@
-WARLOCK — PRIVATE CHARACTER-CREATION TEST
+WARLOCK - PRIVATE CHARACTER-CREATION TEST
 
 Role: Pact-bound spellcaster.
 Prime attributes: Intelligence and Piety.
