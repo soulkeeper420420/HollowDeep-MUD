@@ -2,7 +2,7 @@ WARLOCK - PRIVATE CHARACTER-CREATION TEST
 
 Role: Pact-bound spellcaster.
 Prime attributes: Intelligence and Piety.
-Starting stats: standard 65-point allocation (3–18 each).
+Starting stats: standard 65-point allocation (3-18 each).
 Native training: Mage-compatible during this identity-only test.
 
 This candidate tests the durability and isolation of Warlock identity.
