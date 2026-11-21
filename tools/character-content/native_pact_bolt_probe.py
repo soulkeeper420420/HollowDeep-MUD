@@ -40,7 +40,7 @@ SOURCE_FILES = {
         (r'\{\s*"conjure"\s*,', 12, 1),
     ],
 }
-MAX_PRINTED_LINES = 475
+MAX_PRINTED_LINES = 650
 MAX_LINE_LENGTH = 235
 
 
