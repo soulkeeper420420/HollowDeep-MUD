@@ -3,9 +3,13 @@
  */
 #include "hd_player_store.h"
 #include <assert.h>
+#include <dirent.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define WARLOCK_CLAIM "ffffffffffffffffffffffffffffff78"
 #define WARLOCK_DIGEST "a74d000000000000000000000000000000000000000000000000000000000001"
@@ -34,8 +38,43 @@ static void make_player(creature *p, const char *name)
     p->intelligence = p->piety = 16;
 }
 
+static void private_fixture_guard(int verifying_existing_save)
+{
+    const char *expected = getenv("HD_PRIVATE_WARLOCK_TEST_ROOT");
+    static const char private_build[] = "/root/hollowdeep-dev/round78e-";
+    static const char private_probe[] = "/tmp/hd-warlock-receipt-check-";
+    char cwd[PATH_MAX];
+    struct stat st;
+    DIR *directory;
+    struct dirent *entry;
+
+    if (!expected || !getcwd(cwd, sizeof cwd) || strcmp(expected,cwd) ||
+        (strncmp(cwd,private_build,sizeof(private_build)-1) &&
+         strncmp(cwd,private_probe,sizeof(private_probe)-1))) {
+        fputs("REFUSED: Not a private Round 78E fixture directory\n", stderr);
+        exit(2);
+    }
+    if (lstat("player",&st) || !S_ISDIR(st.st_mode) ||
+        st.st_uid!=geteuid() || (st.st_mode & 0077) != 0) {
+        fputs("REFUSED: Unsafe private player fixture directory\n", stderr);
+        exit(2);
+    }
+    if (verifying_existing_save) return;
+    directory=opendir("player");
+    if (!directory) exit(2);
+    while ((entry=readdir(directory)) != NULL) {
+        if (strcmp(entry->d_name,".") && strcmp(entry->d_name,"..")) {
+            closedir(directory);
+            fputs("REFUSED: Native test needs an empty player fixture\n", stderr);
+            exit(2);
+        }
+    }
+    closedir(directory);
+}
+
 int main(int argc, char **argv)
 {
+    private_fixture_guard(argc == 2);
     creature warlock, necromancer, mage, fighter, *reload = NULL;
     if (argc == 2) {
         assert(hd_store_load_player(argv[1], &reload) == 0);
