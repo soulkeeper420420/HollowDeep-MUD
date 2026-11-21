@@ -142,3 +142,35 @@ native fixture and socket replay under a separate network namespace.
 **Not yet playable:** Pact Bolt/Pactbrand combat and Warlock-specific
 score display are outside this identity-only milestone. No production
 deployment, service restart or migration is authorized.
+
+
+## Round 78F: Pact Bolt, combat-safety preflight
+
+The private Round 78E Warlock identity, socket creation, save/reconnect
+and Mage/Necromancer isolation regressions all passed on Linode.
+The next stage starts with read-only discovery of the native targeting,
+damage, death and XP-credit APIs before installing a damaging command.
+
+- hd_pact_bolt_rules.h/.c: isolated, deterministic playtest math for
+  6 MP, 8-second cooldown, level/INT-scaled damage, and optional
+  one-charge empowerment (values provisional).
+- test_pact_bolt_rules.c: success, cooldown, mana, charge and input
+  validation, without modifying native player records.
+- native_pact_bolt_probe.py: bounded source-only audit of the
+  verified /tmp/hd-army-game-round78-*/src private ELF32 candidate.
+
+Within this repository directory, test the math separately:
+
+    cc -m32 -std=gnu89 -Wall -Wextra -Werror -DHD_WARLOCK_PLAYTEST \
+       -I. hd_pact_bolt_rules.c test_pact_bolt_rules.c \
+       -o /tmp/private-pact-bolt-rules-test
+    /tmp/private-pact-bolt-rules-test
+
+Run the native combat audit against the validated private candidate:
+
+    python3 native_pact_bolt_probe.py /tmp/hd-army-game-round78-VibwvrvC/src
+
+These tools never edit the live game. Pact Bolt is **not yet an actual
+native command or playable attack**; do not confuse passing rule-only
+unit tests with gameplay acceptance. Run a real socket combat replay
+after the native hooks are added. Pactbrand remains unavailable.
