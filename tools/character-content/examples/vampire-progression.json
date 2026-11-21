@@ -14,12 +14,12 @@
   },
   "skill_unlocks": [
     {
-      "skill": "lifedrain",
+      "skill": "blood-drain",
       "level": 1,
       "rebirth": 0
     },
     {
-      "skill": "mist-form",
+      "skill": "crimson-veil",
       "level": 1,
       "rebirth": 1
     }
