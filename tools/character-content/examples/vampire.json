@@ -12,7 +12,8 @@
   },
   "selectable": false,
   "abilities": [
-    "lifedrain"
+    "lifedrain",
+    "mist-form"
   ],
   "starting_equipment": [],
   "training": {
