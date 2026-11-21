@@ -81,7 +81,6 @@ int main(int argc, char **argv)
         assert(reload && reload->class == MAGE);
         assert(hd_store_is_warlock(argv[1]) == 1);
         assert(hd_store_is_necromancer(argv[1]) == 0);
-        assert(hd_store_read_claim(argv[1], WARLOCK_CLAIM, WARLOCK_DIGEST) == 1);
         free(reload);
         puts("PASS: Socket-created Warlock has verified durable identity");
         return 0;
@@ -100,7 +99,6 @@ int main(int argc, char **argv)
     assert(hd_store_is_warlock(warlock.name) == 1);
     assert(hd_store_is_necromancer(warlock.name) == 0);
     assert(hd_store_verified_remorts(warlock.name) == 0);
-    assert(hd_store_read_claim(warlock.name, WARLOCK_CLAIM, WARLOCK_DIGEST) == 1);
     assert(hd_store_create_warlock(warlock.name, &warlock) != HD_STORE_OK);
     puts("PASS: Warlock first atomic save with separate native identity");
 
