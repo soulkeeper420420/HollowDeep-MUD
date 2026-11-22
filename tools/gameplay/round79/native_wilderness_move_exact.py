@@ -15,7 +15,8 @@ def inspect(root):
     if (root.name!="src" or root.is_symlink() or
             root.parent.parent != Path("/tmp") or
             not root.parent.name.startswith(("hd-army-game-round78-",
-                                             "hd-army-game-round79-")) or
+                                             "hd-army-game-round79-",
+                                             "hd-army-game-round79hud-")) or
             root.resolve(strict=True)!=root.absolute()):
         raise ValueError("Expected the verified disposable private source tree")
     exe=root/"frp.new"
