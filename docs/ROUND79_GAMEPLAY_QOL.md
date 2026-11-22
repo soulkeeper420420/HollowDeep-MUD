@@ -1171,3 +1171,28 @@ to match the tracer's existing heading; no native code or gameplay
 behavior was changed. The actual private Linode C source audit did
 not run in this attempt, and its PASS result remains pending.
 Production deployment: NONE.
+
+
+### Round79O FINAL: verified native process_cmd dispatch — PASS
+
+The user's latest Linode private source trace confirms:
+- 7/7 synthetic trace/safety regression tests PASS.
+- Round79O private actual native execution-boundary audit PASS.
+- Actual \`process_cmd(fd,cmnd)\` in command1.c lines ~708-749 is
+  the native command-dispatch boundary. Permissions and moderation
+  are checked before \`special_cmd\` or the final
+  \`(*cmdlist[cmdno].cmdfn)(Ply[fd].ply,cmnd)\` invocation.
+- A second function-pointer match in hollowdeep_help.c is only an
+  extern command-table declaration, NOT another dispatch site.
+- Player logout/save/update_ply() in player.c, player death in
+  creature.c and login/account lifecycle in command1.c were
+  identified for future cleanup hooks.
+- Production service PID/binary and the accepted private ELF32 game
+  fingerprint were checked unchanged; deployment NONE.
+
+The next private integration must hook explicit rest entry at the
+verified command dispatcher (before real command execution),
+interruption on action, cleanup on free/death and timed recovery via
+the existing atomic Breath storage. Registration and cleanup must
+preserve legacy ABI and all unmodified social emotes. There is
+still NO tested real +15 native resting gameplay at this stage.
