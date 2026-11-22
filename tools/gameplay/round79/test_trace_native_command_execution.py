@@ -55,7 +55,7 @@ class NativeExecutionTraceTests(unittest.TestCase):
         with contextlib.redirect_stdout(output):
             trace.trace(self.src)
         result=output.getvalue()
-        self.assertIn("actual native function-pointer dispatch sites: 1",result)
+        self.assertIn("ACTUAL native function-pointer dispatch sites: 1",result)
         self.assertIn("DISPATCH CALL: io.c:7",result)
         self.assertIn("ENCLOSING K&R FUNCTION: interpret()",result)
         self.assertIn("cmdlist[cmnd->num].cmdfn",result)
