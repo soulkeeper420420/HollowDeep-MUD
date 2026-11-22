@@ -299,3 +299,69 @@ final product cap. Mount species/endurance/costs remain
 provisional from Round79G. Any eventual stable location must
 be approved based on the private builder/world data rather
 than guessed from the Atlas screenshot. No live deployment.
+
+
+## Round79S accepted — Round79T mount two-receipt wire + native storage audit
+
+The user's final Round79S Linode run reports the pure ELF32
+six-mount roster test **PASS**:
+- Epoch-bound ownership and malformed records rejected.
+- Six-species cap, one active mount, verified stable locality
+  and no remote retrieval/recharge PASS.
+- Mounted movement subtracts Endurance exactly once, leaves
+  player Breath unchanged, and allows exhausted mount retreat.
+- Revision overflow/forged active-state denial PASS.
+- Production service PID/binary and previously accepted private
+  ELF32 executable unchanged; deployment NONE.
+
+Round79T is an **independent, pure serialization/receipt-capacity
+foundation**, not a native save integration. The existing
+HDTR1-style receipt values hold 64 hexadecimal characters.
+Six mounts, ownership epoch, revision and stable locations cannot
+safely fit in one 64-hex record. Therefore:
+
+1. \`hd79_mount_wire.h/.c\` serialize a canonical fixed
+   **64-byte** mount record into two NUL-terminated
+   **64-character lower-case hex fragments**, suitable as two
+   *separate reserved receipt payloads only after IDs and
+   receipt capacity are verified*. The record contains
+   version, count, active mount, the 12-byte character
+   epoch (24 hex chars), full uint32 revision and six
+   fixed entries with species/Endurance/stabled/
+   24-bit stable-room ID.
+2. CRC32 protects the **combined** record against accidental
+   cross-fragment mixing or corrupted/partial data;
+   unused bytes and version fields must be zero/valid.
+   A CRC is not a MAC or an authentication mechanism:
+   ownership authorization and stale-revision denial
+   remain the responsibility of the native locked
+   player-save transaction.
+3. \`test_hd79_mount_wire.c\` checks empty and full
+   roster roundtrips, exact canonical repeat encoding,
+   active/same-stable fields, max room ID, max revision,
+   corruption/uppercase/bad length, output immutability
+   and mixed-generation rejection.
+4. \`audit_native_mount_receipt_capacity.py\` and seven
+   synthetic private-source safety tests inspect the
+   actual accepted \`hd_player_store.c\`,
+   \`treasure_receipt.h/.c\`, and Breath/Conjure includes
+   for receipt limits, reserved claim IDs, epoch
+   binding, add/encode APIs and atomic snapshot contract,
+   without changing any source or player data.
+5. \`private_mount_wire_audit_round79t.sh\` runs the
+   synthetic source tests, compiles/executes the pure
+   wire tests as ELF32, produces a **root-only receipt
+   capacity report**, and confirms the original private
+   ELF32 and production PID/executable remain unchanged.
+
+Round79T has **not yet been run on Linode**. Two dedicated
+mount receipt IDs are **not allocated**, and no mount
+persistence is wired into \`hd_player_store.c\`.
+The next real persistence milestone must test that the
+receipt set has space for both fragments alongside existing
+Necromancer, Conjure and Breath records and must add both
+fragments in one atomic snapshot under the same lock.
+Check authoritative character epoch, conflicting writes,
+short-write/uncertain rename, ordinary saves, relog, death,
+recreated names, full receipt sets and malformed input.
+No live deployment or player-world changes are authorized.
