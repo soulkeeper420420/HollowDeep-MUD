@@ -39,8 +39,9 @@ int hd79_mount_roster_valid(const hd79_mount_roster *roster)
         }
     }
     for(i=roster->count;i<HD79_MOUNT_MAX_OWNED;i++) {
-        static const hd79_owned_mount empty={0,0,0,0,0};
-        if (memcmp(&roster->entries[i],&empty,sizeof empty))
+        const hd79_owned_mount *m=&roster->entries[i];
+        if (m->id || m->species || m->endurance || m->stabled ||
+            m->stable_room)
             return 0;
     }
     return roster->active_id==0 || active_found;
