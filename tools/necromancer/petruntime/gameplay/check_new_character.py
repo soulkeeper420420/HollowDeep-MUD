@@ -152,6 +152,7 @@ def create(client,name,profession):
     text=prior['collect'](client)
     submitted=None
     submitted_password=False
+    create.ansi_choice_seen=False
 
     for _ in range(20):
         low=text.lower()
@@ -189,6 +190,9 @@ def create(client,name,profession):
             answer='Lawful'
         elif 'available races' in low:
             answer='Human'
+        elif 'enable ansi colors' in low:
+            answer='yes' if profession=='Necromancer' else 'no'
+            create.ansi_choice_seen=True
         elif 'choose a password' in low:
             answer='Fixturepass'
             submitted_password=True
@@ -245,6 +249,12 @@ try:
                 cwd=copied,text=True)
 
         print(result,flush=True)
+
+        if create.ansi_choice_seen:
+            match=re.search(r'ANSI=(\d+)',result)
+            assert match, 'Saved ANSI preference absent from native probe'
+            assert int(match[1])==int(necro), 'Wrong saved ANSI preference'
+            print('PASS: Character ANSI choice saved for '+profession,flush=True)
 
         if not necro:
             assert submitted is not None
