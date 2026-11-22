@@ -97,7 +97,7 @@ def run(player,prior,ask,clean):
     current=baseline
     ticks=[]
     while time.monotonic()-started<MAX_PULSE_WAIT:
-        time.sleep(3)
+        time.sleep(5)
         observed=sample()
         outcome=check_pulse_transition(current,observed)
         if outcome=="unchanged":
@@ -106,6 +106,14 @@ def run(player,prior,ask,clean):
         print("Observed natural native timer recovery: %s %d -> %d"%
               (outcome,current,observed),flush=True)
         if outcome=="rest_plus15":
+            # The +15 can only begin after 45 seconds of continuous
+            # native resting. Allow a small offset because the timer
+            # started when the server received REST, before our first
+            # read-only status sample.
+            elapsed=time.monotonic()-started
+            if elapsed<38:
+                raise AssertionError(
+                    "Native REST awarded +15 too early: %.1f seconds"%elapsed)
             # Read-only commands must not produce extra awards before
             # the next durable 45-second recovery gate.
             immediately=sample()
