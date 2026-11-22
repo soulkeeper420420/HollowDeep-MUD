@@ -669,3 +669,39 @@ and hook the actual native periodic active-player update with
 the same 45-second atomic recovery/anti-spam gates in a new
 disposable build. Do not modify production before explicit
 approval. Mounts/Endurance/stables are still pending.
+
+
+## Round79Q PASS — Round79R read-only mount foundation
+
+Round79Q completed on private Linode with 18 passing Python
+regressions and a real isolated MUD socket recovering exactly
++15 Breath after an uninterrupted natural 45-second REST tick,
+without an immediate duplicate. Real \`update.c:129\` invokes
+\`update_ply(Ply[i].ply)\`. This confirms the Round79P private
+rest integration is actually scheduled. The full Round79K–Q
+Breath/rest private gameplay sequence is accepted. No live
+production deployment has occurred.
+
+Round79R prepares for the mount milestone **without introducing
+native mount gameplay yet**:
+- \`native_mount_command_audit.py\` now accepts previously
+  validated \`/tmp/hd-army-game-round79rest-*/src\` input
+  alongside its original private source layouts.
+- \`test_native_mount_command_audit.py\` verifies six
+  isolated-source evidence and security cases.
+- \`private_mount_foundation_round79r.sh\` recompiles the
+  already designed pure terrain/Endurance rules as ELF32,
+  runs the audit tests, produces a root-private native flag
+  and command collision report, and compares live production
+  PID/executable and accepted private ELF32 checksum.
+
+Run from a fresh root-only pinned \`round79r-*\` checkout:
+    bash tools/gameplay/round79/private_mount_foundation_round79r.sh \
+      /root/hollowdeep-dev/round79r-PRIVATE \
+      /tmp/hd-army-game-round79rest-JQgo3wi5/src
+
+The Round79R source audit report is NOT a native playable
+mount implementation and should not be uploaded to GitHub.
+Next native feature after source validation is epoch-bound
+ownership/Endurance atomic persistence and a safe stable
+interaction, preserving Conjure and Raise Corpse isolation.
