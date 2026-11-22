@@ -137,3 +137,34 @@ Read the complete acceptance requirements in
 docs/ROUND79_GAMEPLAY_QOL.md. The standalone C code **is not yet hooked
 into native wilderness travel or saved-player persistence**. Do not publish
 any private audit/source output, real world data, or game credentials.
+
+
+## Round 79E: Native ANSI HP/MP status line (private candidate)
+
+The Round 79D source report identified the existing ply_prompt() in player.c,
+which used a 40-byte static output buffer. Round 79E enlarges it to 256
+bytes under STATUS_HUD_PLAYTEST=1, and displays actual HP/MP current/max
+with ANSI colors when the saved PANSIC bit is set. For non-ANSI clients it
+sends plain ASCII text with zero escape sequences. Alias and prompt
+suppression paths are preserved by a conditional native patch that retains
+the old handler when the feature flag is off.
+
+The Breath label is deliberately "--" until the wilderness travel-stamina
+resource has durable native storage and verified successful-move hooks.
+A successful formatter unit test does not establish Breath gameplay.
+
+Files:
+- stage_status_hud.py, test_stage_status_hud.py
+- private_status_hud.sh (ELF32 build and real socket acceptance)
+- native_wilderness_move_exact.py (bounded read-only function audit)
+
+Use the previously successful ANSI-enabled private Round 79 build as input.
+Within a fresh checkout, run private_status_hud.sh with two parameters:
+a new private results directory and that Round 79 ANSI source path. The
+private runner verifies ANSI enabled and disabled, saved ANSI preference,
+HUD after reconnect, Mage/Necromancer/Warlock creation and help regressions,
+and unchanged production PID/binary. It also writes native-wilderness-move.txt,
+which must be reviewed before adding a Breath debit/save hook.
+
+The Round 79E patch and tests are currently unverified on Linode.
+There is NO production deployment or world edit.
