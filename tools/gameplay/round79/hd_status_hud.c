@@ -14,8 +14,8 @@ static int bounded(int value, int maximum)
 static int percent_color(int current, int maximum, int normal)
 {
     if (maximum <= 0) return 31;
-    if ((long)current * 4L <= maximum) return 31;
-    if ((long)current * 2L <= maximum) return 33;
+    if (current <= maximum / 4) return 31;
+    if (current <= maximum / 2) return 33;
     return normal;
 }
 
