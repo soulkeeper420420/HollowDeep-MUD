@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import sys
 
-MAX_LINES=780
+MAX_LINES=1500
 TRUNCATE=210
 
 def check(raw):
@@ -69,13 +69,13 @@ def audit(root):
         r"^int hd_store_read_claim\s*\(",
         r"\b(?:reserved_receipt|conjure_id|warlock_id|necromancer_id)\b",
         r"\b(?:hd_conjure_store|hd_roster_store)\b",
-    ),6,42,4,used)
+    ),6,29,2,used)
     excerpt(root,"hd_player_store.c",(
         r"\b(?:read_record|write_record|atomic_write|safe_write|fsync|flock)\s*\(",
-    ),3,14,5,used)
+    ),3,12,3,used)
     excerpt(root,"treasure_receipt.c",(
         r"^int hd_receipt_(?:add|encode|decode|lookup)\s*\(",
-    ),1,18,5,used)
+    ),1,15,2,used)
     excerpt(root,"player.c",(
         r"^\s*if\s*\(ply_ptr->parent_rom\s*&&\s*\(t\s*>\s*LT\(ply_ptr,\s*LT_HEALS\)\)\)",
         r"^\s*char \*ply_prompt\s*\(",
