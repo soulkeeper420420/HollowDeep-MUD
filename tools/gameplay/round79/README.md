@@ -565,3 +565,51 @@ reset on disconnect/login/death, and use the existing atomic
 Breath recovery with resting=1 ONLY after 45 uninterrupted seconds.
 Keep the report, source excerpts and all player/game fixtures
 private. No live deployment without explicit approval.
+
+
+## Round79P: first feature-gated native REST +15 candidate
+
+The final Round79O private ELF32 source trace passed all seven
+regression tests. It identified the real command callback in
+command1.c process_cmd(): after alias and authorization checks,
+before calling special_cmd() or the command function pointer.
+hollowdeep_help.c merely declares the callback table.
+
+Round79P uses that verified boundary and the earlier Round79N
+rest-session timing policy to introduce, **privately only**, a new
+rest command and genuine +15 Breath eligibility:
+- hd79_rest_game.h/.c: transient rest slots keyed by player pointer,
+  FD, name, room and original HP; new rest begins a 45-second
+  uninterrupted timer; read-only look/help/skills retain rest;
+  other commands interrupt, and death/free clear sessions
+- stage_rest_breath.py: strict isolated source copy from accepted
+  Round79K, exact native command1.c process_cmd() insertion,
+  feature-gated global.c rest command, runtime receipt recovery
+  rate switch, and verified K&R die()/free_crt() cleanup
+- test_stage_rest_breath.py: staging and failure denials including
+  original file fingerprints and shared-file lifecycle hook cases
+- test_native_rest_game.c: private ELF32 synthetic player receipt
+  test showing 80->95 on eligible rest (+15), then 95->100 after
+  real attack interruption (+5), one grant per durable 45-second
+  receipt and damage/room/logout reset
+- check_breath_rest_socket.py: real native isolated socket test
+  for rest entry, repeated rest anti-spam, social stand/sleep
+  interruption, existing wilderness charges and reconnect
+- private_native_rest_game.sh: one private staging + native
+  compile + atomic fixture + full native ELF32 build + real
+  network-isolated socket replay, with unchanged-production checks
+
+The runner expects a fresh pinned checkout under
+/root/hollowdeep-dev/round79p-* and the accepted private Round79K
+source under /tmp/hd-army-game-round79travel-*/src:
+
+    bash tools/gameplay/round79/private_native_rest_game.sh \
+      /root/hollowdeep-dev/round79p-PRIVATE \
+      /tmp/hd-army-game-round79travel-VERIFIED/src
+
+This is an **untested candidate until Linode reports PASS**.
+The short socket test establishes rest registration and
+interruption, not the duration of a real 45-second server tick;
+the native atomic receipt fixture establishes the +15 value.
+Do not publish source excerpts, fixture data or logs to GitHub.
+No production deployment is performed.
