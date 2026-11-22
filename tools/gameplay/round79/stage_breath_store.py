@@ -59,6 +59,8 @@ def stage(source,destination):
     dest=check(destination,DEST_PREFIX,False)
     p=(source/"hd_player_store.c").read_text(encoding="latin-1")
     m=(source/"Makefile").read_text(encoding="latin-1")
+    old_p=p
+    old_m=m
     if "HD79_BREATH_STORE_PLAYTEST" in p or "BREATH_STORE_PLAYTEST" in m:
         raise ValueError("Breath store is already installed")
     if "HD79_STATUS_HUD_PLAYTEST" not in m or "HD79_STATUS_ANSI_PLAYTEST" not in m:
@@ -100,10 +102,8 @@ def stage(source,destination):
             shutil.copyfile(HERE/name,dest/name)
         # Any input race before copying/rewriting must reject; all-or-none
         # deletes the unverified copy instead of risking a mixed build.
-        if ((source/"hd_player_store.c").read_text(encoding="latin-1") !=
-            (source/"hd_player_store.c").read_text(encoding="latin-1") or
-            (source/"Makefile").read_text(encoding="latin-1") !=
-            (source/"Makefile").read_text(encoding="latin-1")):
+        if ((source/"hd_player_store.c").read_text(encoding="latin-1") != old_p or
+            (source/"Makefile").read_text(encoding="latin-1") != old_m):
             raise ValueError("Concurrent private source modification")
     except Exception:
         shutil.rmtree(dest)
