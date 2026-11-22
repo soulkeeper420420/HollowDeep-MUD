@@ -1490,3 +1490,33 @@ Next independent project track: durable epoch-bound mount roster,
 single active mount, separate Endurance, safe stables and validated
 terrain/exit movement. Existing Round79G mount profiles are pure
 rules, not a native playable mount implementation.
+
+
+### Round79S final ELF32 mount-roster policy — PASS
+
+The user's private Linode run in
+\`/root/hollowdeep-dev/round79s-wDGd3tjN\` reports:
+- Private ELF32 pure mount-roster, travel, terrain and Breath
+  compilation PASS.
+- Epoch-based ownership, six species and cap, invalid/forged
+  input refusal PASS.
+- Exactly one active mount; stable deposit only with verified
+  player/mount presence; same-stable retrieval, no remote
+  retrieval or refill from mount switching PASS.
+- One Endurance debit per successful validated mounted move;
+  failed/stale movement denied without modifying output;
+  zero-Endurance safe indoor retreat PASS.
+- Revision overflow and corrupt roster states denied PASS.
+- \`ROUND79S: PRIVATE MOUNT ROSTER/ENDURANCE/STABLE POLICY PASS\`.
+- Accepted private ELF32 game and production PID/binary unchanged.
+  \`PRODUCTION DEPLOYMENT: NONE\`.
+
+**Round79S is accepted as a pure roster/Endurance/stable policy
+milestone**, NOT native mount persistence or gameplay. The next
+step must inspect exact hd_player_store.c native receipt limits,
+reserved IDs and owner epoch before designing atomic roster and
+Endurance storage. The existing single-claim Breath wire is 64
+hexadecimal characters, so a roster of six mounts must not be
+squeezed into that receipt without a documented format and
+capacity/snapshot safety proof. Do not claim real mounts playable
+without native isolated save/reconnect/uncertain-rename tests.
