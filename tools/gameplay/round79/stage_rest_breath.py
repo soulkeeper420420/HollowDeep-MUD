@@ -192,17 +192,18 @@ def patch(src):
                          "existing atomic +5 Breath recovery")
     edited["hd79_breath_travel_runtime.c"]=runtime
 
+    # Both cleanup functions may live in the same native C unit.
+    # Insert from last line toward first so original K&R line
+    # positions remain exact and no source offset needs guessing.
+    cleanup={}
     for symbol in ("free_crt","die"):
         path,opening,param=native_cleanup_definition(src,symbol)
-        old=edited.get(path.name)
-        if old is not None:
-            # If multiple hooks share a file, recompute opening after
-            # the prior insert; conservatively refuse on ambiguity.
-            raise ValueError("Multiple native cleanup hooks in "+
-                             path.name+" require separate staging")
-        body=path.read_text(encoding="latin-1")
-        edited[path.name]=inject_after_brace(
-            body,opening,param,symbol)
+        cleanup.setdefault(path.name,[]).append((opening,param,symbol))
+    for name,hooks in cleanup.items():
+        body=(src/name).read_text(encoding="latin-1")
+        for opening,param,symbol in sorted(hooks,reverse=True):
+            body=inject_after_brace(body,opening,param,symbol)
+        edited[name]=body
 
     return edited
 
