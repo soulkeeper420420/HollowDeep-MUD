@@ -463,3 +463,59 @@ The current implementation is only a **pure, native-independent terrain
 and resource selection library** under tools/gameplay/round79.
 Actual mounts, owned inventory, stables, flight, movement speed and the
 durable player Breath receipt remain unimplemented. No production changes.
+
+
+## Round 79H — Native atomic Breath receipt staging
+
+The newly uploaded Round 79F audit establishes the native store's
+private extension points:
+- The existing reserved HDTR1 receipt IDs use suffixes 74 through 78.
+- Native store_internal holds a directory flock(LOCK_EX) while it reads
+  and writes checksum-protected player/receipt data.
+- Ordinary player saves preserve the HDTR1 receipt trailer.
+- Pet and Conjure storage already use locked CAS updates and the
+  hd_atomic_player_snapshot writer, including uncertain rename handling.
+- The original ELF32 creature ABI has no new Breath member.
+
+Round 79G foot-versus-mount travel rules and the read-only mount command
+audit both passed on the isolated Linode ELF32 test. Native mounts are
+not yet implemented.
+
+### Round 79H private, source-gated storage patch
+
+stage_breath_store.py verifies the previous private Round 79E HUD
+candidate and copies it to a NEW /tmp/hd-army-game-round79store-*
+candidate. It does not edit the source baseline or production.
+
+The new private feature gate HD79_BREATH_STORE_PLAYTEST:
+- Reserves a separate HDTR1 receipt suffix 79 for Breath, including
+  refusal to use it for public loot claims, without touching IDs 74-78.
+- Installs hd_breath_store.inc in the existing native atomic store.
+- Adds fail-closed read; one-time init with random 96-bit character epoch;
+  and revisioned, expected-state CAS debit/recovery operations.
+- Reuses player-file directory locking, HDTR1 encoding, compression
+  and snapshot write mechanics. A before_rename fault denies mutation;
+  an after_rename uncertain commit requires re-read reconciliation.
+- Preserves the native character ABI, the existing pet/Conjure receipts,
+  inventory and other player save data.
+- Does not refill Breath on ordinary save or reconnect.
+- Does not edit player.c, wilderness.c or the live service.
+
+test_native_breath_store.c exercises reservation, init, 50 sequential
+native receipt debits, exhausted travel denial, timed recovery, ordinary
+save, stale CAS, before/after rename faults, Necromancer pet coexistence
+and rejection of old character epochs after name reuse.
+
+private_breath_store.sh compiles the ELF32 native receipt regression
+and private full MUD executable, and checks the production PID/hash.
+
+This patch is NOT YET TESTED ON LINODE. It contains the storage
+operations but deliberately does not connect them to wilderness travel
+or native timed recovery. A later integration must atomically checkpoint
+both successful movement position and Breath. Charging one without the
+other risks overcharging or allowing free travel across crashes or
+write failures.
+
+The six proposed mounts remain a separate milestone after the player
+Breath store and native movement are validated. No deployment or
+production restart has been authorized.
