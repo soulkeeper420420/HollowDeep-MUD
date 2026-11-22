@@ -243,3 +243,31 @@ Do not treat a read-only source report or 79C pure rules PASS as native
 Breath gameplay PASS. The next native implementation must use only exact
 audited source anchors, preserve existing player-save ABI and old-world
 movement, and never modify or restart the live service.
+
+
+### Round 79D isolated native acceptance — verified from Linode output
+
+The private run reported the following, without touching production:
+- 10/10 Python staging + source-audit tests passed.
+- Standalone HP/MP/Breath ANSI formatter test passed.
+- Standalone character-creation ANSI choice parser test passed.
+- Native ANSI creation was staged and compiled successfully as ELF32.
+- Creation socket regressions passed, including a saved ANSI preference for
+  Necromancer (YES) and Mage (NO). The Mage probe printed ANSI=0.
+- Warlock reconnect/identity regression passed.
+- Native help/skills regression passed.
+- Production MainPID remained 51424 and no deployment occurred.
+
+Status HUD rendering in the native player prompt is NOT YET INTEGRATED.
+The wilderness Breath resource has NOT YET BEEN CONNECTED to native
+movement, recovery ticks, or persisted player state.
+
+The private audit generated two reports that remain solely on Linode:
+- /root/hollowdeep-dev/round79b-4VMzSSxA/breath-hooks-report.txt
+  (534 lines of movement, recovery, receipt and prompt source excerpts).
+- /root/hollowdeep-dev/round79b-4VMzSSxA/native-status-report.txt
+  (308 prompt, ANSI and Breath references).
+
+The source excerpts must be reviewed before patching player.c or committing
+any native Breath storage and debit hooks. Do not publish private logs or
+fixtures to GitHub.
