@@ -403,3 +403,47 @@ changes and crash behavior after an atomic precommit but before traps
 and followers finish, plus save throughput with many connected
 players. Keep all socket logs, fixtures, private paths and
 credentials outside public GitHub.
+
+
+## Round 79K accepted, Round 79L private native resting-state audit
+
+The final isolated Linode Round79K socket replay confirmed
+\`ROUND 79K: SOCKET BREATH TRAVEL AND HUD PASS\`:
+- 8/8 socket/reconnect regression tests.
+- Real ELF32 native wilderness moves charged Breath 100 -> 98 -> 96 -> 94.
+- Interior retreat and invalid exits did not charge.
+- ANSI HP/MP/Breath HUD displayed exact persisted values.
+- Save/logout/reconnect restored both the saved room and Breath 94.
+- The private ELF32 baseline and production service PID/binary were unchanged.
+- Production deployment remains NONE.
+
+**Round 79L is only a source audit, not a live gameplay change.**
+The already tested hd_wilderness_breath.c policies specify +5 for
+ordinary timed recovery and +15 while resting. No native rest/sleep
+pose flag has yet been verified, so treating typing "rest" repeatedly
+as recovery would be incorrect.
+
+New read-only private tooling:
+- audit_native_rest_state.py scans only a known disposable Round79K
+  ELF32 source under /tmp/hd-army-game-round79travel-*/src and emits
+  a bounded private report with native rest/sleep/sit/stand/wake
+  declarations, relevant player flags, and update_ply() timing.
+- test_audit_native_rest_state.py covers K&R rest/stand definitions,
+  private path/ELF32/symlink refusal and missing source guards.
+- private_rest_state_audit.sh runs only these tests and reports native
+  rest-state evidence; it re-verifies production PID/binary and the
+  accepted private executable fingerprint remain unchanged.
+
+Use a fresh, pinned private repo under /root/hollowdeep-dev/round79l-*.
+Supply the existing accepted Round79K source from the socket-pass:
+
+    bash tools/gameplay/round79/private_rest_state_audit.sh \
+      /root/hollowdeep-dev/round79l-PRIVATE \
+      /tmp/hd-army-game-round79travel-VERIFIED/src
+
+The generated private-rest-state-report.txt must remain off GitHub.
+After reviewing it, introduce +15 only when the real native character
+pose is actively resting and the durable recovery interval has
+elapsed. Reuse the atomic Breath store, preserve the default +5,
+and validate rest->stand->rest and death/logout/reconnect cases.
+Do not restart or modify production.
