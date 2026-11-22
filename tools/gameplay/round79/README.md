@@ -530,3 +530,38 @@ Do not upload private native source excerpts, credentials or player
 saves to GitHub. The real +15 Breath recovery and new rest command
 have NOT been implemented until the native command and lifecycle
 hooks are inspected and gameplay socket tests pass.
+
+
+## Round79N accepted — Round79O exact native command function-pointer trace
+
+The verified Linode Round79N run passed five private audit tests,
+the standalone C99 rest-session unit test, and read-only
+dispatch/lifecycle source tracing. The 45-second rest eligibility
+contract is now tested in isolation, including anti-spam, interruption,
+no stale rest after reconnect and durable last_recover guards.
+Neither the real rest command nor +15 Breath is hooked to the MUD.
+
+Round79O uses:
+- trace_native_command_execution.py: read only, scans the accepted
+  disposable ELF32 tree for the real C command-function-pointer
+  invocation and its enclosing legacy K&R handler, plus nearby
+  login/disconnect/death and combat callback definitions
+- test_trace_native_command_execution.py: seven synthetic private
+  ELF32 tests for exact dispatch recognition, refusal on missing
+  or excessive candidate sites, production path/ELF64/symlink
+  rejection and no native source modification
+- private_trace_command_execution.sh: reruns the regressions and
+  emits a bounded private report, verifying production PID,
+  executable SHA256 and the private ELF32 baseline unchanged
+
+Use:
+    bash tools/gameplay/round79/private_trace_command_execution.sh \
+      /root/hollowdeep-dev/round79o-PRIVATE \
+      /tmp/hd-army-game-round79travel-VERIFIED/src
+
+After confirming the real native call site, stage the explicit
+rest command, interrupt before executing non-readonly commands,
+reset on disconnect/login/death, and use the existing atomic
+Breath recovery with resting=1 ONLY after 45 uninterrupted seconds.
+Keep the report, source excerpts and all player/game fixtures
+private. No live deployment without explicit approval.
