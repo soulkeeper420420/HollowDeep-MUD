@@ -217,3 +217,29 @@ Next acceptance gate: inspect the native movement report in a private
 workspace; then stage actual movement/recovery hooks only after examining
 the native source, compile ELF32 and run successful/blocked movement,
 safe-retreat, regeneration, logout/reconnect and class regressions.
+
+
+## Round 79D - Exact native movement-hook audit
+
+The uploaded Round 79C read-only report contains 262 source lines but does
+NOT locate the movement-success path. It shows incidental room references
+in command1-6.c and login/logout logic in player.c; neither is sufficient
+to debit Breath on a completed step. It also does not establish a durable
+Breath field or the correct timed recovery callback.
+
+The revised native_breath_hooks_probe.py searches ALL *.c sources from
+the isolated ELF32 Round 78/79 candidate for actual calls to
+add_ply_rom/del_ply_rom, character rom_num mutations and move helpers.
+Its bounded output also extracts wilderness classification, player
+recovery timers, exact HDTR1 receipt-store interfaces and prompt/ANSI
+code. The report remains private on Linode, not in GitHub.
+
+Separately, stage_ansi_creation.py had a Python line-continuation syntax
+error. Round 79D corrects the syntax before running any Round 79B build.
+The private staging tests, real class-creation socket acceptance, Breath
+persistence, player prompt, and real wilderness movement remain gates.
+
+Do not treat a read-only source report or 79C pure rules PASS as native
+Breath gameplay PASS. The next native implementation must use only exact
+audited source anchors, preserve existing player-save ABI and old-world
+movement, and never modify or restart the live service.
