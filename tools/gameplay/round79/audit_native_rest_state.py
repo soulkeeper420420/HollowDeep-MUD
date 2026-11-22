@@ -38,8 +38,11 @@ def validate(source):
         source.resolve(strict=True)!=source.absolute()):
         raise ValueError("Only verified private /tmp/hd-army-game-round79travel-*/src accepted")
     exe=source/"frp.new"
-    if exe.is_symlink() or not exe.is_file() or exe.open("rb").read(5)!=b"\x7fELF\x01":
+    if exe.is_symlink() or not exe.is_file():
         raise ValueError("Private ELF32 candidate missing")
+    with exe.open("rb") as binary:
+        if binary.read(5)!=b"\x7fELF\x01":
+            raise ValueError("Private ELF32 candidate missing")
     needed=("player.c","update.c","global.c","mstruct.h","mtype.h",
             "hd79_breath_travel_runtime.c")
     for name in needed:
@@ -71,12 +74,13 @@ def format_excerpt(filename,lines,indices,used):
 
 
 def focus(source,cfiles):
-    # Start with real rest/sleep/wake command implementations so the
-    # bounded report cannot be consumed by generic status references.
-    files=sorted(cfiles)
-    files += [source/x for x in ("player.c","update.c","mtype.h",
-                               "mstruct.h","global.c",
-                               "hd79_breath_travel_runtime.c")]
+    # Always show the actual timer and the Breath pulse first, even
+    # when the function name contains no bare rest/sleep keyword.
+    # Then inspect command implementations and native pose definitions.
+    files=[source/"player.c",source/"hd79_breath_travel_runtime.c"]
+    files+=sorted(cfiles)
+    files += [source/x for x in ("update.c","mtype.h",
+                                "mstruct.h","global.c")]
     used=[0]
     total=0
     print("=== ROUND79L PRIVATE NATIVE REST/POSE/TIMER SOURCE AUDIT ===")
@@ -84,7 +88,10 @@ def focus(source,cfiles):
     for file in files:
         lines=file.read_text(encoding="latin-1").splitlines()
         matches=[i for i,line in enumerate(lines) if REST.search(line)]
-        if not matches:
+        # hd79_breath_pulse() is the real recovery callback, but its C
+        # implementation may contain no plain REST tokens. Include its
+        # exact definition regardless, without inventing a pose state.
+        if not matches and file.name!="hd79_breath_travel_runtime.c":
             continue
         total+=len(matches)
         print("\n=== %s: %d rest/timer matches ==="%(file.name,len(matches)))
