@@ -304,3 +304,27 @@ direction command, and do not refill it on logout/reconnect.
 
 Round 79E is **published as unverified private development**, pending
 the native build/socket results from Linode. No deployment approved.
+
+
+### Round 79E — Private HUD socket acceptance and harness fix
+
+The private Linode run confirmed:
+- Ten Python staging/audit tests passed.
+- ANSI status rendering and native ELF32 compilation passed.
+- Native Necromancer and Mage creation, saved ANSI YES/NO choices, and
+  ANSI-colored/plain HP/MP/Breath-- status prompts across reconnect passed.
+- Production remained unchanged.
+
+Warlock validation was blocked before opening a socket by the test harness
+directory allowlist: the new isolated HUD directory has a distinct
+round79hud prefix. The regression harness and exact wilderness source
+audit now accept that specific additional private build prefix while still
+requiring a real ELF32 source in /tmp and isolated networking for sockets.
+A separate unit test covers the new private directory and rejects production
+and invalid executable paths. The game executable is NOT implicated by the
+original Warlock harness refusal.
+
+Only resume Warlock and help regressions and run the focused wilderness
+movement source audit against the already built private ELF32 HUD candidate;
+do not needlessly recompile the tested native game or replay passing class
+creation tests. Actual Breath depletion and persistence are still pending.
