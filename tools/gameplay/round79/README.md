@@ -312,3 +312,41 @@ wilderness move debit to gameplay, verify that the new destination room
 and Breath receipt are committed consistently under fail injection.
 Unmounting/dismounting, save/reconnect and changing owned mounts must
 not reset either rider Breath or mount Endurance.
+
+
+## Round 79J — Atomic player room and Breath checkpoint (private only)
+
+The uploaded Round79I audit verifies native update_ply(), the map wrapper,
+and the existing hd_atomic_player_snapshot() save boundary. It does not
+supply a complete, untruncated move()/go() destination resolver.
+
+New sources:
+- hd_breath_move_checkpoint.h / .inc — co-commit one changed player
+  rom_num and revised Breath receipt under a single existing native
+  player-save directory lock; guard both old room and exact Breath
+  revision; preserve worn items and other receipts; report uncertain
+  renames for disk reconciliation
+- stage_breath_move_checkpoint.py / test_stage_breath_move_checkpoint.py
+  — source-only opt-in copy from verified Round79H storage candidate to
+  NEW private Round79J candidate
+- test_native_breath_move_checkpoint.c — native synthetic player
+  assertions: old/new room+Breath, stale room/receipt, aborted write,
+  uncertain write, zero-Breath wilderness denial and free retreat
+- native_move_go_precise.py / test_native_move_go_precise.py — bounded
+  actual K&R move()/go() definition extraction, avoiding old terminal
+  transcript truncation
+- private_room_breath_checkpoint.sh — all of the above plus private ELF32
+  compile and unchanged-production assertions
+
+Pass a NEW /root/hollowdeep-dev/round79j-* results directory containing
+the pinned repository at repo/ and the verified Round79H source:
+
+    bash tools/gameplay/round79/private_room_breath_checkpoint.sh \
+      /root/hollowdeep-dev/round79j-PRIVATE \
+      /tmp/hd-army-game-round79store-VERIFIED/src
+
+The private runner writes exact-move-go-report.txt for review. This
+script neither changes the native movement commands nor charges Breath
+during real travel. It cannot be deployed as a finished player feature:
+pre-move exit permission, post-move rollback/reconciliation, optional
+mount Endurance, numeric HUD and recovery remain future integration.
