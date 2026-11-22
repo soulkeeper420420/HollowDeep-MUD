@@ -67,7 +67,10 @@ def end_function(lines,start):
                 state="string";i+=1;continue
             if ch=="'":
                 state="char";i+=1;continue
-            if ch==";" and pending:
+            # K&R function parameter declarations end in semicolons
+            # after the signature; only a same-line semicolon is a
+            # prototype rather than a native function definition.
+            if ch==";" and pending and line==start:
                 return None
             if ch=="{":
                 pending=False;depth+=1
