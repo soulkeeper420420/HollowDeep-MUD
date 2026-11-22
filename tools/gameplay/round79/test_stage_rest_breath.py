@@ -94,108 +94,18 @@ class RestStageTests(unittest.TestCase):
         for name in ("private","native_cleanup_definition",
                      "inject_after_brace","patch","stage","main"):
             self.assertEqual(functions.count(name),1,name)
-        self.assertEqual(
-            source.count('if __name__=="__main__":'),1)
-        self.assertTrue(
-            source.rstrip().endswith("sys.exit(main())"))
-        # Native die() has two K&R arguments; free_crt() has one.
+        self.assertEqual(source.count('if __name__=="__main__":'),1)
+        self.assertTrue(source.rstrip().endswith("sys.exit(main())"))
+        # The actual native signatures include one- and two-argument
+        # K&R functions. Keep a regression covering both variants.
         pattern=rest.re.compile(
-            r'^[ \t]*(?:void[ \t]+|int[ \t]+)?free_crt'
-            r'[ \t]*\([ \t]*([A-Za-z_]\w*)[ \t]*'
-            r'(?:,[ \t]*[A-Za-z_]\w*[ \t]*)*\)[ \t]*
-        before={p.name:hashlib.sha256(p.read_bytes()).hexdigest()
-                for p in self.src.iterdir()}
-        rest.stage(self.src,self.dst)
-        self.assertEqual(before,{
-            p.name:hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in self.src.iterdir()})
-        self.assertEqual((self.dst/"original.c").read_text(),
-                         self.base["original.c"])
-        command=(self.dst/"command1.c").read_text()
-        self.assertEqual(command.count("hd79_rest_before_command("),2)
-        self.assertLess(command.index("hd79_rest_before_command(Ply[fd].ply"),
-                        command.index("if(cmdlist[cmdno].cmdno < 0)"))
-        self.assertLess(command.index("hd79_rest_before_command(Ply[fd].ply"),
-                        command.index("return((*cmdlist[cmdno].cmdfn)"))
-        global_c=(self.dst/"global.c").read_text()
-        self.assertIn('  { "rest", 100, hd79_rest_command },',global_c)
-        self.assertIn('  { "sleep", 100, action },',global_c)
-        self.assertIn('  { "stand", 100, action },',global_c)
-        runtime=(self.dst/"hd79_breath_travel_runtime.c").read_text()
-        self.assertIn("hd79_rest_bonus_eligible(player,now",runtime)
-        self.assertIn("0,resting,now,&after",runtime)
-        self.assertIn("0,0,now,&after",runtime)
-        for name,parameter in (("memory.c","crt_ptr"),
-                               ("creature.c","crt_ptr")):
-            body=(self.dst/name).read_text()
-            self.assertEqual(body.count(
-                "hd79_rest_forget("+parameter+")"),1)
-            self.assertIn("#ifdef HD79_REST_PLAYTEST",body)
-        self.assertIn("OBJECTS += hd79_rest_session.o hd79_rest_game.o",
-                      (self.dst/"Makefile").read_text())
-        for file in rest.NEW:
-            self.assertEqual((self.dst/file).read_bytes(),
-                             (rest.HERE/file).read_bytes())
-
-    def test_cleanup_hooks_when_free_and_die_share_one_native_file(self):
-        moved=self.src/"memory.c"
-        body=moved.read_text()
-        moved.unlink()
-        destination=self.src/"creature.c"
-        destination.write_text(destination.read_text()+"\n"+body)
-        rest.stage(self.src,self.dst)
-        staged=(self.dst/"creature.c").read_text()
-        self.assertEqual(staged.count("hd79_rest_forget(crt_ptr)"),2)
-        self.assertEqual(staged.count("#ifdef HD79_REST_PLAYTEST"),2)
-        self.assertTrue((self.dst/"frp.new").is_file())
-
-    def test_missing_true_native_function_pointer_denied(self):
-        path=self.src/"command1.c"
-        path.write_text(path.read_text().replace(
-            "return((*cmdlist[cmdno].cmdfn)(Ply[fd].ply, cmnd));",
-            "return wrong_callback();"))
-        with self.assertRaisesRegex(ValueError,"native callback"):
-            rest.stage(self.src,self.dst)
-        self.assertFalse(self.dst.exists())
-
-    def test_ambiguous_free_crt_implementations_denied(self):
-        (self.src/"other.c").write_text(LIFECYCLE)
-        with self.assertRaisesRegex(ValueError,
-                                    r"free_crt\(\) lifecycle definition count 2"):
-            rest.stage(self.src,self.dst)
-        self.assertFalse(self.dst.exists())
-
-    def test_no_native_die_implementation_denied(self):
-        (self.src/"creature.c").write_text("void missing() { }\n")
-        with self.assertRaisesRegex(ValueError,
-                                    r"die\(\) lifecycle definition count 0"):
-            rest.stage(self.src,self.dst)
-        self.assertFalse(self.dst.exists())
-
-    def test_existing_destination_denied(self):
-        self.dst.mkdir()
-        with self.assertRaisesRegex(ValueError,"Destination"):
-            rest.stage(self.src,self.dst)
-
-    def test_symlinked_native_source_denied(self):
-        (self.src/"symlink.c").symlink_to(self.src/"command1.c")
-        with self.assertRaisesRegex(ValueError,"Symlinks"):
-            rest.stage(self.src,self.dst)
-
-    def test_production_path_denied(self):
-        with self.assertRaisesRegex(ValueError,"Only disposable"):
-            rest.stage(Path("/srv/hollowdeep/world/src_3.00"),self.dst)
-
-    def test_elf64_denied(self):
-        (self.src/"frp.new").write_bytes(b"\x7fELF\x02wrong")
-        with self.assertRaisesRegex(ValueError,"ELF32"):
-            rest.stage(self.src,self.dst)
-
-if __name__=="__main__":
-    unittest.main(verbosity=2)
-)
-        self.assertEqual(pattern.match("void free_crt(crt_ptr)").group(1),
+            r'^[ \t]*(?:void[ \t]+|int[ \t]+)?'
+            r'(?P<name>free_crt|die)[ \t]*'
+            r'\([ \t]*([A-Za-z_]\w*)[ \t]*'
+            r'(?:,[ \t]*[A-Za-z_]\w*[ \t]*)*\)[ \t]*$')
+        self.assertEqual(pattern.match("void free_crt(crt_ptr)").group(2),
                          "crt_ptr")
+        self.assertIsNotNone(pattern.match("void die(crt_ptr, att_ptr)"))
 
     def test_exact_native_rest_hooks_staged_and_source_unchanged(self):
         before={p.name:hashlib.sha256(p.read_bytes()).hexdigest()
