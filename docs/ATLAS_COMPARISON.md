@@ -34,3 +34,25 @@ For each future release, update this comparison with **implemented**, **deployed
 ## Detailed research update — November 6, 2026
 
 The [class, skill, spell and quest investigation](ATLAS_RESEARCH_AND_QUEST_DESIGN.md) examines Atlas's public embedded help library and separates its documented rules from original HollowDeep proposals. The [level study](LEVELS_AND_EXPERIENCE.md) analyzes HollowDeep's actual engine, with three proposed XP curves. See [future releases](FUTURE_RELEASES.md) for implementation dependencies.
+
+
+## New AtlasMUD in-game flag screenshots — November 21, 2026
+
+Six user-provided GMud screenshots show AtlasMUD **player,
+monster, and item** flag menus, including the monster MOUNT,
+HIREABLE, TRAINER and VENDOR labels; item WEIGHTLESS,
+REMORT, GIFT, PERSONAL and class-restriction labels; and
+player remorting/quest indicators. These are visual flag
+names, **not verified source implementations or compatible
+numeric IDs**. Some raw P-flag numbers disagree with the
+human-readable screenshot list, indicating version/context
+ambiguity. The complete screenshot-derived inventory, caveats,
+and original HollowDeep feature priorities are recorded in
+[AtlasMUD flag screenshot notes](ATLAS_FLAG_SCREENSHOT_NOTES.md).
+
+The findings help prioritize existing HollowDeep projects:
+the *separate* epoch-bound mount roster/Endurance and stables,
+rebirth-bound weightless bags and legacy gifts, builder-safe
+trainer/vendor/quest NPCs, and later herbal crafting. Do not
+copy any Atlas source, world content, UI assets or flag offsets.
+None of these gameplay features is enabled by the research note.
