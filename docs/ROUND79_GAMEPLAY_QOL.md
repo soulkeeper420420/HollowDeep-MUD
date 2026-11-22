@@ -859,3 +859,37 @@ preserves all fail-closed private-source guards. This is an
 **unverified compile fix** until Linode runs the updated native tests.
 
 No live world, production service, player save or binary was changed.
+
+
+### Round 79K native ELF32 successful build; socket path repair
+
+A subsequent private Linode execution confirmed:
+- 11/11 source-staging/security tests passed.
+- Private native Breath hooks staged successfully.
+- **ELF32 pre-transfer receipt fixture compiled and passed**:
+  initial saved Breath 100, atomic movement room+Breath checkpoint,
+  refusal on injected pre-rename failure, post-rename uncertainty
+  reconciliation, non-spammable +5 timed recovery, exhausted
+  wilderness denial and free indoor retreat.
+- **Full ELF32 MUD executable compiled with actual move()/go() hooks**.
+- The real socket replay did NOT start: its Python harness resolved the
+  Necromancer helper files relative to the repository root rather than
+  the correct tools/necromancer directory.
+- No live deployment or restart was performed; successful socket gameplay
+  is still pending.
+
+The fix sets the socket harness helper root to
+tools/necromancer, verifies existence of the two committed Python
+fixtures and native help directory, and adds a regression test.
+A dedicated private_breath_socket_only.sh reuses the already compiled
+and fixture-verified Round79K ELF32 candidate (under the restricted
+/tmp/hd-army-game-round79travel-* path) to run ONLY the isolated
+network-namespace/chroot gameplay socket test. It rechecks production
+binary/service PID and the private executable fingerprint. This
+avoids repeating the previously successful full ELF32 compile.
+
+**This is a harness path fix, not proof that socket gameplay works.**
+Do not claim live Breath playable until directional and named movement,
+HUD, save and reconnect pass within an isolated real MUD socket.
+Migrations, timed recovery and all mounts remain private/unpublished
+to the production server.
