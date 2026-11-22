@@ -711,3 +711,101 @@ room state, and choose an actual native timed-recovery hook.
 The Breath gameplay HUD currently shows "--" rather than a numeric
 resource; mounts, endurance and stables are not playable yet. Do not
 confuse the passing durable test fixture with a native movement feature.
+
+
+## Round 79K — Native wilderness Breath travel and saved HUD private candidate
+
+**Status: staged on the GitHub playtest branch; not yet compiled or
+socket-tested on Linode. Production remains unchanged.**
+
+The Round 79J native co-checkpoint fixture passed. A fresh private
+source report then provided the actual legacy K&R implementations:
+- command2.c move(), lines 203–487: resolves directional exits,
+  checks class/lock/flight/time/guards/authorization/inventory/fall,
+  loads the destination room, checks level and occupancy, THEN
+  broadcasts departures, moves room occupants/followers and handles
+  traps. The last eligibility point precedes the class-specific
+  departure broadcast around line 417.
+- command6.c go(), lines 85–329: handles named exits, validates
+  exit locks, class/flight, time, guards, identity/sex, equipment,
+  climb/fall, room loading, level and capacity before departure
+  broadcast around line 267, entity transfers and traps.
+- Existing wilderness.c wrappers run *after* these native handlers,
+  so a simple post-hoc Breath debit would risk a free step or a
+  position/save mismatch on failure.
+
+Private feature-gated implementation, currently UNTESTED:
+- stage_breath_travel.py copies ONLY an already verified private
+  Round 79J candidate and inserts a checked hd79_breath_precommit
+  call in the two real native move/go handlers **after all native
+  eligibility tests but before any room transfer/announcement**.
+  This preserves the existing exit rules and avoids charging for
+  locked/blocked destinations.
+- hd79_breath_travel_runtime.c/.h validates a real destination tile
+  through hd79_wilderness_tile (wilderness.map HDW1 parser, not
+  simply a high room number), reads or initializes a character's
+  saved Breath once, checks exhaustion, and builds a temporary
+  proposed player snapshot at the destination.
+- The previously verified hd_breath_store_checkpoint_move atomically
+  saves BOTH resulting room and Breath before the native in-memory
+  transfer occurs. Failed writes deny movement; uncertain writes
+  re-read both persistent room and expected Breath before acknowledging
+  the original command.
+- Ordinary interior transfers also checkpoint the new room for
+  consistency but charge 0 Breath. Retreat to an interior remains
+  possible at 0 Breath. The player receives an error on unavailable
+  wilderness map or unverifiable save.
+- The Round79E ANSI/plain status formatter now obtains the actual
+  persisted Breath reading, including lazily initializing an absent
+  legacy/new-character record after a valid character save exists.
+  It never overwrites an exhausted existing record.
+- The native update_ply() callback includes a bounded +5 recovery
+  attempt after at least 45 elapsed seconds since the last saved
+  Breath recovery timestamp. This is not triggered directly by a
+  command and cannot be spammed faster than the durable interval.
+  Resting +15 remains pending exact native rest-state verification;
+  it is NOT secretly treated as normal recovery.
+- Feature gate: BREATH_TRAVEL_PLAYTEST=1, requiring prior
+  BREATH_STORE_PLAYTEST=1 and BREATH_MOVE_CHECKPOINT_TEST=1.
+  The native creature/player binary structure is unchanged.
+
+Added test coverage:
+- test_stage_breath_travel.py: private path protection, no original
+  mutation, exact ordering of permission/capacity checks and atomic
+  pre-transfer save, tile reader, HUD and pulse hook staging.
+- test_native_breath_travel.c: synthetic ELF32 native player file,
+  one-time save migration and initial HUD, normal move, failed rename,
+  uncertain rename recovery, timed +5 pulse, depletion, exhaustion
+  and free indoor retreat.
+- check_breath_travel_socket.py: real native ELF32 game running as an
+  unprivileged process in a separate network namespace and disposable
+  chroot. The test builds synthetic native binary rooms, a proper
+  HDW1 wilderness map with two tiles, directional/named exits,
+  checks Breath 100 -> 98 -> 96 -> 94, zero cost on indoor return
+  and refused exit, and save/logout/reconnect persistence.
+- private_breath_travel.sh: consolidated stage, tests, ELF32 compile,
+  socket replay and PID/hash no-production-change checks.
+
+Remaining safety risks to validate before promotion:
+- Any teleport, GM relocation or alternate room-change entrypoint
+  not using native move/go must synchronize its persistent room
+  separately. The current patch may reject a subsequent normal step
+  rather than silently bypass a stale room, which is fail-closed.
+- Crashes after the atomic room+Breath precommit but before a
+  follower/trap side effect can leave the character durably at the
+  destination without that side effect. User-facing travel must
+  not be declared fully playable without validating this behavior.
+- Immediate durability costs an atomic save per actual player step,
+  including ordinary interior travel. Benchmark throughput and
+  ensure no regressions with larger inventories and pets.
+- A status lookup may initialize missing Breath on first
+  authenticated prompt and performs a durable read per prompt;
+  validate cost under normal player load.
+- Resting +15, mounted travel, mount Endurance/ownership, stables,
+  dragon flight and route permissions are future milestones.
+- Production deployment requires explicit user approval and a
+  separate verified rollout.
+
+This private milestone does NOT deploy to the live service,
+edit the live world, restart hollowdeep.service, or expose
+private logs/fixtures/credentials in GitHub.
