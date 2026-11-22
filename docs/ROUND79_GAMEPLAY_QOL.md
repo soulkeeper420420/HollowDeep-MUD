@@ -1305,3 +1305,31 @@ ran in this attempt.** The previously accepted Round79K native ELF32
 game was not modified and no production deployment occurred.
 The reported Python apport/excepthook error during exception display
 is ancillary to the underlying test syntax error, not a MUD failure.
+
+
+### Round79P third private attempt — native process_cmd whitespace
+
+Third private Linode Round79P run:
+- Five Python source syntax/definition preflight checks PASS.
+- 22 fail-closed staging, action and dispatch regressions PASS.
+- Native ELF32 staging REFUSED before source copy/build:
+  \`Exact native source anchor drift: process_cmd before special dispatch\`.
+- Previous stager required exactly eight spaces preceding
+  \`if(cmdlist[cmdno].cmdno < 0)\`; the Round79O verified native
+  \`command1.c\` uses its own legacy whitespace/indentation.
+- No Round79P ELF32 binary was compiled and no rest gameplay/socket
+  test ran. Production deployment NONE.
+
+The corrected stager scopes insertion to the **single verified
+K&R process_cmd(fd, cmnd) body**, matches the exact
+\`cmdlist[cmdno].cmdno < 0\` condition with variable tab/space
+indentation, requires exactly one actual command callback,
+and checks moderation precedes the hook and dispatch follows it.
+It refuses missing, duplicate or misordered native dispatch
+conditions. Four new staging regressions exercise tabbed legacy
+source, duplicate dispatch conditions, reversed moderation ordering,
+and unrelated functions with a superficially matching condition.
+
+The updated Round79P candidate still requires private ELF32
+atomic fixture, full native build and real isolated socket PASS
+before any real gameplay claims can be made.
