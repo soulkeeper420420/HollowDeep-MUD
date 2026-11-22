@@ -540,3 +540,53 @@ actual move/go destination selection and room transitions, and identify a
 crash-consistent update strategy for *both* new room and Breath. A free
 non-wilderness retreat must remain possible when exhausted. Source reports,
 private fixture paths, logs, credentials and real player data remain off GitHub.
+
+
+## Round 79I — Crash-consistent wilderness movement integration audit
+
+The Round 79H native atomic Breath storage test has **PASSED on Linode**
+for the private ELF32 synthetic native player-save fixtures:
+- Seven secure staging/parser tests; successful private store patch + full
+  ELF32 game build.
+- Reserved Breath receipt initialized exactly once; 50 committed Breath
+  travel debits to zero; exhaustion denied; timed recovery.
+- Ordinary native saves preserved depleted Breath.
+- Exact expected-state/revision CAS denies stale updates.
+- before_rename failed writes denied, after_rename uncertain writes can be
+  reconciled by re-reading the record without duplicate charges.
+- Existing Necromancer pet save retained; name reuse gets a distinct epoch.
+- Production PID and production executable unchanged; deployment NONE.
+
+**Still not integrated:** native movement debit, the real timed regen
+callback, the numeric Breath HUD or mount ownership. A native Breath
+storage PASS is not a playable Breath PASS.
+
+### Next safety gate — room and Breath must agree across crashes
+
+The existing wilderness wrappers call move()/go() and compare the
+previous and current room. That is good for detecting successful moves
+but is NOT, by itself, enough for atomic Breath spending: a crash
+between position persistence and receipt persistence could leave the
+character in a different room with incorrect remaining Breath.
+
+Round 79I source-only tooling:
+- native_movement_atomicity_audit.py locates native definitions of
+  move(), go(), wilderness map post-move handling, player update
+  heartbeat, player save serialization and native exit structures
+  from the verified private Breath-enabled ELF32 source.
+- test_native_movement_atomicity_audit.py denies production locations,
+  symlinks, wrong binary architectures and unrelated temp builds.
+- private_movement_atomicity_audit.sh uses that tested private build
+  only and checks production binary/service PID are unchanged.
+
+The next implementation must arrange a single durable save transaction
+for the player's resulting room and Breath charge, or a verified
+equivalent recovery journal that preserves the same invariant under
+fail injection. Pre-move gating must account for the resolved
+destination, including locked/secret exits and safe retreat into
+non-wilderness rooms; the post-move path must not charge aborted moves.
+The native timer must not award repeatable recovery on command spam.
+
+Mount travel will then choose between two saved resources: foot player
+Breath and the currently ridden mount's Endurance. Mount stabling,
+ownership and riding commands remain future integrations.
