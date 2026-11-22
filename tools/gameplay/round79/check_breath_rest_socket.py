@@ -256,5 +256,8 @@ finally:
             process.wait()
 
 print("ROUND 79P: PRIVATE SOCKET REST COMMAND + TRAVEL + HUD PASS",flush=True)
-print("REST +15: NATIVE ATOMIC FIXTURE TESTED, SOCKET TIMER PENDING",flush=True)
+if os.environ.get("HD79Q_TIMED_REST")=="1":
+    print("REST +15: REAL CONNECTED 45-SECOND SOCKET TIMER VERIFIED",flush=True)
+else:
+    print("REST +15: NATIVE ATOMIC FIXTURE TESTED, SOCKET TIMER PENDING",flush=True)
 print("PRODUCTION DEPLOYMENT: NONE",flush=True)
