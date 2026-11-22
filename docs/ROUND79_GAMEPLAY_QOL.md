@@ -835,3 +835,27 @@ The revised patch has NOT YET BEEN RUN on Linode. Do not label native
 Breath movement or recovery PASS until the private ELF32 build
 and actual socket travel tests succeed. The live world and MUD
 service remain unchanged.
+
+
+### Round 79K second Linode run — native runtime include order repair
+
+Second isolated Round79K attempt results:
+- **10/10** Python staging/path/K&R source regressions PASS.
+- Private source staged correctly under a new disposable Round79K tree.
+- ELF32 compile of the native Breath pre-transfer fixture FAIL due to
+  native type declarations missing before mextern.h in
+  hd79_breath_travel_runtime.c: iobuf, extra, creature, room, exit_
+  and HD_STORE_OK were unavailable at that point. These are compile
+  errors, not live game errors. Unrelated files3.c fgets warnings
+  were also printed but are not the cause of this failure.
+- Native game build, isolated real socket gameplay and persistence
+  regressions did not run. No deployment occurred.
+
+The follow-up native source patch now includes hd_player_store.h
+before mextern.h in the standalone Breath travel runtime translation
+unit, matching the ordering used by the already passing native
+player-store fixture. The staging regression asserts this order and
+preserves all fail-closed private-source guards. This is an
+**unverified compile fix** until Linode runs the updated native tests.
+
+No live world, production service, player save or binary was changed.
