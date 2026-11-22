@@ -519,3 +519,24 @@ write failures.
 The six proposed mounts remain a separate milestone after the player
 Breath store and native movement are validated. No deployment or
 production restart has been authorized.
+
+
+### Round 79H private native persistence acceptance — verified
+
+The private Round79H Linode run reported:
+- Seven private staging/security unit tests passed.
+- Breath receipt successfully staged in a separate ELF32 source tree.
+- Native atomic storage fixture passed one-time initialization, reservation,
+  fifty movement debits, exhaustion, timed recovery, ordinary player-save
+  preservation, stale revision rejection, pre/post-rename fault replay,
+  Necromancer pet record preservation, and recreation epoch isolation.
+- Private full ELF32 game compiled with Breath store enabled but gameplay
+  movement and recovery hooks **disabled**.
+- The live service PID and binary were unchanged; deployment: NONE.
+
+The persistence functions have been verified with synthetic private players,
+NOT through native player wilderness movement. The next milestone must audit
+actual move/go destination selection and room transitions, and identify a
+crash-consistent update strategy for *both* new room and Breath. A free
+non-wilderness retreat must remain possible when exhausted. Source reports,
+private fixture paths, logs, credentials and real player data remain off GitHub.
