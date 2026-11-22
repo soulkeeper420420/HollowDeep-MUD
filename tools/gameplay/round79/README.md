@@ -81,3 +81,24 @@ The status renderer is **not yet connected** to player.c's native prompt:
 run native_status_ansi_probe.py on the private source and inspect its
 prompt buffer and breath implementation before patching. Never overwrite
 production binaries, world files or character saves.
+
+
+### Consolidated private Linode run
+
+After a fresh clone pinned to the Round 79B commit, run the single
+private_status_ansi.sh script with the absolute fresh checkout directory.
+It performs stand-alone C unit tests, fail-closed Python staging tests,
+read-only native source discovery, private ELF32 recompilation with
+STATUS_ANSI_PLAYTEST=1, new-character ANSI YES/NO persistence through
+save/reconnect, Warlock creation, and Necromancer help regressions.
+
+The script captures private logs and a source-only report at:
+
+    /root/hollowdeep-dev/round79b-*/native-status-report.txt
+
+The report contains the native prompt buffer, code references to any
+breathing mechanism, and ANSI flag handling. This evidence is required to
+wire the display into player.c without breaking existing prompt behavior
+or inventing a Breath meter.
+
+No production restart or deployment is performed by this script.
