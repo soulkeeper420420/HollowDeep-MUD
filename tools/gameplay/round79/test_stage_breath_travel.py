@@ -149,6 +149,21 @@ class TravelStageTests(unittest.TestCase):
             mod.stage(self.src,self.dst)
         self.assertFalse(self.dst.exists())
 
+    def test_native_runtime_types_loaded_before_legacy_externs(self):
+        # The native mextern.h is NOT self-contained. Its iobuf, extra,
+        # creature, room and exit_ types are supplied by player-store
+        # headers first. This is essential when compiling the runtime as
+        # its own ELF32 translation unit, unlike the original source files.
+        runtime=(mod.HERE/"hd79_breath_travel_runtime.c").read_text()
+        store=runtime.find('#include "hd_player_store.h"')
+        externs=runtime.find('#include "mextern.h"')
+        receipt=runtime.find('#include "hd_breath_move_checkpoint.h"')
+        self.assertGreaterEqual(store,0)
+        self.assertGreater(externs,store)
+        self.assertGreater(receipt,externs)
+        self.assertEqual(runtime.count('#include "hd_player_store.h"'),1)
+        self.assertEqual(runtime.count('#include "mextern.h"'),1)
+
     def test_production_source_denied(self):
         with self.assertRaisesRegex(ValueError,"Only disposable"):
             mod.stage(Path("/srv/hollowdeep/world/src_3.00"),self.dst)
