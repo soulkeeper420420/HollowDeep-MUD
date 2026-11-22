@@ -893,3 +893,41 @@ Do not claim live Breath playable until directional and named movement,
 HUD, save and reconnect pass within an isolated real MUD socket.
 Migrations, timed recovery and all mounts remain private/unpublished
 to the production server.
+
+
+### Round 79K socket replay — successful gameplay, stale login-room harness
+
+The private socket-only replay progressed through the real ELF32 MUD,
+with native ANSI prompt and actual player moves:
+- Wilderness entry and subsequent movement displayed saved Breath
+  **100 -> 98 -> 96 -> 94**.
+- A named `go west` exit returned to the synthetic
+  **Necromancer Trial Annex** without a Breath debit.
+- `go north` against a missing exit was refused and did not change
+  Breath 94/100.
+- Native `save` responded `Player saved.`; `quit` closed the
+  original socket after its normal cooldown.
+- On reconnect the game displayed the saved **Necromancer Trial
+  Annex** and **Breath 94/100**, demonstrating both values persisted.
+- The replay's generic Necromancer fixture login helper erroneously
+  required the original seed-room text **Necromancer Grave Trial**
+  and therefore raised an exception before its final PASS marker.
+  This is a test expectation mismatch, not a native Breath regression.
+- The socket-only runner verified the production PID, binary and
+  private ELF32 executable were unchanged. Deployment: NONE.
+
+A new small helper `breath_socket_reconnect.py` verifies *both* saved
+room and Breath directly in the actual native login banner, with ANSI
+and telnet bytes tolerated. The socket test now performs its standard
+login prompts, then requires the correct **Annex** and Breath **94/100**;
+it no longer calls the prior helper with the original-room assumption.
+New unit tests reject wrong room, wrong stamina, missing text,
+invalid expected values and non-socket input. The existing socket-only
+runner now executes these tests before replay, reusing the tested
+private ELF32 executable and never touching production.
+
+**The updated full socket replay has not been rerun yet.** Do not label
+Round79K finished until the final
+`ROUND 79K: SOCKET BREATH TRAVEL AND HUD PASS` line appears.
+Resting +15, mount Endurance, ownership/stables and dragon flight
+remain unimplemented, as does any production deployment.
