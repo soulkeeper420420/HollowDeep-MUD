@@ -89,6 +89,26 @@ PY
 (cd "$HERE" && python3 -W error::ResourceWarning -m unittest -q \
   test_round79q_real_rest_tick test_breath_socket_reconnect)
 
+echo "=== 1B. READ-ONLY NATIVE UPDATE_PLY CALLSITE TRACE ==="
+python3 - "$SOURCE" <<'PY'
+from pathlib import Path
+import re,sys
+root=Path(sys.argv[1])
+pattern=re.compile(r"\bupdate_ply[ \t]*\(")
+matches=[]
+for file in sorted(root.glob("*.c")):
+    if file.is_symlink():
+        raise RuntimeError("Native source symlink refused: "+file.name)
+    for number,line in enumerate(file.read_text(encoding="latin-1").splitlines(),1):
+        if pattern.search(line):
+            matches.append((file.name,number,line.strip()[:125]))
+if not matches:
+    raise RuntimeError("No real native update_ply references discovered")
+for name,number,line in matches:
+    print("PRIVATE NATIVE CALLSITE %s:%d %s"%(name,number,line))
+print("Native update_ply callsite count:",len(matches))
+PY
+
 echo "=== 2. REUSE VERIFIED PRIVATE ELF32 GAME IN ISOLATED NETWORK/CHROOT ==="
 unshare --net --mount --fork bash -c '
 set -Eeuo pipefail
