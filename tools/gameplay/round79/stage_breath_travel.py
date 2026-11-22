@@ -187,23 +187,23 @@ def patch(source):
     update_start=player.index(update_mark)
     head=player[update_start:update_start+1100]
     clock_pattern=re.compile(
-        r'(?m)^[ \\t]*t[ \\t]*=[ \\t]*time[ \\t]*\\([ \\t]*0[ \\t]*\\)[ \\t]*;[ \\t]*(?:\\r?\\n)')
+        r'(?m)^[ \t]*t[ \t]*=[ \t]*time[ \t]*\([ \t]*0[ \t]*\)[ \t]*;[ \t]*(?:\r?\n)')
     clocks=list(clock_pattern.finditer(head))
     if len(clocks)!=1:
         raise ValueError("Exact native source anchor drift: verified update_ply native tick")
     clock=clocks[0]
     tail=head[clock.end():clock.end()+240]
     next_write=re.match(
-        r'[ \\t]*ply_ptr->lasttime\\[LT_HOURS\\]\\.interval[ \\t]*\\+=',
+        r'[ \t]*ply_ptr->lasttime\[LT_HOURS\]\.interval[ \t]*\+=',
         tail)
     if not next_write:
         raise ValueError("Exact native source anchor drift: verified LT_HOURS recovery adjacency")
     where=update_start+clock.end()
     player=(player[:where]+
-        '#ifdef HD79_BREATH_TRAVEL_PLAYTEST\\n'
-        '  /* Single native player-update callback; durable 45-second gate. */\\n'
-        '  hd79_breath_pulse(ply_ptr,t);\\n'
-        '#endif\\n'+
+        '#ifdef HD79_BREATH_TRAVEL_PLAYTEST\n'
+        '  /* Single native player-update callback; durable 45-second gate. */\n'
+        '  hd79_breath_pulse(ply_ptr,t);\n'
+        '#endif\n'+
         player[where:])
     files["player.c"]=player
 
