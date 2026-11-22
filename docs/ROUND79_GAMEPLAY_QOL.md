@@ -809,3 +809,29 @@ Remaining safety risks to validate before promotion:
 This private milestone does NOT deploy to the live service,
 edit the live world, restart hollowdeep.service, or expose
 private logs/fixtures/credentials in GitHub.
+
+
+### Round 79K first Linode stage failure — K&R update_ply formatting
+
+The first private Round79K attempt ran 7/7 staging and live-path
+regression tests successfully, but stopped before modifying the
+disposable candidate because stage_breath_travel.py required an exact
+whitespace match for the native player.c update_ply() clock and
+LT_HOURS interval statement. The actual Mordor source uses different
+tab/space formatting. There was no compile, socket run, gameplay
+test, production deployment or service restart in that attempt.
+
+The staging patch now finds the single actual update_ply() entry
+and its opening time(0) assignment with whitespace-tolerant matching.
+It still requires the *immediately following native statement* to
+be the LT_HOURS interval update, and rejects ambiguous clock
+assignments, nonadjacent statements, altered native entry points,
+symlinks and production paths. It inserts only the feature-gated
+Breath pulse and does not edit the original native statements.
+Additional tests cover K&R tab indentation, multiple clock
+assignments and reordered LT_HOURS updates.
+
+The revised patch has NOT YET BEEN RUN on Linode. Do not label native
+Breath movement or recovery PASS until the private ELF32 build
+and actual socket travel tests succeed. The live world and MUD
+service remain unchanged.
