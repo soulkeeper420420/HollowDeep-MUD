@@ -6,31 +6,31 @@
 #include <stdio.h>
 #include <string.h>
 
-static int nibble(char ch)
+static int hd_breath_nibble(char ch)
 {
     if (ch>='0' && ch<='9') return ch-'0';
     if (ch>='a' && ch<='f') return ch-'a'+10;
     return -1;
 }
-static int epoch_ok(const char *p)
+static int hd_breath_epoch_ok(const char *p)
 {
     unsigned i,nonzero=0;
     if (!p) return 0;
     for(i=0;i<24;i++) {
         int v;
         if (!p[i]) return 0;
-        v=nibble(p[i]);
+        v=hd_breath_nibble(p[i]);
         if(v<0) return 0;
         nonzero|=(unsigned)v;
     }
     return p[24]==0 && nonzero!=0;
 }
-static int read_hex(const char *in, unsigned n, uint32_t *out)
+static int hd_breath_read_hex(const char *in, unsigned n, uint32_t *out)
 {
     unsigned i;
     uint32_t value=0;
     for(i=0;i<n;i++) {
-        int d=nibble(in[i]);
+        int d=hd_breath_nibble(in[i]);
         if(d<0) return -1;
         value=(value<<4)|(uint32_t)d;
     }
@@ -39,14 +39,14 @@ static int read_hex(const char *in, unsigned n, uint32_t *out)
 }
 int hd_breath_record_valid(const hd_breath_record *s)
 {
-    return s && epoch_ok(s->epoch) && s->revision &&
+    return s && hd_breath_epoch_ok(s->epoch) && s->revision &&
            s->last_recover && s->current<=HD_BREATH_MAX;
 }
 int hd_breath_record_new(hd_breath_record *out,const char *epoch,
                          uint32_t now)
 {
     hd_breath_record s;
-    if (!out || !epoch_ok(epoch) || !now) return -1;
+    if (!out || !hd_breath_epoch_ok(epoch) || !now) return -1;
     memset(&s,0,sizeof s);
     memcpy(s.epoch,epoch,25);
     s.revision=1;
@@ -81,11 +81,11 @@ int hd_breath_record_decode(const char *wire,hd_breath_record *out)
     memset(&s,0,sizeof s);
     memcpy(s.epoch,wire+2,24);
     s.epoch[24]=0;
-    if (!epoch_ok(s.epoch) ||
-        read_hex(wire+26,8,&rev) ||
-        read_hex(wire+34,8,&tick) ||
-        read_hex(wire+42,2,&cur) ||
-        read_hex(wire+44,2,&max) ||
+    if (!hd_breath_epoch_ok(s.epoch) ||
+        hd_breath_read_hex(wire+26,8,&rev) ||
+        hd_breath_read_hex(wire+34,8,&tick) ||
+        hd_breath_read_hex(wire+42,2,&cur) ||
+        hd_breath_read_hex(wire+44,2,&max) ||
         max!=HD_BREATH_MAX)
         return -1;
     s.revision=rev;
