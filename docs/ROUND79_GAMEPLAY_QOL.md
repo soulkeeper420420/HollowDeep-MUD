@@ -1258,3 +1258,26 @@ None of the new Round79P code has yet been run on Linode.
 Do not deploy, copy game binaries to production, touch live saves
 or restart hollowdeep.service. Keep the private logs and fixtures
 outside GitHub.
+
+
+### Round79P first Linode run — staging Python syntax repair
+
+The first pinned Round79P private attempt stopped before source staging
+because stage_rest_breath.py raised:
+\`SyntaxError: unterminated string literal (line 66)\`.
+This came from a malformed regular-expression string while updating
+the exact native K&R lifecycle signature detection for die() and
+free_crt(). A later review also identified accidental duplicate
+script text appended after the normal Python main entry point.
+The canonical source was restored to one complete 247-line script
+with the correct anchored C function-signature regex. No native
+source was staged, no ELF32 compilation or socket test occurred,
+and no +15 gameplay outcome can be claimed.
+
+The new staging regression parses the entire script as an AST,
+requires exactly one instance of each key function and one main
+entrypoint, and denies appended duplicate code. The runner now
+performs an AST syntax preflight over the staging, test and socket
+scripts before the unit tests and private gameplay build.
+The previous private accepted Round79K ELF32 source is reused
+unchanged for the next full test. Production deployment: NONE.
