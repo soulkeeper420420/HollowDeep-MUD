@@ -1042,3 +1042,31 @@ mounts and mounts' separate Endurance are not installed. Review
 the private action report before modifying gameplay command routing,
 player session state, or the next native timer hook. No production
 deployment is authorized.
+
+
+### Round79M FINAL PRIVATE ACTION AUDIT — PASS
+
+The user's private Linode report \`round79m-dAs0cj3Q\` confirms:
+- Seven read-only command-scanner/security regressions PASS.
+- \`ROUND 79M: PRIVATE ACTION COMMAND AUDIT PASS\`.
+- Exactly one native \`action()\` definition was verified in
+  \`action.c:40-661\`.
+- \`global.c\` dispatches \`sleep\`, \`sit\`, and \`stand\` through
+  the generic social \`action\` command (ID 100); **no** \`rest\` or
+  \`wake\` entry was found.
+- The \`sleep\` branch emits a nap message, while \`relax\` emits
+  a deep-breath social message; neither visible body establishes a
+  persistent rest state. No dedicated REST/SLEEP/SIT/STAND/WAKE
+  P-flag definition was found.
+- The MUD's normal \`meditate\` is a Monk-specific ability and must
+  not be conflated with generic resting.
+- Production PID, binary and accepted Round79K private ELF32
+  baseline verified unchanged; production deployment NONE.
+
+**Conclusion:** There is no verified authoritative resting state for
+native +15 Breath recovery. A new explicit \`rest\` state is needed,
+with a timer-based minimum uninterrupted duration, interruption on
+real player actions/combat/movement, logout/disconnect/death cleanup,
+and no binary creature-struct ABI change. Inspect the real command
+dispatcher and lifecycle before wiring hooks. The already tested
+default +5 remains the only native recovery rate.
