@@ -112,7 +112,7 @@ def staged_creation(source,target):
         +ret+'    RETURN(fd, create_ply, 8);\n'
         +cas+'}\n'
         '#else\n'
-        +match.group(0).rstrip('\n')+'\n'
+        +match.group(0).rsplit('case 8:',1)[0].rstrip('\n')+'\n'
         '#endif\n'
         +cas+'case 8:'
     )
