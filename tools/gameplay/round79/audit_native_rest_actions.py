@@ -37,8 +37,12 @@ def validate(raw):
         path=src/name
         if path.is_symlink() or not path.is_file():
             raise ValueError("Private native source missing "+name)
-    sources=list(sorted(src.glob("command*.c")))
-    sources+=[src/"misc.c",src/"main.c",src/"io.c",src/"player.c"]
+    # Social action() may be declared in any native translation unit,
+    # not just commandN.c. Inspect all private C files to avoid a
+    # false-negative audit on an alternate Mordor source layout.
+    sources=sorted(src.glob("*.c"))
+    if sum(p.name.startswith("command") for p in sources)<2:
+        raise ValueError("Private native command modules missing")
     for path in sources:
         if path.is_symlink() or not path.is_file():
             raise ValueError("Unsafe private command source "+path.name)
