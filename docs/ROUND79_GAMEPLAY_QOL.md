@@ -197,3 +197,23 @@ logout/reconnect; ANSI YES/NO display; existing class/conjure/corpse
 regressions; production PID and binary unchanged.
 
 No production deployment or service restart has been authorized.
+
+
+### Round 79C private rules verification (2026-11-21)
+
+Isolated Linode results reported:
+- Wilderness Breath movement and regeneration rules: PASS
+- Read-only native movement audit: PASS (262 extracted source lines)
+- Native wilderness movement integration: PENDING
+- Production deployment: NONE
+
+The source audit contents remain private and must be examined before
+choosing native movement hooks, regen cadence or durable character storage.
+A passing standalone rules test is not a completed native gameplay test.
+The Linux shell reported that `breath` is not a shell command, which
+is unrelated to the in-game Breath status display.
+
+Next acceptance gate: inspect the native movement report in a private
+workspace; then stage actual movement/recovery hooks only after examining
+the native source, compile ELF32 and run successful/blocked movement,
+safe-retreat, regeneration, logout/reconnect and class regressions.
