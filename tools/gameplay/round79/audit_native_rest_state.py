@@ -71,10 +71,12 @@ def format_excerpt(filename,lines,indices,used):
 
 
 def focus(source,cfiles):
-    files=[source/x for x in ("player.c","update.c","global.c",
-                             "mstruct.h","mtype.h")]
-    files+=sorted(cfiles)
-    files.append(source/"hd79_breath_travel_runtime.c")
+    # Start with real rest/sleep/wake command implementations so the
+    # bounded report cannot be consumed by generic status references.
+    files=sorted(cfiles)
+    files += [source/x for x in ("player.c","update.c","mtype.h",
+                               "mstruct.h","global.c",
+                               "hd79_breath_travel_runtime.c")]
     used=[0]
     total=0
     print("=== ROUND79L PRIVATE NATIVE REST/POSE/TIMER SOURCE AUDIT ===")
@@ -116,8 +118,8 @@ def focus(source,cfiles):
                 chosen.update(range(max(0,i-2),min(len(lines),i+65)))
         if file.name in ("mtype.h","mstruct.h"):
             for i,line in enumerate(lines):
-                if "lasttime" in line or "status" in line.lower() or
-                    "position" in line.lower():
+                if ("lasttime" in line or "status" in line.lower() or
+                    "position" in line.lower()):
                     chosen.update(range(max(0,i-2),min(len(lines),i+3)))
         format_excerpt(file.name,lines,chosen,used)
         if used[0]>=MAX_LINES:
