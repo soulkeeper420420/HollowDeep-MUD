@@ -12,7 +12,7 @@ import sys
 
 CMD=re.compile(r'\{\s*"(mount|dismount|stable|unstable|ride|riding|'
                r'horse|dragon|griffin|call|retrieve)"\s*,',re.I)
-SYMBOL=re.compile(r'\b(?:mount|dismount|stable|ride|riding|horse|'
+SYMBOL=re.compile(r'\b(?:[PCOM]MOUNT|mount|dismount|stable|ride|riding|horse|'
                   r'griffin|dragon|endurance)\b',re.I)
 ROOM=re.compile(r'\b(?:hd_wilderness_move|hd_wilderness_go|read_tile|'
                 r'after_move|showmap|mapradius)\b',re.I)
