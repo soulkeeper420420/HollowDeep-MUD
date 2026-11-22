@@ -678,3 +678,36 @@ occur on a failed update.
 
 Mount Endurance and ownership will use the same verified durability
 principle. No live-world changes or service restart are authorized.
+
+
+### Round 79J private atomic room+Breath acceptance — verified
+
+Private Linode results (reported after running the pinned Round 79J
+checkpoint runner):
+- 13/13 Python staging/security/K&R parser tests passed.
+- Native ELF32 atomic co-checkpoint fixture passed, and the native
+  game rebuilt privately with movement hookup still disabled.
+- One atomic snapshot preserved the new room 10001 and Breath 98.
+- Stale old-room and expected-Breath-revision conflicts were denied.
+- before_rename failure saved neither moved room nor spent Breath.
+- after_rename uncertainty persisted both room and charge exactly once,
+  and stale replay was denied.
+- Exhausted wilderness travel failed; returning to an ordinary room
+  persisted at zero Breath cost.
+- Exact native move()/go() source extraction succeeded in the private
+  candidate. The stdout line showing a zero count for go() belongs to a
+  *negative parser unit test*; it is not a native gameplay failure.
+- Production PID/binary and the Round 79H baseline remained unchanged.
+  No production deployment was performed.
+
+The exact-move-go-report.txt generated on Linode is PRIVATE and was
+not supplied in the passing test output. The full native move()/go()
+resolution paths remain necessary for safe gameplay integration:
+determine the destination before exhaustion gating, preserve locked or
+invisible exits and all existing game restrictions, detect confirmed
+successful movement, reconcile failed/uncertain writes with in-memory
+room state, and choose an actual native timed-recovery hook.
+
+The Breath gameplay HUD currently shows "--" rather than a numeric
+resource; mounts, endurance and stables are not playable yet. Do not
+confuse the passing durable test fixture with a native movement feature.
