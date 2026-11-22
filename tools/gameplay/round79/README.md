@@ -589,7 +589,7 @@ rest command and genuine +15 Breath eligibility:
 - test_stage_rest_breath.py: staging and failure denials including
   original file fingerprints and shared-file lifecycle hook cases
 - test_native_rest_game.c: private ELF32 synthetic player receipt
-  test showing 80->95 on eligible rest (+15), then 95->100 after
+  test showing 80->95 on eligible rest (+15), then 85->90 after
   real attack interruption (+5), one grant per durable 45-second
   receipt and damage/room/logout reset
 - check_breath_rest_socket.py: real native isolated socket test
