@@ -1070,3 +1070,48 @@ real player actions/combat/movement, logout/disconnect/death cleanup,
 and no binary creature-struct ABI change. Inspect the real command
 dispatcher and lifecycle before wiring hooks. The already tested
 default +5 remains the only native recovery rate.
+
+
+### Round79N staged — explicit rest-session policy and dispatch/lifecycle audit
+
+**Status: committed to the private-playtest branch as source/test
+scaffolding; not yet run on Linode and NOT wired to the native game.**
+
+Round79M's private report verifies one real action() function in
+action.c and sleep/sit/stand mapped to the social action handler.
+Neither those emotes nor relax define a durable/resting pose.
+There are no registered rest/wake commands or native REST/POS state
+flags. Granting +15 from the emote name alone would allow recovery
+while performing other actions.
+
+Round79N introduces a standalone C99, no-I/O, ABI-independent state:
+- hd79_rest_session.h/.c defines an explicit per-session pose with
+  begin, interrupt/init and eligibility checks. It does **not** store
+  state in the native creature struct, any character file, Conjure
+  pet roster or mount data; it is not connected to a live session yet.
+- A bonus cannot be eligible until **45 uninterrupted seconds**
+  after the true rest start AND the existing durable Breath receipt's
+  last recovery time was at least 45 seconds ago. The repeated rest
+  command is idempotent. Movement/combat/casting/other activity must
+  call interrupt before executing. Logout/death/disconnect must clear
+  the active pose; login initializes new state. If any required fact
+  cannot be verified, only ordinary +5 is allowed.
+- test_hd79_rest_session.c checks the contract: no instant +15,
+  repeated-rest spam, timed receipts, movement interruption,
+  reconnect reset and clock rollback fail closed.
+- audit_native_rest_dispatch.py plus Python tests reads only
+  accepted isolated ELF32 source and extracts native dispatcher
+  evidence, action/command routing, update_ply and logout/death
+  cleanup candidates. It does NOT alter production or private source.
+- private_rest_dispatch_and_policy.sh runs the Python audit tests,
+  compiles and runs the standalone C policy fixture, generates a
+  root-only private report and checks that the native ELF32 candidate
+  and live production service PID/executable hash are unchanged.
+
+This step deliberately does NOT add a native rest command,
+set a per-player state in the event loop, update a real Breath
+receipt with resting=1, or modify any live player or world. Exact
+dispatch/lifecycle source must be inspected before those changes
+can safely proceed. The 45-second rest threshold is a conservative
+anti-spam implementation default to be confirmed in real gameplay.
+No private source excerpts or log files are committed.
