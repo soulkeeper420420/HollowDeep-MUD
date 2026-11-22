@@ -275,6 +275,20 @@ try:
             submitted[2]+=1
             assert actual==submitted,(actual,submitted)
 
+        if 'HD79_STATUS_HUD_PLAYTEST' in (src/'player.c').read_text(encoding='latin-1'):
+            with prior['connect_game'](port,p) as reconnected:
+                login(reconnected,name)
+                again=command(reconnected,'skills')
+                clean=re.sub(r'\x1b\[[0-9;]*m','',again)
+                require(clean,' | MP ')
+                require(clean,' | Breath --')
+                if necro:
+                    require(again,'\x1b[1;32mHP ')
+                else:
+                    assert '\x1b[' not in again, 'ANSI leaked after reconnect'
+                print('PASS: Saved ANSI HUD restored on reconnect for '+profession,flush=True)
+                logout(reconnected,p,port)
+
         print('PASS: Native creation and saved identity '+profession,flush=True)
 
 finally:
