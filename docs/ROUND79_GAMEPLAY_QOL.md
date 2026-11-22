@@ -1239,7 +1239,7 @@ normal movement restrictions, exact function-pointer dispatch,
 rest-session cleanup, two cleanup hooks in the same C source, unsafe
 paths, symlinks and multiple/missing C definitions.
 The new native ELF32 test replays Round79K's passing atomic movement
-tests and then exercises +15 from 80 to 95, single durable receipt
+tests and then exercises +15 from 80 to 95, a separate spend from 95 to 85 then +5 to 90 after attack, single durable receipt
 per tick, command interruption with fallback +5, and session
 revocation on damage, relocation and explicit cleanup.
 A separate private real socket replay checks that the dedicated
