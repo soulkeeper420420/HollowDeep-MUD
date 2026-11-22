@@ -108,13 +108,16 @@ def extract(root):
         print("SOURCE: %s:%d-%d"%(filename,start+1,end+1))
         # Include start, actual brace/body context, destination and room
         # mutation edges, final returns. Stay under ~280 lines per function.
-        selected=set(range(start,min(end+1,start+110)))
-        selected.update(range(max(start,end-30),end+1))
+        # Prioritize the signature/body, real room writes and function
+        # end. Cap before rendering to avoid chat-terminal truncation.
+        selected=set(range(start,min(end+1,start+48)))
+        selected.update(range(max(start,end-26),end+1))
         indices=[i for i in range(start,end+1) if INTEREST.search(lines[i])]
-        for ix in indices[:85]:
+        for ix in indices:
+            if len(selected)>=185:break
             selected.update(range(max(start,ix-1),min(end+1,ix+3)))
         previous=-2
-        for ix in sorted(selected)[:285]:
+        for ix in sorted(selected):
             if ix!=previous+1:
                 print("...")
             print("%s:%04d: %s"%(filename,ix+1,lines[ix][:205]))
