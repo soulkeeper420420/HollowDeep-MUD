@@ -119,6 +119,18 @@ class RestStageTests(unittest.TestCase):
             self.assertEqual((self.dst/file).read_bytes(),
                              (rest.HERE/file).read_bytes())
 
+    def test_cleanup_hooks_when_free_and_die_share_one_native_file(self):
+        moved=self.src/"memory.c"
+        body=moved.read_text()
+        moved.unlink()
+        destination=self.src/"creature.c"
+        destination.write_text(destination.read_text()+"\n"+body)
+        rest.stage(self.src,self.dst)
+        staged=(self.dst/"creature.c").read_text()
+        self.assertEqual(staged.count("hd79_rest_forget(crt_ptr)"),2)
+        self.assertEqual(staged.count("#ifdef HD79_REST_PLAYTEST"),2)
+        self.assertTrue((self.dst/"frp.new").is_file())
+
     def test_missing_true_native_function_pointer_denied(self):
         path=self.src/"command1.c"
         path.write_text(path.read_text().replace(
