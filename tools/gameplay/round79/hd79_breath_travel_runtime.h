@@ -4,6 +4,7 @@
  */
 #ifndef HD79_BREATH_TRAVEL_RUNTIME_H
 #define HD79_BREATH_TRAVEL_RUNTIME_H
+#include "hd_wilderness_breath.h"
 
 /* Return 0 to permit the original native move/go transfer, -1 to deny.
  * Called only after all vanilla exit restrictions and destination room
@@ -11,6 +12,10 @@
  * mutation, follower movement or traps. Never call for denied exits.
  */
 int hd79_breath_precommit(creature *, room *);
+
+/* Load/migrate the exact saved value, only after player save exists;
+ * returns -1 and leaves the output untouched on failure. */
+int hd79_breath_status(creature *, int *);
 
 /* Called only from existing update_ply native update callback.
  * Limits recovery to the player's durable last_recover, never to
