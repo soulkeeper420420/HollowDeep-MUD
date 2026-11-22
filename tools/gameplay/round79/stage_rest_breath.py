@@ -116,22 +116,49 @@ def patch(src):
                                   "feature-gated ELF32 Makefile")
 
     command=(src/"command1.c").read_text(encoding="latin-1")
+    decl="int process_cmd(fd, cmnd)"
+    if command.count(decl)!=1:
+        raise ValueError("Exact native source anchor drift: process_cmd definition")
+    lines=command.splitlines(keepends=True)
+    plain=[line.rstrip("\r\n") for line in lines]
+    starts=[i for i,line in enumerate(plain) if line.strip()==decl]
+    if len(starts)!=1:
+        raise ValueError("Exact native source anchor drift: process_cmd definition")
+    start=starts[0]
+    end=end_function(plain,start)
+    if end is None or end<=start:
+        raise ValueError("Exact native source anchor drift: process_cmd K&R body")
+    function="".join(lines[start:end+1])
     native_end="return((*cmdlist[cmdno].cmdfn)(Ply[fd].ply, cmnd));"
+    if function.count(native_end)!=1:
+        raise ValueError("Exact native source anchor drift: native callback")
+    # The accepted Mordor command1.c uses native tab indentation;
+    # match the one exact dispatch decision within process_cmd(),
+    # rather than demanding eight leading spaces in the entire file.
+    special=re.compile(
+        r'(?m)^(?P<indent>[ \t]*)if[ \t]*\([ \t]*'
+        r'cmdlist\[cmdno\]\.cmdno[ \t]*<[ \t]*0[ \t]*\)'
+        r'[ \t]*(?=\r?$)')
+    matches=list(special.finditer(function))
+    if len(matches)!=1:
+        raise ValueError("Exact native source anchor drift: "
+                         "process_cmd before special dispatch")
+    chosen=matches[0]
+    moderation="hd_staff_blocks_command(Ply[fd].ply, cmdlist[cmdno].cmdno)"
+    if (function.count(moderation)!=1 or
+        function.index(moderation)>chosen.start() or
+        function.index(native_end)<chosen.end()):
+        raise ValueError("Exact native source anchor drift: "
+                         "process_cmd authorization/dispatch ordering")
+    indent=chosen.group("indent")
     prep=(
         "#ifdef HD79_REST_PLAYTEST\n"
-        "        /* Rest is cleared only after alias and authorization checks,\n"
-        "         * but before special or ordinary native command execution.\n"
-        "         */\n"
-        "        hd79_rest_before_command(Ply[fd].ply,cmdlist[cmdno].cmdstr);\n"
+        +indent+"/* Verified after alias+moderation, before native dispatch. */\n"
+        +indent+"hd79_rest_before_command(Ply[fd].ply,cmdlist[cmdno].cmdstr);\n"
         "#endif\n"
     )
-    special="        if(cmdlist[cmdno].cmdno < 0)"
-    command=replace_once(command,special,prep+special,
-                         "process_cmd before special dispatch")
-    command=replace_once(
-        command,native_end,native_end,
-        "one real process_cmd native callback")
-    decl="int process_cmd(fd, cmnd)"
+    function=function[:chosen.start()]+prep+function[chosen.start():]
+    command="".join(lines[:start])+function+"".join(lines[end+1:])
     command=replace_once(
         command,decl,
         "#ifdef HD79_REST_PLAYTEST\n"
