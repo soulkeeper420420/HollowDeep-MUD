@@ -168,14 +168,40 @@ def patch(src):
     edited["command1.c"]=command
 
     global_c=(src/"global.c").read_text(encoding="latin-1")
-    sleep='  { "sleep", 100, action },'
+    # Native command rows are tab/space aligned and can contain trailing
+    # comments. Preserve the ENTIRE original sleep row unchanged, and
+    # insert one feature-gated rest entry before that exact row.
+    # Reject duplicate/missing rows or a retargeted sleep callback.
+    table=re.compile(r'\bcmdlist[ \t]*\[[ \t]*\][ \t]*=[ \t]*\{')
+    table_matches=list(table.finditer(global_c))
+    if len(table_matches)!=1:
+        raise ValueError("Exact native source anchor drift: cmdlist table")
+    sleep_row=re.compile(
+        r'(?m)^(?P<indent>[ \t]*)\{[ \t]*"sleep"[ \t]*,'
+        r'[ \t]*100[ \t]*,[ \t]*action[ \t]*\}[ \t]*,'
+        r'[^\r\n]*(?:\r?\n|$)')
+    matching=list(sleep_row.finditer(global_c))
+    if len(matching)!=1:
+        raise ValueError("Exact native source anchor drift: "
+                         "dedicated rest command beside old sleep emote")
+    row=matching[0]
+    table_end=re.search(r'(?m)^[ \t]*\}[ \t]*;[ \t]*$',
+                        global_c[table_matches[0].end():])
+    if (row.start()<table_matches[0].end() or table_end is None or
+        row.start()>=table_matches[0].end()+table_end.start()):
+        raise ValueError("Exact native source anchor drift: "
+                         "sleep not in native cmdlist table")
+    # Reject existing rest/wake definitions instead of shadowing them.
+    if re.search(r'(?m)^[ \t]*\{[ \t]*"rest"[ \t]*,',global_c):
+        raise ValueError("Exact native source anchor drift: "
+                         "rest command already registered")
+    indent=row.group("indent")
     addition=(
         "#ifdef HD79_REST_PLAYTEST\n"
-        '  { "rest", 100, hd79_rest_command },\n'
+        +indent+'{ "rest", 100, hd79_rest_command },\n'
         "#endif\n"
     )
-    global_c=replace_once(global_c,sleep,addition+sleep,
-                          "dedicated rest command beside old sleep emote")
+    global_c=(global_c[:row.start()]+addition+global_c[row.start():])
     global_c=(
         "#ifdef HD79_REST_PLAYTEST\n"
         "extern int hd79_rest_command();\n"
