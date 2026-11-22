@@ -113,6 +113,11 @@ int main(void)
     assert(hd_breath_record_encode(&now,NULL)==-1);
 
     next.revision=UINT32_MAX;
+    /* Even when revisions are exhausted or the clock fails, a retreat
+       to a non-wilderness room is still free and must remain possible. */
+    assert(hd_breath_record_step(&next,&decoded,
+        HD_BREATH_OP_TRAVEL,0,0,0)==0);
+    assert(same_record(&decoded,&next));
     untouched=decoded;
     assert(hd_breath_record_step(&next,&decoded,
         HD_BREATH_OP_TRAVEL,1,0,2002)==-1);
