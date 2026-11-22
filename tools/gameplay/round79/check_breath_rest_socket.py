@@ -239,6 +239,12 @@ try:
         ask(returning,"skills","Breath 94/100")
         print("PASS: native save/logout/reconnect preserves spent Breath",
               flush=True)
+        if os.environ.get("HD79Q_TIMED_REST")=="1":
+            # A separate, explicit opt-in REAL wall-clock replay:
+            # connected native game must emit a +15 recovery event.
+            # Original Round79P socket acceptance remains unchanged.
+            from round79q_real_rest_tick import run as run_natural_rest_tick
+            run_natural_rest_tick(returning,prior,ask,clean)
         prior["quit_with_cooldown"](returning,process)
 finally:
     if process is not None and process.poll() is None:
