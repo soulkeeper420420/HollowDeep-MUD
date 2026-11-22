@@ -350,3 +350,73 @@ checkpoint, failure/rollback handling and timed recovery integration.
 
 The playable Breath meter is NOT complete. Do not conflate the completed
 HUD and ANSI functionality with native Breath travel and persistence.
+
+
+## Round 79F — Verified wilderness move wrappers and Breath receipt wire
+
+The Round 79E focused movement audit supplied the exact existing native
+wilderness.c entry points:
+
+- hd_wilderness_move() saves the previous room, calls move(), and then calls
+  hd_wilderness_after_move().
+- hd_wilderness_go() follows the same pattern but calls go().
+- hd_wilderness_after_move() already compares the old and new room numbers
+  and suppresses redraw when the room did not change. This is a credible
+  POST-success integration point for Breath charging.
+- The route into the destination must be known BEFORE calling move/go to
+  enforce an exhaustion gate. The wrapper alone cannot assume a command
+  succeeded. Inspect exit selection and hidden/locked door checks before
+  patching a pre-move gate.
+- Native wilderness.map has explicit tile IDs and terrain; do not assume
+  every room with ID above 10000 is walkable wilderness. The current map
+  reader enforces a tile schema and a 6000-row limit.
+- player.c has LT_HEALS timed HP/MP recovery, but this does not prove that
+  it should be the Breath recovery clock or that repeated REST commands
+  cannot regenerate on demand. A native timer callback must be reviewed.
+
+New tools/gameplay/round79/hd_breath_record.h/.c supplies a pure 64-hex wire
+format suitable for one HDTR1-style receipt value, matching the *width*
+of the existing receipt metadata. The record contains:
+- Format version, 96-bit character epoch, revision, last recovery timestamp,
+  current Breath, fixed maximum 100, and reserved bytes.
+- Strict encode/decode, input range and nonzero epoch checks, reject corrupt
+  or noncanonical records, no partial output on error.
+- Two deterministic state actions: exactly one successfully completed
+  wilderness travel debit (-2), or a verified timed recovery (+5 normal /
+  +15 resting); no update for ordinary indoor moves.
+- Replay/ordering guard via expected revision and same-second recovery denial.
+  It does not implement durable locking/CAS by itself.
+- Free retreat to an interior remains possible even when Breath is 0,
+  the state revision is exhausted, or the wall clock is unavailable.
+
+test_breath_record.c checks the wire roundtrip, fifty wilderness moves to
+exhaustion, safe retreat, rest recovery, repeat recovery denial, input
+corruption and ANSI HUD rendering with a real numeric Breath reading.
+
+### Still required before activating native Breath
+
+1. Identify a collision-free and server-reserved Breath receipt ID and a
+   durable owner/epoch binding contract.
+2. Extend the EXISTING native player-store transaction under its lock for
+   revision-checked Breath state updates. Both ordinary save and recovery
+   replay must preserve the record without dropping other receipts, the
+   pet roster, Conjure state or character inventory.
+3. Identify a pre-move gate with the resolved destination and a post-success
+   charge. A failed persistence write must never allow free repeatable
+   wilderness movement. Test injected short writes, crashes and retries.
+4. Derive time-based Breath recovery from a verified native timer and test
+   both normal and REST rates without command-spam farming.
+5. Feed the stored Breath into the existing ANSI/plain HUD. Do not display
+   100/100 until the native saved resource actually exists.
+6. Run ELF32/private world native movement, repeated travel, exhaustion,
+   free retreat, map redraw, old-world movement, save/reconnect and
+   Necromancer/Mage/Warlock regressions, plus production safety.
+
+The read-only native_breath_store_audit.py extracts the save, receipt,
+legacy timer, location and prompt contracts from the already verified
+private ELF32 HUD candidate. Run private_breath_record.sh in a disposable
+results directory to execute pure unit tests and collect that report.
+
+**This milestone is source development only. The Breath record has not been
+written into the native atomic player store, and the game does not yet debit
+or regenerate Breath during travel. Production remains unchanged.**
