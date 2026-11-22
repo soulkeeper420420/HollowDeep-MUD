@@ -239,3 +239,44 @@ Linode**. No command, mount ownership, stabling, flying, movement speed,
 Endurance persistence or game-native Breath debit has been added to the
 running game. The atomic Breath-store source audit remains the gate before
 implementation. Do not publish private source reports or player data.
+
+
+## Round 79H — Native, atomic Breath receipt storage (new private candidate)
+
+The newly supplied Round 79F source audit confirms the existing native
+HDTR1 receipt IDs 74–78 and flock-protected atomic player-save pipeline.
+Round 79G's standalone foot/mount travel rules also PASS on private ELF32.
+
+Round 79H adds a strict storage-only extension using receipt suffix 79:
+- hd_breath_store.h / hd_breath_store.inc: native locked read, init, and
+  exact-expected-state CAS debit/recovery receipt operations.
+- stage_breath_store.py / test_stage_breath_store.py: secure, fail-closed
+  private copying from tested HUD source to a new disposable candidate.
+- test_native_breath_store.c: native real compressed player record, 50
+  debits, exhausted move denial, timed recovery, ordinary saves,
+  stale revisions, before/after rename failures, independent undead
+  receipt, and owner-epoch replay tests.
+- private_breath_store.sh: isolated ELF32 fixture/native game compile
+  and production PID/executable checksum guard.
+
+The patch is enabled only with BREATH_STORE_PLAYTEST=1 and the already
+verified PET_STORE_PLAYTEST=1 feature gate. It reuses the existing
+HDTR1 trailer without changing the serialized creature structure.
+
+To run in a *new* private Linode checkout pinned to the released commit:
+
+    bash tools/gameplay/round79/private_breath_store.sh \
+      /root/hollowdeep-dev/round79h-PRIVATE \
+      /tmp/hd-army-game-round79hud-VERIFIED/src
+
+The private work directory must contain the pinned checkout at repo/.
+The script is not yet tested on the actual Linode private native build.
+It intentionally does not modify wilderness movement, player prompt,
+rest timer, mount ownership or stable commands. Running it does not
+deploy a service or touch production world/player files.
+
+A future gameplay hook must reconcile both player room and Breath
+atomically, including failed writes, interrupted moves, logged-out
+recovery and locked/hidden exit validation. Merely debiting the
+receipt after a successful movement without position persistence
+is not sufficient for crash-safe gameplay.
