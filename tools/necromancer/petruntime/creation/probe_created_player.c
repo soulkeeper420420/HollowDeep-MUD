@@ -1,4 +1,5 @@
 #include "hd_player_store.h"
+#include "mtype.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,9 +26,9 @@ int main(int argc,char **argv)
     assert(p->race==HUMAN);
     assert(p->level==1);
 
-    printf("CREATED: identity=%d STR=%d DEX=%d CON=%d INT=%d PIETY=%d\n",
+    printf("CREATED: identity=%d STR=%d DEX=%d CON=%d INT=%d PIETY=%d ANSI=%d\n",
            necro,p->strength,p->dexterity,p->constitution,
-           p->intelligence,p->piety);
+           p->intelligence,p->piety,F_ISSET(p,PANSIC)?1:0);
 
     if(necro) {
         assert(p->strength>=8 && p->strength<=14);
