@@ -66,11 +66,21 @@ int main(void)
      * The subsequent normal recovery remains +5 and must not reuse
      * the previous rest state's accelerated rate.
      */
+    /* Create headroom first, otherwise 95+5 and 95+15 would both
+     * cap at 100 and the test could not distinguish the two rates.
+     */
+    assert(hd_breath_store_read(name,&before)==HD_BREATH_STORE_OK);
+    for(i=0;i<5;i++) {
+        assert(hd_breath_store_step(name,&before,
+            HD_BREATH_OP_TRAVEL,1,0,start+46+i,&after)==HD_BREATH_STORE_OK);
+        before=after;
+    }
+    expect_disk(name,2,85);
     hd79_rest_before_command(live,"attack");
     assert(hd79_rest_bonus_eligible(live,start+90,start+45)==0);
     assert(hd79_breath_pulse(live,(long)start+90)==0);
-    expect_disk(name,2,100);
-    puts("PASS: attack interruption restores normal +5 recovery");
+    expect_disk(name,2,90);
+    puts("PASS: attack interruption restores exactly +5, not +15");
 
     /* Damage, even from non-command monster combat, invalidates rest. */
     assert(hd79_rest_begin_at_for_test(live,start+100)==0);
