@@ -30,7 +30,7 @@ SOURCES={
     "mstruct.h":[(r"\b(?:hpmax|hpcur|mpmax|mpcur|flags\[|breath|oxygen)\b",3,4,12)],
     "io.c":[(r"\b(?:PANSIC|PPROMP)\b",5,7,5)],
 }
-MAX_ROWS=560
+MAX_ROWS=750
 WIDTH=210
 BREATH_PATTERN=re.compile(r"\b(?:breath|oxygen|drown|underwater|pbrwat)\b",re.I)
 
