@@ -68,18 +68,15 @@ static int from_hex(const char *input,unsigned char out[32])
 {
     unsigned i;
     if (!input) return -1;
-    for(i=0;i<64;i++) {
+    for(i=0;i<32;i++) {
         unsigned hi,lo;
-        /* A NUL inside the 64 required characters fails closed. */
-        if (!input[i]) return -1;
-        hi=nibble(input[i]);
-        i++;
-        if (!input[i]) return -1;
-        lo=nibble(input[i]);
+        /* Require exactly 64 lower-case hexadecimal digits. */
+        if (!input[i*2] || !input[i*2+1]) return -1;
+        hi=nibble(input[i*2]);
+        lo=nibble(input[i*2+1]);
         if (hi>15U || lo>15U) return -1;
-        out[(i-1)/2]=(unsigned char)((hi<<4)|lo);
+        out[i]=(unsigned char)((hi<<4)|lo);
     }
-    /* Loop increments twice: i ends at 64, checked below. */
     return input[64]==0 ? 0:-1;
 }
 int hd79_mount_wire_encode(const hd79_mount_roster *roster,
