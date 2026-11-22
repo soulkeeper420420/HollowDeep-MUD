@@ -13,6 +13,7 @@ Nothing modifies production world, code, player files or services.
 """
 import argparse
 import os
+import re
 from pathlib import Path
 import shutil
 import sys
@@ -175,16 +176,35 @@ def patch(source):
         }
     }
 #endif''',"true persisted Breath HUD")
-    # update_ply has a verified native t=time(0) source anchor.
-    tick='  t = time(0);\n  ply_ptr->lasttime[LT_HOURS].interval +='
-    player=insert_once(player,tick,
-        '  t = time(0);\n'
-        '#ifdef HD79_BREATH_TRAVEL_PLAYTEST\n'
-        '  /* Single native player-update callback; durable 45-second gate. */\n'
-        '  hd79_breath_pulse(ply_ptr,t);\n'
-        '#endif\n'
-        '  ply_ptr->lasttime[LT_HOURS].interval +=',
-        "verified update_ply native tick")
+    # Mordor's K&R update_ply() uses TAB/SPACE-aligned statements in
+    # different private source baselines. Locate only its verified initial
+    # time update and adjacent LT_HOURS interval write, then insert a
+    # feature-gated pulse between them without rewriting either line.
+    # Never fall back to a global time(0) replacement or another function.
+    update_mark='void update_ply(ply_ptr)'
+    if player.count(update_mark)!=1:
+        raise ValueError("Exact native source anchor drift: update_ply definition")
+    update_start=player.index(update_mark)
+    head=player[update_start:update_start+1100]
+    clock_pattern=re.compile(
+        r'(?m)^[ \\t]*t[ \\t]*=[ \\t]*time[ \\t]*\\([ \\t]*0[ \\t]*\\)[ \\t]*;[ \\t]*(?:\\r?\\n)')
+    clocks=list(clock_pattern.finditer(head))
+    if len(clocks)!=1:
+        raise ValueError("Exact native source anchor drift: verified update_ply native tick")
+    clock=clocks[0]
+    tail=head[clock.end():clock.end()+240]
+    next_write=re.match(
+        r'[ \\t]*ply_ptr->lasttime\\[LT_HOURS\\]\\.interval[ \\t]*\\+=',
+        tail)
+    if not next_write:
+        raise ValueError("Exact native source anchor drift: verified LT_HOURS recovery adjacency")
+    where=update_start+clock.end()
+    player=(player[:where]+
+        '#ifdef HD79_BREATH_TRAVEL_PLAYTEST\\n'
+        '  /* Single native player-update callback; durable 45-second gate. */\\n'
+        '  hd79_breath_pulse(ply_ptr,t);\\n'
+        '#endif\\n'+
+        player[where:])
     files["player.c"]=player
 
     # No source mutation outside the targeted file list.
