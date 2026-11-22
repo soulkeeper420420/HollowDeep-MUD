@@ -1,5 +1,9 @@
 # HollowDeep release notes
 
+## 2026-11-22 — Round 79T private native mounts
+
+Added native ownership, purchase, mounting, dismounting, stable deposit/retrieval and wilderness Endurance integration. The paired mount record and native character save commit atomically. See the [implementation guide](docs/ROUND79T_NATIVE_MOUNTS.md) for commands, pricing, stable configuration and isolated validation.
+
 ## 2026-11-17 — Pet storage ELF32 acceptance; private runtime restart integration
 
 Accepted operator-reported `581473e` private ELF32 pet storage PASS. Added [private runtime integration and combined validation](tools/necromancer/petruntime/README.md): atomic raise debit plus pet receipt, authenticated login restore, stat/location checkpoints, death tombstone before removal, private fail-stop on uncertain/conflicting storage and unexpected live-pet free, exclusion from ordinary wandering/despawn, seven native ASCII help pages. Exact 47-file profile, six output fingerprints and fresh native64 focused multi-process replay passed locally; legacy/private syntax excluding the unavailable Round74B header passed. Full Linode build and real three-listener socket raise/restore/death/restart replay pending. Corpse/floor loot still transient, crash-atomic consumption and complete recovery/rollback not implemented. Production NO-GO.

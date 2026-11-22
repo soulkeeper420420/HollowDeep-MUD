@@ -365,3 +365,7 @@ Check authoritative character epoch, conflicting writes,
 short-write/uncertain rename, ordinary saves, relog, death,
 recreated names, full receipt sets and malformed input.
 No live deployment or player-world changes are authorized.
+
+## Round 79T native integration
+
+The [native mount implementation and runner](ROUND79T_NATIVE_MOUNTS.md) add persistent ownership, stable commands and Endurance-aware native travel in a disposable ELF32 build. The preceding notes document the earlier pure-policy and wire stages. The native candidate reserves two receipt IDs, preserves their fragments through ordinary saves, and checkpoints them with the moved character.
