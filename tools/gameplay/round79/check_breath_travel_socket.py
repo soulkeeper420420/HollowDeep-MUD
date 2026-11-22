@@ -149,8 +149,14 @@ def ask(client,query,marker):
             time.sleep(int(delay[1])+1)
             continue
         if marker.lower() not in clean(output).lower():
-            raise AssertionError("Native command "+repr(query)+
-                                 " missing "+repr(marker)+"; "+repr(output[-900:]))
+            # Native movement commands may print only the direction.
+            # Require the destination via a separate read-only LOOK.
+            # The LOOK must not spend Breath.
+            seen=prior["room_view"](client)
+            if marker.lower() not in clean(seen).lower():
+                raise AssertionError("Native command "+repr(query)+
+                                     " missing "+repr(marker)+"; "+
+                                     repr((output+"\n"+seen)[-900:]))
         return output
     raise RuntimeError("Native movement cooldown limit reached: "+query)
 
