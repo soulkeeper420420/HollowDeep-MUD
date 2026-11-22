@@ -447,3 +447,49 @@ pose is actively resting and the durable recovery interval has
 elapsed. Reuse the atomic Breath store, preserve the default +5,
 and validate rest->stand->rest and death/logout/reconnect cases.
 Do not restart or modify production.
+
+
+## Round 79L accepted; Round 79M precise native action dispatch audit
+
+The accepted Round79L Linode report verifies:
+- Six private audit unit tests passed.
+- Native update_ply() is the player update callback and runs the
+  saved Breath pulse beside LT_HOURS processing.
+- Existing default +5 recovery is durable. The pure Breath policy
+  already supports +15 when a trusted resting boolean is supplied.
+- Native global.c maps "sleep", "sit" and "stand" to the generic
+  action social command; these entries do NOT, by themselves,
+  prove any persistent native pose or true resting state.
+- Monk meditation is a separate class skill, not general resting.
+- Production service PID/binary and private ELF32 build were unchanged.
+
+Round79M intentionally avoids installing an unsafe +15 hook based
+on cosmetic emote commands. New read-only tools:
+- audit_native_rest_actions.py finds the EXACT native C/K&R
+  action() function and extracts its full/most relevant implementation,
+  existing global.c sleep/sit/stand/rest/wake command bindings,
+  relevant native command fields, and matching real pose flag
+  definitions if present. It fails closed on ambiguous definitions.
+- test_audit_native_rest_actions.py tests exact action detection,
+  raw brace/string handling, real command mapping, and refuses
+  production paths, wrong ELF32 binaries or symlinks.
+- private_rest_actions_audit.sh runs the private tests and analysis,
+  checks the prior accepted private build and live service are unchanged,
+  and stores private-action-handler-report.txt in a root-only folder
+  outside GitHub.
+
+Next: inspect the actual action() implementation and native command
+dispatch before choosing whether to introduce a dedicated rest mode
+and which movement/combat/stand actions clear it. Once this is proven,
+wire rest only into the existing durable 45-second Breath pulse using
+resting=1; never award +15 for repeated text commands or background
+recovery after death/logout. No native creature ABI or player save
+format changes are authorized.
+
+Use a new pinned private checkout with this command:
+
+    bash tools/gameplay/round79/private_rest_actions_audit.sh \
+      /root/hollowdeep-dev/round79m-PRIVATE \
+      /tmp/hd-army-game-round79travel-VERIFIED/src
+
+Generated source excerpts remain PRIVATE and must not be added to GitHub.
