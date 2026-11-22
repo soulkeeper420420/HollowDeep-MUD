@@ -1363,3 +1363,36 @@ proceeding, alongside the existing action/dispatch tests.
 **No new private native ELF32 test or gameplay socket run has passed
 yet; production deployment remains NONE.** The already accepted
 Round79K private baseline remains unmodified.
+
+
+### Round79P FINAL PRIVATE ELF32 + SOCKET ACCEPTANCE — PASS
+
+The user's completed private Linode Round79P run at
+\`/root/hollowdeep-dev/round79p-IQMqBirF\` reports:
+- 32 private source-staging/dispatch/safety tests PASS.
+- Native isolated ELF32 source created at
+  \`/tmp/hd-army-game-round79rest-JQgo3wi5/src\`.
+- Pure 45-second rest policy tested; command spam, clock rollback,
+  interrupted rest and reconnect reset denied.
+- Native ELF32 atomic fixture revalidated Round79K's room+Breath
+  precommit, uncertain rename, exhausted movement and 45s +5 recovery.
+- Native ELF32 **+15** from Breath 80 -> 95 under eligible rest
+  PASS; exactly one receipt per tick; after attack interruption a
+  new headroom deficit confirmed +5, not +15. Damage, room
+  relocation, social emotes and free/death cleanup invalidate rest.
+- Full private ELF32 MUD built with REST_BREATH_PLAYTEST=1.
+- Real isolated socket play confirmed dedicated rest registration,
+  repeated rest idempotence, native social interruption, wilderness
+  travel costs, numeric ANSI HUD, save/logout/reconnect preserving
+  saved room and Breath 94/100, and private socket shutdown.
+- Final marker:
+  \`ROUND79P: PRIVATE REST COMMAND +15 ATOMIC AND SOCKET PASS\`.
+- Production PID and binary, accepted Round79K source baseline
+  unchanged; **production deployment: NONE**.
+
+**Round79P is accepted for the private native atomic +15 receipt and
+real rest-command behavior.** It does *not* yet demonstrate that a
+connected idle socket actually triggers the +15 award after the
+natural native timer. Round79Q must verify that wall-clock timer
+using the already compiled private ELF32 game. No claims about
+live deployment or mounted Endurance are made.
