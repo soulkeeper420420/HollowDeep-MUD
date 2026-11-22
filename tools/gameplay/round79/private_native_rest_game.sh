@@ -80,8 +80,26 @@ names=("stage_rest_breath.py","test_stage_rest_breath.py",
        "audit_native_rest_dispatch.py")
 for name in names:
     path=here/name
-    ast.parse(path.read_text(encoding="utf-8"),filename=str(path))
-    print("PASS: syntax",name)
+    tree=ast.parse(path.read_text(encoding="utf-8"),filename=str(path))
+    if name in ("stage_rest_breath.py","test_stage_rest_breath.py"):
+        if name=="stage_rest_breath.py":
+            functions=[n.name for n in tree.body
+                       if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))]
+            expected=("private","native_cleanup_definition",
+                      "inject_after_brace","patch","stage","main")
+            for symbol in expected:
+                if functions.count(symbol)!=1:
+                    raise RuntimeError("Stage script function duplicated/missing: "+symbol)
+        else:
+            classes=[n for n in tree.body
+                     if isinstance(n,ast.ClassDef) and n.name=="RestStageTests"]
+            if len(classes)!=1:
+                raise RuntimeError("Rest staging tests class duplicated/missing")
+            methods=[n.name for n in classes[0].body
+                     if isinstance(n,ast.FunctionDef) and n.name.startswith("test_")]
+            if len(methods)!=len(set(methods)) or len(methods)<10:
+                raise RuntimeError("Rest staging tests duplicated/missing")
+    print("PASS: syntax and definitions",name)
 PY
 
 echo "=== 1. FAIL-CLOSED NATIVE REST STAGING REGRESSIONS ==="
