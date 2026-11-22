@@ -68,7 +68,8 @@ def stage(source,destination):
 
     idanchor='static const char conjure_id[] = "ffffffffffffffffffffffffffffff77";'
     once(p,idanchor,"Conjure receipt ID")
-    assert 'ffffffffffffffffffffffffffffff79' not in p, "Breath receipt ID already allocated"
+    if 'ffffffffffffffffffffffffffffff79' in p:
+        raise ValueError("Breath receipt ID already allocated")
     receiptanchor="!strcmp(claim, conjure_id)"
     once(p,receiptanchor,"reserved receipt guard")
     footer='#include "hd_conjure_store.inc"\n#endif'
