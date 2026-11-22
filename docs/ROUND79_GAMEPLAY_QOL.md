@@ -982,3 +982,32 @@ command excerpts, and uses an explicit with block to close the ELF32
 file. The test runner now treats ResourceWarnings as errors.
 This is an **audit/reporting fix only**. No new rest recovery logic
 has been installed or gameplay-tested. Production was not modified.
+
+
+### Round 79L verified resting-state source audit — PASS
+
+The private Linode run \`round79l-fSr2pVy0\` confirms:
+- Six read-only source-audit tests PASS.
+- \`ROUND 79L: PRIVATE NATIVE REST/UPDATE SOURCE AUDIT PASS\`.
+- Production service PID, binary, and accepted private ELF32 baseline unchanged; deployment NONE.
+- In \`player.c\` native \`update_ply()\` at approximately lines 443–457, the existing feature-gated Breath callback executes after \`t = time(0)\` and before \`LT_HOURS\` advancement. Existing non-poisoned HP/MP updates use \`LT_HEALS\`.
+- In \`hd79_breath_travel_runtime.c\`, the native
+  \`hd79_breath_pulse()\` checks the durable elapsed-time interval
+  and calls \`hd_breath_store_step(...HD_BREATH_OP_RECOVER,0,0,...)\`,
+  with resting explicitly false.
+- The private \`global.c\` command table routes \`sleep\`, \`sit\`,
+  and \`stand\` to the generic \`action\` command (ID 100), with no
+  audited pose-setting implementation. The Monk-only \`meditate\`
+  command is separate, not a universal rest state.
+- The audit did NOT verify any reliable persistent rest/sleep pose
+  that could be passed into the already tested +15 Breath policy.
+  Mapping generic social/emote commands to resting without verifying
+  their implementation would permit unintended recovery.
+
+Round79L is therefore **accepted as a read-only audit**, not as a
+playable +15 recovery feature. The next milestone must inspect the
+actual generic action() implementation and command dispatcher, then
+add an explicit, session-safe resting state with rest/stand/reset
+semantics and one durable +15 award per eligible timed pulse. Avoid
+changing native creature ABI or old save formats. All private source
+excerpts/reports stay outside GitHub.
