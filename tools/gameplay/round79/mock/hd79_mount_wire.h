@@ -1,0 +1,4 @@
+#ifndef HD79_MOUNT_WIRE_MOCK_H
+#define HD79_MOUNT_WIRE_MOCK_H
+#define HD79_MOUNT_MAX_STABLE_ROOM 0xffffffU
+#endif
