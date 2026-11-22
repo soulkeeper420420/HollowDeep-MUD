@@ -705,3 +705,41 @@ mount implementation and should not be uploaded to GitHub.
 Next native feature after source validation is epoch-bound
 ownership/Endurance atomic persistence and a safe stable
 interaction, preserving Conjure and Raise Corpse isolation.
+
+
+## Round79R accepted; Round79S epoch-bound mount-roster policy
+
+The user's final Round79R private Linode output confirmed
+eight passed source audit tests, ELF32 pure mount/Endurance
+terrain rules PASS and read-only native command/flag audit PASS.
+The actual native \`global.c\` has no registered mount/stable
+verbs and \`mstruct.h\`/\`mtype.h\` have no match for the
+candidate mount symbols. Conjure dragons and the "stable
+Necromancer receipt format" preprocessor text are unrelated
+to rideable mounts. Production PID, binary and private
+ELF32 hashes remained unchanged.
+
+Round79S introduces a self-contained pure C policy:
+- \`hd79_mount_roster.h/.c\`: epoch-bound 6-slot max roster,
+  immutable-output transitions, one active mount, explicit
+  stable deposit/retrieval constrained to a verified stable
+  and verified physical proximity, no Endurance refill from
+  boarding/stabling, and mount-only Endurance debit for a
+  successful validated native movement plan
+- \`test_hd79_mount_roster.c\`: synthetic owner epoch and
+  mounting, stabling, forged/stale IDs, depleted Endurance,
+  duplicate/replayed movement and safe retreat regression
+- \`private_mount_roster_round79s.sh\`: compile pure C
+  policy together with already tested Round79G terrain rules
+  as ELF32, execute tests in a root-only results directory,
+  check live service PID/executable and accepted private
+  ELF32 binary unchanged; no native source patch
+
+Run a new \`round79s-*\` pinned checkout with the accepted
+\`/tmp/hd-army-game-round79rest-JQgo3wi5/src\` source.
+
+The proposed rider/stable policy is not connected to the
+native MUD's character save or command tables. Real ownership
+and Endurance cannot be marked playable until an atomic
+player receipt/checkpoint and real private socket tests
+pass. No production deployment is authorized.
