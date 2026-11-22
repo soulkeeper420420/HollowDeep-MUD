@@ -269,3 +269,38 @@ The private audit generated two reports that remain solely on Linode:
 The source excerpts must be reviewed before patching player.c or committing
 any native Breath storage and debit hooks. Do not publish private logs or
 fixtures to GitHub.
+
+
+## Round 79E - Native ANSI status prompt staged privately
+
+The submitted native source audits identify a concrete, safe display hook:
+player.c's ply_prompt() (legacy static prompt[40]) contains the existing
+HP/MP prompt and is gated by PPROMP, PALIAS, PSPYON and PREADI. The
+Round 79E status patch expands that prompt buffer to 256 bytes and uses
+the existing standalone hd_status_hud_format() function to render:
+- ANSI enabled (saved PANSIC): colorized exact HP/MP current/max values.
+- ANSI disabled: exact HP/MP values with no escape sequences.
+- Breath until a real durable movement resource exists: "Breath --".
+- Preserve absent prompts for private/staff states, alias target HP/MP,
+  and the native fallback when PPROMP is off.
+
+The patch is opt-in STATUS_HUD_PLAYTEST=1 and is staged only from the
+verified private Round 79 ANSI-creation candidate into a new, disposable
+Round 79 HUD source tree. It does not modify player-save ABI, current
+player records, running service, production world, or Breath economics.
+
+Files: stage_status_hud.py, test_stage_status_hud.py,
+private_status_hud.sh, and native_wilderness_move_exact.py.
+Native socket acceptance checks ANSI-on Necromancer, ANSI-off Mage,
+saved creation preferences, Warlock persistence, and legacy help.
+
+The source audit reveals native hd_wilderness_move in the command
+table and the wilderness.map tile reader, but does NOT give complete
+successful-transfer, recovery or atomic save code. The focused
+native_wilderness_move_exact.py extracts a bounded code excerpt of
+the actual handler to choose a proper Breath pre-move gate and
+post-success debit. DO NOT hook Breath directly to a redraw or a
+direction command, and do not refill it on logout/reconnect.
+
+Round 79E is **published as unverified private development**, pending
+the native build/socket results from Linode. No deployment approved.
