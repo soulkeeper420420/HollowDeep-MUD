@@ -256,17 +256,15 @@ The private run reported the following, without touching production:
   Necromancer (YES) and Mage (NO). The Mage probe printed ANSI=0.
 - Warlock reconnect/identity regression passed.
 - Native help/skills regression passed.
-- Production MainPID remained 51424 and no deployment occurred.
+- Production service PID was unchanged and no deployment occurred.
 
 Status HUD rendering in the native player prompt is NOT YET INTEGRATED.
 The wilderness Breath resource has NOT YET BEEN CONNECTED to native
 movement, recovery ticks, or persisted player state.
 
 The private audit generated two reports that remain solely on Linode:
-- /root/hollowdeep-dev/round79b-4VMzSSxA/breath-hooks-report.txt
-  (534 lines of movement, recovery, receipt and prompt source excerpts).
-- /root/hollowdeep-dev/round79b-4VMzSSxA/native-status-report.txt
-  (308 prompt, ANSI and Breath references).
+- A private breath-hooks-report.txt (534 movement/recovery/receipt/prompt source lines).
+- A private native-status-report.txt (308 prompt/ANSI/Breath code excerpts).
 
 The source excerpts must be reviewed before patching player.c or committing
 any native Breath storage and debit hooks. Do not publish private logs or
