@@ -15,13 +15,15 @@ static int nibble(char ch)
 static int epoch_ok(const char *p)
 {
     unsigned i,nonzero=0;
-    if (!p || strlen(p)!=24U) return 0;
+    if (!p) return 0;
     for(i=0;i<24;i++) {
-        int v=nibble(p[i]);
+        int v;
+        if (!p[i]) return 0;
+        v=nibble(p[i]);
         if(v<0) return 0;
         nonzero|=(unsigned)v;
     }
-    return nonzero!=0;
+    return p[24]==0 && nonzero!=0;
 }
 static int read_hex(const char *in, unsigned n, uint32_t *out)
 {
