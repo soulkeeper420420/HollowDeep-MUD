@@ -26,9 +26,9 @@ PASSWORD_ANCHOR=re.compile(
 
 def validate(root,prefix,allow_nonexistent=False):
     root=Path(root)
-    if root.is_symlink() or root.name!="src" or
+    if (root.is_symlink() or root.name!="src" or
         root.parent.parent!=SOURCE_ROOT or
-        not root.parent.name.startswith(prefix):
+        not root.parent.name.startswith(prefix)):
         raise ValueError("Expected private /tmp/"+prefix+"*/src")
     if allow_nonexistent:
         if root.exists() or root.parent.is_symlink() or not root.parent.is_dir():
