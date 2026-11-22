@@ -1,8 +1,8 @@
 /* Round 79J: actual native compressed character room and Breath receipt
  * share ONE atomic save transaction. Only synthetic player files exist.
  */
-#define main hd79h_fixture_main
-#include "test_native_breath_store.c"
+#define main legacy_main
+#include "test_pet_store.c"
 #undef main
 
 #include "hd_breath_move_checkpoint.h"
@@ -10,12 +10,13 @@
 int main(void)
 {
     char *who="Hdbrmove";
+    char *seed[]={0,"seed",NULL};
     hd_breath_record first,second,third,old;
     creature p,*live=NULL,*disk=NULL;
     int i,old_room;
 
-    /* Run the previously proven native Breath/receipt suite unchanged. */
-    assert(hd79h_fixture_main()==0);
+    /* Reuse the established isolated native pet-store seed only. */
+    assert(legacy_main(2,seed)==0);
 
     initial(&p,who);
     p.class=FIGHTER;
