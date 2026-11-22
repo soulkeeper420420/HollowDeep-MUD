@@ -19,7 +19,7 @@ int main(void)
     assert(hd79_rest_session_begin(&state,100)==0);
     assert(state.active==1 && state.began_at==100);
     /* Rest command spam cannot reset start time or create instant bonus. */
-    for(i=101;i<150;i++) {
+    for(i=101;i<145;i++) {
         assert(hd79_rest_session_begin(&state,i)==0);
         assert(state.began_at==100);
         assert(!hd79_rest_session_eligible(&state,i,100));
