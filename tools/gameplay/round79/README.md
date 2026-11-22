@@ -280,3 +280,35 @@ atomically, including failed writes, interrupted moves, logged-out
 recovery and locked/hidden exit validation. Merely debiting the
 receipt after a successful movement without position persistence
 is not sufficient for crash-safe gameplay.
+
+
+## Round 79I: inspect atomic native room and Breath movement
+
+The Round 79H **native atomic Breath receipt test passed** on the
+isolated ELF32 Linode candidate. Real movement, regeneration and HUD
+updates are still pending.
+
+Rather than changing the old Mordor movement functions blindly, this
+milestone provides a bounded, READ-ONLY inspection of the verified
+private Round 79H source:
+- native_movement_atomicity_audit.py extracts native move() and go()
+  definitions and their destination/commit operations, wilderness
+  callbacks, atomic player save functions and legacy timed recovery.
+- test_native_movement_atomicity_audit.py enforces private ELF32-only
+  input and rejects production locations and symlinked code.
+- private_movement_atomicity_audit.sh runs those checks without
+  rebuilding the game or touching any live player/world data.
+
+Use the previously tested Round 79H source and a fresh private results
+directory:
+
+    bash tools/gameplay/round79/private_movement_atomicity_audit.sh \
+      /root/hollowdeep-dev/round79i-PRIVATE \
+      /tmp/hd-army-game-round79store-VERIFIED/src
+
+The resulting movement-atomicity-report.txt is for private review and
+must NOT be committed to the public repository. Before connecting a
+wilderness move debit to gameplay, verify that the new destination room
+and Breath receipt are committed consistently under fail injection.
+Unmounting/dismounting, save/reconnect and changing owned mounts must
+not reset either rider Breath or mount Endurance.
