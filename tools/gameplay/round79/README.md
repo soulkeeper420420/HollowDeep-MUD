@@ -168,3 +168,39 @@ which must be reviewed before adding a Breath debit/save hook.
 
 The Round 79E patch and tests are currently unverified on Linode.
 There is NO production deployment or world edit.
+
+
+## Round 79F: Breath persistent-record specification and storage preflight
+
+The verified movement wrappers in wilderness.c call native move/go, compare
+the player's previous room and invoke hd_wilderness_after_move. Breath will
+charge only after a completed move into a *mapped wilderness destination*,
+and needs an exhaustion gate before the native move command runs. Ordinary
+rooms and safe exits remain free even at zero Breath.
+
+New hd_breath_record.c/h defines the 64-character, non-ABI-changing receipt
+wire representation: version, character epoch, revision, last recovery time,
+current Breath and fixed 100-point capacity. It is intentionally **only a
+state and encoding contract**. Neither it nor the standalone tests writes
+player saves. The existing HDTR1 receipt append/overwrite, directory lock,
+CRC and atomic player checkpoint must still be integrated with a dedicated,
+collision-free reserved receipt identifier.
+
+To run just the compiled state test on a private Linux system:
+
+    cc -m32 -std=gnu89 -Wall -Wextra -Werror -I. \
+      hd_breath_record.c hd_wilderness_breath.c hd_status_hud.c \
+      test_breath_record.c -o /tmp/private-breath-record
+    /tmp/private-breath-record
+
+To audit the native persistence extension points, use the read-only
+native_breath_store_audit.py against the previously validated private HUD
+ELF32 tree; do NOT run against production.
+
+The consolidated private_breath_record.sh script builds and runs this test,
+reruns travel rules, audits native atomic save and recovery functions,
+and verifies the production PID and live binary are unchanged.
+
+The next required milestone is real socket gameplay with debit,
+recovery, atomic failure denial, save/reconnect and the actual colored
+Breath counter. Do not label this milestone complete yet.
