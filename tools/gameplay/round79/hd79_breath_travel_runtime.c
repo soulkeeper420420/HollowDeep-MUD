@@ -2,7 +2,8 @@
  * No custom command bypasses the game's move()/go() exit restrictions.
  * No mounts, flight, stable or riding behavior are enabled here.
  */
-#include "mextern.h"
+#include "hd_player_store.h" /* native creature/room and HD_STORE_OK */
+#include "mextern.h"      /* requires native model types above */
 #include "hd_breath_store.h"
 #include "hd_breath_move_checkpoint.h"
 #include "hd_wilderness_breath.h"
