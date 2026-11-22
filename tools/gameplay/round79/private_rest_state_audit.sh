@@ -29,7 +29,7 @@ BASE="$(sha256sum "$SOURCE/frp.new" | cut -d' ' -f1)"
 
 echo "=== ROUND79L: NATIVE REST/SLEEP STATE AUDIT ==="
 echo "=== 1. PRIVATE SOURCE SAFETY AND NATIVE REST STATE TESTS ==="
-(cd "$HERE" && python3 -m unittest -q test_audit_native_rest_state)
+(cd "$HERE" && python3 -W error::ResourceWarning -m unittest -q test_audit_native_rest_state)
 
 echo "=== 2. INSPECT EXACT REST, STAND, SLEEP, WAKE AND UPDATE_PLY STATE ==="
 python3 "$HERE/audit_native_rest_state.py" "$SOURCE" \
