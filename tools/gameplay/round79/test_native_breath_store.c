@@ -15,6 +15,7 @@ int main(void)
     char *seed[]={0,"seed",NULL};
     hd_breath_record a,b,c,old,recreated;
     creature p,*loaded=NULL;
+    hd_pet_state undead;
     int i;
 
     /* Existing fixture initializes private Necromancer/pet saved records. */
@@ -99,7 +100,7 @@ int main(void)
     assert(hd_breath_store_init(name,2500,&a)==HD_BREATH_STORE_OK);
     assert(hd_breath_store_step(name,&a,
         HD_BREATH_OP_TRAVEL,1,0,2501,&b)==HD_BREATH_STORE_OK);
-    assert(hd_pet_store_read(name,&(hd_pet_state){0})==HD_PET_OK);
+    assert(hd_pet_store_read(name,&undead)==HD_PET_OK);
     puts("PASS: existing Necromancer/pet record retained");
 
     /* New character with reused name receives a new random epoch. */
