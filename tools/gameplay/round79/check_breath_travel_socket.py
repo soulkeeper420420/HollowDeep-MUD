@@ -16,6 +16,8 @@ import sys
 import tempfile
 import time
 
+from breath_socket_reconnect import require_saved_login_banner
+
 if len(sys.argv)!=2:
     raise SystemExit("Usage: check_breath_travel_socket.py PRIVATE_ELF32_SRC")
 SOURCE=Path(sys.argv[1])
@@ -206,7 +208,19 @@ try:
         prior["quit_with_cooldown"](player,process)
 
     with prior["connect_game"](port,process) as returning:
-        prior["login"](returning,"Hdnecroqa")
+        # The older Necromancer fixture helper expects its initial seed
+        # room on every login. A real save correctly restores the Annex
+        # after wilderness travel; check that location AND Breath directly
+        # from the native reconnect banner instead of expecting a reset.
+        prior["recv_until"](returning,b"Please enter name:")
+        prior["send"](returning,"Hdnecroqa")
+        prior["recv_until"](returning,b"Please enter password:")
+        prior["send"](returning,"Fixturepass")
+        banner=prior["recv_until"](returning,b"Breath 94/100",seconds=15)
+        require_saved_login_banner(
+            banner,"Necromancer Trial Annex",94)
+        print("PASS: native reconnect restored saved Annex room and Breath 94/100",
+              flush=True)
         ask(returning,"skills","Breath 94/100")
         print("PASS: native save/logout/reconnect preserves spent Breath",
               flush=True)
