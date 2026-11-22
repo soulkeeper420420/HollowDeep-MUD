@@ -174,6 +174,9 @@ class TravelStageTests(unittest.TestCase):
         source=script.read_text(encoding="utf-8")
         self.assertIn('NECRO=REPO/"tools"/"necromancer"',source)
         self.assertNotIn('NECRO=REPO/"necromancer"',source)
+        self.assertIn("require_saved_login_banner(",source)
+        self.assertIn('"Necromancer Trial Annex",94)',source)
+        self.assertNotIn('prior["login"](returning,"Hdnecroqa")',source)
         for relative in (
             "corpse/gameplay_smoke.py",
             "cache/cache_gameplay.py",
