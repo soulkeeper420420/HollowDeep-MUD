@@ -81,3 +81,66 @@ wilderness 100-room batch, regular interior rooms, no exit/record changes.
 Roaming wilderness encounters, day/night effects, better inventory and item
 identification, repeatable dungeon objectives, party XP/loot sharing, and
 player events. Each needs a separate economy/security and balance review.
+
+
+## Round 79B — Visible HP / MP / Breath status and creation-time ANSI
+
+**Requested priority change:** implement the on-screen status prompt and ANSI
+selection before the planned encounter and sacrifice features.
+
+### Status display
+
+Plain (ANSI off):
+
+    HP 14/25 | MP 5/10 | Breath --
+
+Colored (ANSI on): same words and numbers, with HP green/yellow/red according
+to remaining health, MP blue and Breath cyan (red/yellow near exhaustion).
+Always reset colors after each component. ANSI color codes are sent only if
+the player explicitly selected ANSI. Both modes must be readable on Telnet
+clients that do not support colors.
+
+The verified legacy game prompt is approximately "(14 H 5 M):". The original
+creature serialization contains hpcur/hpmax and mpcur/mpmax, but **no proven
+numeric Breath field yet**. The current pure formatter shows "Breath --"
+until native breathing mechanics and their persistence are verified. Never
+fabricate "100/100" when no real meter exists. The rendering API accepts
+actual breath current/max only when verified game state supplies them.
+Breath/air capacity mechanics are a separate native test gate.
+
+### Creation-time color selection
+
+After race selection, before password entry, ask:
+
+    Enable ANSI colors? (yes/no):
+
+Accept y/yes/on, n/no/off, case-insensitively; reprompt on invalid input.
+Use the existing native PANSIC character flag (bit 26) for saved preference;
+do not add fields to creature or change player-save ABI. The existing PPROMP
+flag (bit 18) controls whether a status prompt is shown. Retain the existing
+behavior for already-created players; new character creation can enable
+the readable prompt after confirmation. Never send ANSI control sequences
+to users who selected NO. No color selection or prompt change is deployed
+on production without separate approval.
+
+### New source and unit tests
+
+- tools/gameplay/round79/hd_status_hud.{h,c}
+- tools/gameplay/round79/test_status_hud.c
+- tools/gameplay/round79/hd_ansi_choice.{h,c}
+- tools/gameplay/round79/test_ansi_choice.c
+- tools/gameplay/round79/native_status_ansi_probe.py (read-only native audit)
+
+Run these as standalone, native-independent checks with cc -std=gnu89.
+They are pure tests; the actual native prompt and character-creation handlers
+have **not yet been patched**.
+
+Run the read-only audit ONLY on the disposable Round 78E private build.
+It prints exact native player.c prompt, command1.c creation choices,
+global command table, mtype.h ANSI flag and breath mechanics references.
+Inspect that report before writing a strict source patch. Native tests must
+verify HP/MP after combat/healing, ANSI YES/NO, failed invalid selection,
+save/reconnect preference, plain text no escape bytes, existing Mage,
+Necromancer and Warlock creation, and unchanged legacy saves.
+
+The live service, world, character saves and database remain untouched.
