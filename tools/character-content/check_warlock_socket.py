@@ -24,7 +24,8 @@ if (os.geteuid()!=0 or
         os.readlink('/proc/self/ns/net')==os.readlink('/proc/1/ns/net') or
         SRC.name!='src' or SRC.parent.parent!=Path('/tmp') or
         not SRC.parent.name.startswith(('hd-army-game-round78-',
-                                        'hd-army-game-round79-')) or
+                                        'hd-army-game-round79-',
+                                        'hd-army-game-round79hud-')) or
         SRC.is_symlink() or not (SRC/'frp.new').is_file()):
     raise SystemExit('Private root, network namespace and disposable build required')
 
