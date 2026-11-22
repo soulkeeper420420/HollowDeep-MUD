@@ -12,6 +12,14 @@
 #include "hd_breath_move_checkpoint.h"
 #include <time.h>
 
+/* Synthetic native fixture links only the tested player-store components,
+ * not the whole MUD terminal output implementation. */
+void print(int fd,char *format,...)
+{
+    (void)fd;
+    (void)format;
+}
+
 int hd79_wilderness_tile(int id)
 {
     if (id>=10000 && id<=10003) return 1;
