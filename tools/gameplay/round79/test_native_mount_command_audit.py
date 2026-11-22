@@ -42,6 +42,25 @@ class NativeMountAuditTests(unittest.TestCase):
         self.assertIn("ROUND 79G: MOUNT COMMAND/TERRAIN AUDIT COMPLETE",report)
         self.assertIn("NATIVE MOUNTS AND SAVE INTEGRATION: NOT YET ACTIVE",report)
 
+    def test_prefixed_mount_symbols_detected_without_numeric_assumptions(self):
+        # Atlas screenshots are NOT numeric/ABI specifications for
+        # HollowDeep; these are synthetic spellings only.
+        for name in ("PMOUNT","CMOUNT","OMOUNT","MMOUNT"):
+            with self.subTest(name=name):
+                self.assertTrue(mount.SYMBOL.search(
+                    "#define "+name+" 999 /* synthetic fixture */"))
+        self.assertFalse(mount.SYMBOL.search("#define PFLIGHT 75"))
+
+    def test_absent_mount_flag_is_not_fabricated(self):
+        (self.src/"mtype.h").write_text("#define PNOSUM 74\n")
+        output=io.StringIO()
+        with contextlib.redirect_stdout(output):
+            mount.audit(mount.source_dir(self.src))
+        data=output.getvalue()
+        self.assertIn("mtype.h matches=0",data)
+        self.assertNotIn("PMOUNT 75",data)
+        self.assertIn("NATIVE MOUNTS AND SAVE INTEGRATION: NOT YET ACTIVE",data)
+
     def test_production_refused(self):
         with self.assertRaisesRegex(ValueError,"disposable"):
             mount.source_dir("/srv/hollowdeep/world/src_3.00")
