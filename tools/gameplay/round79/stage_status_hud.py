@@ -57,6 +57,7 @@ def staged_status(source,destination):
         raise ValueError("Status HUD already present in source")
     make=(source/"Makefile").read_text(encoding="latin-1")
     player=(source/"player.c").read_text(encoding="latin-1")
+    original_player=player
     once(make,"OBJECTS += hd_ansi_choice.o\nendif\n","ANSI Makefile flag")
     if "HD79_STATUS_ANSI_PLAYTEST" not in make:
         raise ValueError("Creation ANSI is not enabled in this candidate")
@@ -100,13 +101,9 @@ def staged_status(source,destination):
         (destination/"Makefile").write_text(patched_make,encoding="latin-1")
         for name in NEW_FILES:
             shutil.copyfile(HERE/name,destination/name)
-        if ((source/"Makefile").read_text(encoding="latin-1") != make or
-            (source/"player.c").read_text(encoding="latin-1") !=
-                player[:start].split("#ifdef HD79_STATUS_HUD_PLAYTEST")[0]+old+player[last:].split("\n#endif /* HD79_STATUS_HUD_PLAYTEST */")[0]):
-            # The source tree is immutable; do not modify it even if this
-            # conservative second consistency check rejects concurrent edits.
-            if (source/"Makefile").read_text(encoding="latin-1")!=make:
-                raise ValueError("Concurrent native Makefile edit")
+        if ((source/"Makefile").read_text(encoding="latin-1")!=make or
+            (source/"player.c").read_text(encoding="latin-1")!=original_player):
+            raise ValueError("Concurrent source edit detected")
         if not (destination/"hd_status_hud.c").is_file():
             raise ValueError("Missing newly added status formatter")
     except Exception:
