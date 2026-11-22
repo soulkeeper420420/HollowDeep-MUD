@@ -1281,3 +1281,27 @@ performs an AST syntax preflight over the staging, test and socket
 scripts before the unit tests and private gameplay build.
 The previous private accepted Round79K ELF32 source is reused
 unchanged for the next full test. Production deployment: NONE.
+
+
+### Round79P second private attempt — duplicated staging test repaired
+
+The second private Linode attempt passed the newly added
+stage_rest_breath.py syntax preflight but failed the next AST check:
+test_stage_rest_breath.py line 105 contained an unterminated K&R
+signature regex. The test file also contained accidentally duplicated
+test functions and an extra copy of its main entrypoint below the
+first one, from an earlier interrupted edit.
+
+The complete file was reconstructed to a single canonical regression
+suite of ten test methods, including a valid anchored regex covering
+free_crt(crt_ptr) and die(crt_ptr,att_ptr). The private runner
+now parses every relevant Python source and additionally checks
+unique staging function definitions and a unique ten-test staging
+class before starting the tests, staging or compiling native game
+source.
+
+**No Round79P source staging, native +15 compile, or real socket test
+ran in this attempt.** The previously accepted Round79K native ELF32
+game was not modified and no production deployment occurred.
+The reported Python apport/excepthook error during exception display
+is ancillary to the underlying test syntax error, not a MUD failure.
