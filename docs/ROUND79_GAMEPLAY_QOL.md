@@ -614,3 +614,67 @@ a verified failure/recovery protocol.
 Remaining: native wilderness movement Breath charging, timed regeneration,
 numeric prompt, and mount ownership/Endurance/stables. No live deployment
 or restart without explicit user approval.
+
+
+## Round 79J — Private atomic room + Breath co-checkpoint
+
+The uploaded Round 79I source inspection confirmed:
+- Native update_ply() is the periodic player update function, with
+  LT_HEALS controlling existing HP/MP recovery; this is NOT evidence that
+  Breath recovery should fire on every command.
+- The existing hd_wilderness_move()/hd_wilderness_go() wrappers call native
+  move()/go(), then run hd_wilderness_after_move() only after the call.
+  The existing callback checks previous/current room and redraws the map
+  only for changed wilderness rooms. It is not an atomic save.
+- The native hd_player_store.c calls write_crt_to_mem(), hd_receipt_encode(),
+  hd_compress_bounded() and hd_atomic_player_snapshot() inside an exclusive
+  player-directory lock. This is a proven single-file atomic boundary for
+  both the serialized player room and the new Breath receipt.
+- The uploaded report begins midway through command6.c due to text
+  truncation. The exact move()/go() definitions and their exit decisions
+  were NOT visible in the uploaded portion. Claiming a completed
+  pre-move exhaustion hook on that evidence would be unsafe.
+
+This milestone adds a **source-gated private native co-checkpoint API**
+without connecting the gameplay command table yet:
+
+- hd_breath_move_checkpoint.h/.inc implements a new atomic store operation
+  accepting a post-success live player, the previously saved room, the
+  previously read Breath receipt, validated wilderness membership and time.
+- Under the original player directory lock, it rejects unexpected
+  original room or stale Breath receipt. It calculates the Breath debit
+  and serializes BOTH the moved player's new room and the resulting HDTR1
+  Breath receipt into one hd_atomic_player_snapshot() call.
+- On failure, no state is acknowledged; uncertain rename returns
+  UNCERTAIN and requires re-reading BOTH room and Breath before
+  allowing another move. An exhausted player can checkpoint a move
+  into a non-wilderness interior for zero Breath cost.
+- It preserves equipped/inventory pointers through the same snapshot
+  normalization as hd_store_save_live_player(). It never changes the
+  ELF32 creature ABI and retains all existing receipt entries.
+- stage_breath_move_checkpoint.py copies the verified private Round79H
+  store into a fresh private Round79J build. It changes only the native
+  player-store include and Makefile feature gates, and refuses private
+  path symlinks, duplicate stages, or source-anchor drift.
+- test_native_breath_move_checkpoint.c uses the established synthetic
+  native pet/player fixture. It exercises combined room and Breath
+  commits, stale old room, stale receipt, failed rename, uncertain
+  rename, exhaustion, and a free indoor return.
+- native_move_go_precise.py fixes the excessive source output from
+  Round79I by extracting only the exact K&R move()/go() function bodies
+  with a small fixed-size output limit. It refuses production code.
+- private_room_breath_checkpoint.sh compiles the ELF32 store tests,
+  builds the candidate engine with feature gates, runs the read-only
+  move/go audit, and checks the live service PID/hash are unchanged.
+
+**Round79J storage is staged, not yet validated on Linode; actual gameplay
+movement still does not consume Breath.** The checkpoint helper does
+not authorize an exit, roll back a live moved character after a denied
+write, or reconcile on-disk state after an uncertain commit; those
+responsibilities need native movement integration and real socket tests.
+It would be incorrect to connect it to movement before inspecting the
+full move/go bodies, and before proving no room or inventory desync can
+occur on a failed update.
+
+Mount Endurance and ownership will use the same verified durability
+principle. No live-world changes or service restart are authorized.
