@@ -55,11 +55,26 @@ static int hd79_confirm_uncertain(const char *name,int target,
     return ok ? 0:-1;
 }
 
+int hd79_breath_status(creature *player,int *current)
+{
+    hd_breath_record state;
+    time_t stamp;
+    if (!player || !current || player->type!=PLAYER ||
+        player->class>=CARETAKER) return -1;
+    stamp=time((time_t *)0);
+    if (stamp<=0 || (unsigned long)stamp>UINT32_MAX ||
+        hd79_ensure_breath(player,(uint32_t)stamp,&state))
+        return -1;
+    *current=(int)state.current;
+    return 0;
+}
+
 int hd79_breath_precommit(creature *player,room *destination)
 {
     hd_breath_record before,after;
     creature proposed;
     uint32_t now;
+    time_t stamp;
     int wilderness,rc;
 
     if (!player || !destination || !player->parent_rom)
@@ -70,8 +85,9 @@ int hd79_breath_precommit(creature *player,room *destination)
     if (destination==player->parent_rom ||
         destination->rom_num==player->rom_num)
         return -1;
-    now=(uint32_t)time((time_t *)0);
-    if (!now) return -1;
+    stamp=time((time_t *)0);
+    if (stamp<=0 || (unsigned long)stamp>UINT32_MAX) return -1;
+    now=(uint32_t)stamp;
 
     wilderness=hd79_wilderness_tile(destination->rom_num);
     if (wilderness<0) {
@@ -82,7 +98,7 @@ int hd79_breath_precommit(creature *player,room *destination)
         print(player->fd,"Your Breath record cannot be verified. Travel denied.\n");
         return -1;
     }
-    if (!hd_breath_can_move((int)before.current,wilderness)) {
+    if (hd_breath_can_move((int)before.current,wilderness)<=0) {
         print(player->fd,"You are too exhausted to continue through the wilderness. Rest or retreat.\n");
         return -1;
     }
