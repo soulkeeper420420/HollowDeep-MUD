@@ -114,10 +114,18 @@ class TravelStageTests(unittest.TestCase):
         path.write_text(source.replace(original,variant))
         mod.stage(self.src,self.dst)
         staged=(self.dst/"player.c").read_text()
-        self.assertIn("hd79_breath_pulse(ply_ptr,t)",staged)
-        self.assertIn(variant,staged)
-        self.assertLess(staged.index("hd79_breath_pulse(ply_ptr,t)"),
-                        staged.index("ply_ptr->lasttime[LT_HOURS].interval"))
+        # Insertion is intentionally between the two original native
+        # statements. Never demand that they remain adjacent.
+        clock="\tt\t=\ttime ( 0 ) ;\n"
+        hours="\tply_ptr->lasttime[LT_HOURS].interval\t+="
+        pulse="hd79_breath_pulse(ply_ptr,t);"
+        self.assertEqual(staged.count(clock),1)
+        self.assertEqual(staged.count(hours),1)
+        self.assertEqual(staged.count(pulse),1)
+        self.assertLess(staged.index(clock),staged.index(pulse))
+        self.assertLess(staged.index(pulse),staged.index(hours))
+        self.assertIn("#ifdef HD79_BREATH_TRAVEL_PLAYTEST\n",staged)
+        self.assertIn("#endif\n"+hours,staged)
 
     def test_ambiguous_update_clock_denied(self):
         path=self.src/"player.c"
