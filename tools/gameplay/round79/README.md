@@ -743,3 +743,55 @@ native MUD's character save or command tables. Real ownership
 and Endurance cannot be marked playable until an atomic
 player receipt/checkpoint and real private socket tests
 pass. No production deployment is authorized.
+
+
+## Round79S PASS — Round79T two-receipt mount wire and native store limits
+
+Round79S passed private ELF32 deterministic tests on Linode:
+6 mount species, owner-epoch validation, single active rider,
+same-stable deposit/retrieval, exact Endurance-only charging,
+replay/stale-state denial and exhausted safe retreat. Production
+PID/binary and accepted private game unchanged.
+
+Round79T, staged in GitHub but NOT yet run on Linode:
+- \`hd79_mount_wire.h/.c\`: a canonical 64-byte on-wire
+  roster representation split into **two 64-hex fragments**,
+  with magic/version, 24-hex owner epoch, full revision,
+  six bounded slots including 24-bit stable room, and
+  CRC32 spanning both fragments.
+- \`test_hd79_mount_wire.c\`: deterministic fixture for
+  empty/full rosters, stable and mounted fields, bad hex,
+  uppercase, mixed-generation fragments, checksum,
+  rejected overwide stable ID and full revision range.
+- \`audit_native_mount_receipt_capacity.py\`: read-only
+  private \`hd_player_store.c\`, \`treasure_receipt.h/.c\`,
+  \`hd_breath_store.inc\`, \`hd_conjure_store.inc\`
+  receipt capacity, reserved ID and snapshot inspection.
+- \`test_audit_native_mount_receipt_capacity.py\`: seven
+  synthetic safety tests, including ELF32/production source
+  and symlink denial.
+- \`private_mount_wire_audit_round79t.sh\`: one command
+  runs the audit regressions, native ELF32 wire fixture,
+  read-only receipt audit and unchanged production checks.
+
+Run using a fresh \`/root/hollowdeep-dev/round79t-*\` pinned
+checkout and accepted private Round79P source at
+\`/tmp/hd-army-game-round79rest-JQgo3wi5/src\`:
+
+    bash tools/gameplay/round79/private_mount_wire_audit_round79t.sh \
+      /root/hollowdeep-dev/round79t-PRIVATE \
+      /tmp/hd-army-game-round79rest-JQgo3wi5/src
+
+Expected marker ONLY after test execution:
+\`ROUND79T: PRIVATE MOUNT WIRE AND NATIVE RECEIPT AUDIT PASS\`.
+
+Important: The wire format is **not** a native save
+implementation. The two new reserved claim IDs have not been
+assigned, and the native player receipt set may have capacity
+limits that must be inspected. Both fragments require ONE
+atomic player snapshot/CAS alongside existing Conjure,
+Necromancer and Breath receipts. CRC32 detects random
+corruption/mixed fragments, not malicious spoofing;
+authorization and epoch binding remain server-side.
+Never copy a partially tested candidate or its fixtures to
+the live world/server. Production deployment NONE.
