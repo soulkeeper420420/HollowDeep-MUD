@@ -210,3 +210,38 @@ The prior attempt produced:
 It did not reach native source audit or mount/Endurance rule
 compilation. Run the corrected private Round79R tool in a new
 pinned checkout before claiming source-audit or ELF32 PASS.
+
+
+## Round79R FINAL — mount rules + native command/flag audit PASS
+
+The user's private Linode run \`round79r-Vbd8C3ao\` completed:
+- Eight Python native-source audit/safety tests PASS.
+- Existing foot-vs-mounted Endurance/terrain planner compiled and
+  exercised as ELF32: \`ROUND 79G: FOOT BREATH / MOUNT ENDURANCE /
+  TERRAIN RULES PASS\`.
+- Read-only native command/flag audit PASS on the already accepted
+  \`/tmp/hd-army-game-round79rest-JQgo3wi5/src\`.
+- Actual command table \`global.c matches=0\` for mount, dismount,
+  stable, ride, etc.; not evidence the words are available in every
+  command/alias context, so re-check exact registration before use.
+- Actual \`mstruct.h matches=0\` and \`mtype.h matches=0\` for
+  selected mount/Endurance symbols. Do NOT assign Atlas's displayed
+  MOUNT number 75 to any HollowDeep native bit.
+- Verified wilderness \`read_tile()\` and
+  \`hd79_wilderness_tile()\` in \`wilderness.c\`, along with
+  \`hd_wilderness_move/go()\` wrappers around native movement.
+  The map display has an independent ephemeral session structure,
+  not an ownership record.
+- Additional grep matches in Conjure's dragon spell and
+  \`#error "Warlock requires the stable Necromancer receipt format"\`
+  do NOT represent mounts or stables.
+- Production PID and binary hash and accepted ELF32 binary
+  checked unchanged; \`PRODUCTION DEPLOYMENT: NONE\`.
+
+**Round79R accepted as a read-only audit and pure rule validation.**
+It does NOT prove native mount ownership, stable interaction,
+Endurance debit, or persistence, which remain unimplemented.
+The next independent step should define a bounded **epoch-bound**
+mount roster and one-active-mount transition policy and test
+ownership/Endurance/rest/relog/stabling separately from the live
+game before integrating with atomic save receipts.
