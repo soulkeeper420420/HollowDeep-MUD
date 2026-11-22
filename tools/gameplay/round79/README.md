@@ -350,3 +350,56 @@ script neither changes the native movement commands nor charges Breath
 during real travel. It cannot be deployed as a finished player feature:
 pre-move exit permission, post-move rollback/reconciliation, optional
 mount Endurance, numeric HUD and recovery remain future integration.
+
+
+## Round79K: Native Breath movement, true HUD and recovery private gate
+
+The verified private Round79J ELF32 co-checkpoint and the newly
+uploaded exact move()/go() report establish a safe pre-transfer
+integration point: after all legacy exit, destination level/capacity
+tests and before room broadcast/transfer and traps.
+
+Native-only staged files under the new explicit private gate
+BREATH_TRAVEL_PLAYTEST=1:
+- stage_breath_travel.py: copy verified Round79J source to new
+  /tmp/hd-army-game-round79travel-*/src; verify exact native anchors,
+  deny production paths/symlinks and leave old source unchanged
+- hd79_breath_travel_runtime.h/.c: validate map tile, initialize/read
+  a one-time saved Breath receipt, deny exhausted wilderness entry,
+  co-checkpoint room+Breath before real room movement and reconcile
+  uncertain atomic renames
+- wilderness.c injected exact HDW1 map tile lookup (not simply a
+  wilderness room-ID guess)
+- command2.c move() / command6.c go() gated pretransfer call after
+  original permission checks, before player or follower transfers
+- player.c saved numeric ANSI/plain Breath HUD and a guarded +5
+  recovery attempt after a native update_ply callback and at least
+  45 seconds of elapsed, durably recorded recovery time
+- test_stage_breath_travel.py and test_native_breath_travel.c:
+  source safety, native synthetic file save and fail injection
+- check_breath_travel_socket.py: disposable network namespace/chroot,
+  synthetic 2-tile wilderness native world, directional and named
+  traversal, denied exits, HUD and reconnect
+- private_breath_travel.sh: one-shot private tests and game build;
+  verifies no production binary or service PID changed
+
+The initial fixture requires root in a separate network namespace.
+The private runner expects a NEW root-only Round79K work directory
+containing the pinned GitHub checkout under repo/, plus the validated
+Round79J source directory:
+
+    bash tools/gameplay/round79/private_breath_travel.sh \
+      /root/hollowdeep-dev/round79k-PRIVATE \
+      /tmp/hd-army-game-round79move-VERIFIED/src
+
+**The new native code is not yet tested on Linode**. No claim of
+real in-game Breath debits, timed recovery or reconnecting is made
+until the private ELF32 socket test passes. The rest-specific +15,
+mount ownership/Endurance, stables and dragon flight are not wired.
+Production deployment is neither requested nor performed.
+
+Before any live rollout, also audit alternate teleport/admin room
+changes and crash behavior after an atomic precommit but before traps
+and followers finish, plus save throughput with many connected
+players. Keep all socket logs, fixtures, private paths and
+credentials outside public GitHub.
