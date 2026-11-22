@@ -1115,3 +1115,43 @@ dispatch/lifecycle source must be inspected before those changes
 can safely proceed. The 45-second rest threshold is a conservative
 anti-spam implementation default to be confirmed in real gameplay.
 No private source excerpts or log files are committed.
+
+
+### Round79N FINAL PASS and Round79O native command-execution trace
+
+The user's private Linode Round79N results confirm:
+- 5/5 source-audit/safety unit tests PASS.
+- Standalone C99 explicit rest-session policy PASS, including:
+  at least 45 uninterrupted seconds, last-second rest denial,
+  repeat-command anti-spam, durable timestamp gating,
+  interruption/restart, login reset and clock rollback rejection.
+- Read-only native dispatch/lifecycle audit PASS.
+- Accepted Round79K private ELF32 baseline and production PID/binary
+  verified unchanged; production deployment NONE.
+- **No native rest command or +15 Breath recovery hook was installed.**
+  This is policy validation, not native rest gameplay validation.
+
+From private native source, \`action.c\` sleep/sit/stand/relax remain
+generic emotes. \`global.c\` command mappings provide movement,
+attack/kill, cast, quit, save and social actions. Player \`update_ply()\`
+currently runs the known +5 Breath pulse. The passive death handler
+in \`creature.c\` and disconnect/lifecycle references must be included
+when introducing an ephemeral resting session. The Round79N scanner
+did not isolate the actual command-function-pointer *invocation*.
+
+Round79O adds a targeted read-only scanner that searches all native
+private C translation units for the genuine \`cmdlist[].cmdfn\`
+function-pointer call site and its enclosing K&R function, along
+with nearby session creation/disconnection, save, death and combat
+entrypoints. The scanner and its unit tests reject unsafe sources,
+ELF64, symlinked source and missing/ambiguous command-call evidence;
+it prints bounded excerpts into a root-only private report on Linode.
+
+Use \`private_trace_command_execution.sh\` from a fresh pinned checkout,
+with accepted Round79K ELF32 source under
+\`/tmp/hd-army-game-round79travel-*/src\`.
+This audit changes no native gameplay code, production files or
+service. It is **not** proof of +15 native resting behavior.
+The following implementation must add an exact explicit rest command,
+session-state ownership/cleanup and timer-gated +15 receipt updates,
+then compile/test the real private ELF32 native socket path.
