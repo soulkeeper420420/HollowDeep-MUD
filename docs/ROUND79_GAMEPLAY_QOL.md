@@ -590,3 +590,27 @@ The native timer must not award repeatable recovery on command spam.
 Mount travel will then choose between two saved resources: foot player
 Breath and the currently ridden mount's Endurance. Mount stabling,
 ownership and riding commands remain future integrations.
+
+
+### Round 79I private read-only source audit — verified
+
+The user reported this isolated Linode result:
+- 6/6 source/parser/path-security unit tests passed.
+- Read-only native move()/go(), room-commit, atomic-save source audit PASS.
+- Private Breath-enabled ELF32 baseline and production service/binary unchanged.
+- Production deployment: NONE.
+
+This is an audit success only, not native movement/gameplay integration.
+The full private movement-atomicity-report.txt has not been supplied in
+the test output and should not be committed to GitHub. Review its
+destination-resolution, authorization, room-change, and player-record
+transaction excerpts before choosing an ABI-safe hook. Preserve
+correctness across aborted movement, safe retreat, normal save, restart,
+rename/short-write faults, pet/Conjure receipts, and player reconnect.
+Do not charge just because a direction command was attempted, and do
+not debit Breath separately from durable movement position without
+a verified failure/recovery protocol.
+
+Remaining: native wilderness movement Breath charging, timed regeneration,
+numeric prompt, and mount ownership/Endurance/stables. No live deployment
+or restart without explicit user approval.
