@@ -97,7 +97,7 @@ for name in names:
                 raise RuntimeError("Rest staging tests class duplicated/missing")
             methods=[n.name for n in classes[0].body
                      if isinstance(n,ast.FunctionDef) and n.name.startswith("test_")]
-            if len(methods)!=len(set(methods)) or len(methods)<10:
+            if len(methods)!=len(set(methods)) or len(methods)<20:
                 raise RuntimeError("Rest staging tests duplicated/missing")
     print("PASS: syntax and definitions",name)
 PY
