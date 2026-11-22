@@ -1333,3 +1333,33 @@ and unrelated functions with a superficially matching condition.
 The updated Round79P candidate still requires private ELF32
 atomic fixture, full native build and real isolated socket PASS
 before any real gameplay claims can be made.
+
+
+### Round79P fourth private attempt — native global.c sleep command row
+
+The fourth pinned Linode Round79P run passed Python syntax preflight
+and 26 private native staging/audit regression tests, then refused
+private ELF32 staging before any source copy:
+\`Exact native source anchor drift: dedicated rest command beside old
+sleep emote\`.
+
+The native \`global.c\` social command table uses its own legacy
+tab/space/trailing-comment formatting; matching the fixed string
+\`  { "sleep", 100, action },\` was too brittle. The replacement
+stager now resolves the single real \`cmdlist[] = {\` table, matches
+exactly one \`sleep\` action row with command number 100 regardless
+of tabs or trailing comments, ensures it falls inside the command
+table, rejects pre-existing \`rest\` rows, and inserts one
+feature-gated rest row without rewriting the original sleep emote.
+Missing/duplicate/reassigned rows or missing table boundary
+cause immediate refusal rather than guessing.
+
+Six new unit tests cover tab-indented/native comments, duplicate
+sleep entries, unexpected command ID/callback, already registered
+rest, sleep outside the native command table, and absent native
+table. The private runner requires all 20 rest staging tests before
+proceeding, alongside the existing action/dispatch tests.
+
+**No new private native ELF32 test or gameplay socket run has passed
+yet; production deployment remains NONE.** The already accepted
+Round79K private baseline remains unmodified.
