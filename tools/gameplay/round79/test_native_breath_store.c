@@ -96,6 +96,12 @@ int main(void)
 
     /* Existing Necromancer pet receipt must survive an independent Breath
        transaction; don't add fake pets or create gameplay objects. */
+    assert(hd_store_load_player(name,&loaded)==HD_STORE_OK);
+    assert(loaded);
+    loaded->level=10;
+    assert(hd_store_save_live_player(name,loaded)==HD_STORE_OK);
+    free_crt(loaded);
+    loaded=NULL;
     assert(hd_breath_store_read(name,&a)==HD_BREATH_STORE_ABSENT);
     assert(hd_breath_store_init(name,2500,&a)==HD_BREATH_STORE_OK);
     assert(hd_breath_store_step(name,&a,
