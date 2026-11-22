@@ -69,7 +69,8 @@ trap finish EXIT
 echo "=== ROUND 79K: SOCKET-ONLY CONTINUATION ==="
 echo "=== 1. VERIFY CORRECT PRIVATE SOCKET SUPPORT PATHS ==="
 (cd "$HERE" && python3 -m unittest -q \
- test_stage_breath_travel.TravelStageTests.test_socket_harness_helpers_resolve_from_tools_tree)
+ test_stage_breath_travel.TravelStageTests.test_socket_harness_helpers_resolve_from_tools_tree \
+ test_breath_socket_reconnect)
 
 echo "=== 2. REUSE PASSED PRIVATE ELF32 GAME FOR REAL SOCKET REPLAY ==="
 unshare --net --mount --fork bash -c '
