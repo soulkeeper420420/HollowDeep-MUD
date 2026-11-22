@@ -56,7 +56,7 @@ finish() {
 trap finish EXIT
 
 echo "=== ROUND79R: PRIVATE MOUNT FLAG AND COMMAND FOUNDATION ==="
-echo "=== 1. RUN SIX PRIVATE ELF32 AUDIT SAFETY TESTS ==="
+echo "=== 1. RUN EIGHT PRIVATE ELF32 AUDIT SAFETY TESTS ==="
 (cd "$HERE" && python3 -W error::ResourceWarning -m unittest -q \
   test_native_mount_command_audit)
 
