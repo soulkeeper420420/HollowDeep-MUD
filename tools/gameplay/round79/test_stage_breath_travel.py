@@ -164,6 +164,25 @@ class TravelStageTests(unittest.TestCase):
         self.assertEqual(runtime.count('#include "hd_player_store.h"'),1)
         self.assertEqual(runtime.count('#include "mextern.h"'),1)
 
+    def test_socket_harness_helpers_resolve_from_tools_tree(self):
+        # This catches the exact Round79K socket failure without launching
+        # a server or rerunning ELF32 native fixture compilation.
+        root=mod.HERE.parents[2]
+        necro=root/"tools"/"necromancer"
+        script=mod.HERE/"check_breath_travel_socket.py"
+        self.assertTrue(script.is_file())
+        source=script.read_text(encoding="utf-8")
+        self.assertIn('NECRO=REPO/"tools"/"necromancer"',source)
+        self.assertNotIn('NECRO=REPO/"necromancer"',source)
+        for relative in (
+            "corpse/gameplay_smoke.py",
+            "cache/cache_gameplay.py",
+            "petruntime/gameplay/help",
+        ):
+            target=necro/relative
+            self.assertTrue(target.exists(),str(target))
+            self.assertFalse(target.is_symlink(),str(target))
+
     def test_production_source_denied(self):
         with self.assertRaisesRegex(ValueError,"Only disposable"):
             mod.stage(Path("/srv/hollowdeep/world/src_3.00"),self.dst)
