@@ -21,7 +21,7 @@ KEYS = {
     "tick": re.compile(r"\b(?:LT_HEALS|LT_REGEN|recover|regen|regenerat|"
                        r"rest|resting|tick|interval)\b",re.I),
 }
-MAX_LINES=540
+MAX_LINES=1200
 WIDTH=190
 
 def validate(raw):
@@ -60,9 +60,9 @@ def inspect(root):
         # Keep matched body signatures and bounded nearby context, prioritizing
         # real movement identifiers over generic room struct references.
         for kind,max_hits,back,ahead in (
-                ("movement",12,5,18),
-                ("tick",8,4,10),
-                ("room",6,1,5)):
+                ("movement",3,5,18),
+                ("tick",2,4,10),
+                ("room",2,1,5)):
             hits=[i for i,line in enumerate(lines) if KEYS[kind].search(line)]
             for index in hits[:max_hits]:
                 for i in range(max(0,index-back),min(len(lines),index+ahead+1)):
