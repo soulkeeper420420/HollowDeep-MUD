@@ -63,7 +63,8 @@ def native_cleanup_definition(src,symbol):
     pattern=re.compile(r'(?m)^[ \t]*(?:void[ \t]+|int[ \t]+)?'+
                        re.escape(symbol)+
                        r'[ \t]*\([ \t]*([A-Za-z_]\w*)[ \t]*'
-                       r'(?:,[ \t]*[A-Za-z_]\w*[ \t]*)*\)[ \t]*    definitions=[]
+                       r'(?:,[ \t]*[A-Za-z_]\w*[ \t]*)*\)[ \t]*$')
+    definitions=[]
     for path in sorted(src.glob("*.c")):
         lines=path.read_text(encoding="latin-1").splitlines(keepends=True)
         plain=[line.rstrip("\r\n") for line in lines]
