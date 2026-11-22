@@ -22,9 +22,15 @@ cmd *cmnd;
 }
 '''
 GLOBAL='''#include "mstruct.h"
+struct {
+  char *cmdstr;
+  int cmdno;
+  int (*cmdfn)();
+} cmdlist[] = {
   { "nod", 100, action },
   { "sleep", 100, action },
   { "stand", 100, action },
+};
 '''
 RUNTIME='''#include "hd79_breath_travel_runtime.h"
 int hd79_breath_pulse(creature *player,long tick)
@@ -210,6 +216,69 @@ class RestStageTests(unittest.TestCase):
         rest.stage(self.src,self.dst)
         output=(self.dst/"command1.c").read_text()
         self.assertEqual(output.count("hd79_rest_before_command(Ply[fd].ply"),1)
+
+    def test_native_sleep_table_row_with_tabs_and_trailing_comment(self):
+        path=self.src/"global.c"
+        plain=path.read_text()
+        original='  { "sleep", 100, action },'
+        variant='\t{\t"sleep"\t,\t100 ,\taction\t},  /* native social */'
+        self.assertEqual(plain.count(original),1)
+        path.write_text(plain.replace(original,variant))
+        rest.stage(self.src,self.dst)
+        patched=(self.dst/"global.c").read_text()
+        self.assertIn(variant,patched)
+        self.assertEqual(patched.count(variant),1)
+        self.assertIn('\t{ "rest", 100, hd79_rest_command },',patched)
+        self.assertLess(patched.index('hd79_rest_command },'),
+                        patched.index(variant))
+        self.assertIn('#ifdef HD79_REST_PLAYTEST',patched)
+
+    def test_duplicate_native_sleep_rows_fail_closed(self):
+        path=self.src/"global.c"
+        old='  { "sleep", 100, action },'
+        self.assertEqual(path.read_text().count(old),1)
+        path.write_text(path.read_text().replace(old,old+"\n"+old))
+        with self.assertRaisesRegex(ValueError,"dedicated rest command"):
+            rest.stage(self.src,self.dst)
+        self.assertFalse(self.dst.exists())
+
+    def test_retargeted_native_sleep_row_denied(self):
+        path=self.src/"global.c"
+        original=path.read_text()
+        for bad in ('  { "sleep", 102, action },',
+                    '  { "sleep", 100, hd79_rest_command },'):
+            with self.subTest(row=bad):
+                path.write_text(original.replace(
+                    '  { "sleep", 100, action },',bad))
+                with self.assertRaisesRegex(ValueError,"dedicated rest command"):
+                    rest.stage(self.src,self.dst)
+                self.assertFalse(self.dst.exists())
+
+    def test_existing_native_rest_entry_denied(self):
+        path=self.src/"global.c"
+        text=path.read_text()
+        path.write_text(text.replace('  { "sleep", 100, action },',
+            '  { "rest", 100, action },\n  { "sleep", 100, action },'))
+        with self.assertRaisesRegex(ValueError,"rest command already registered"):
+            rest.stage(self.src,self.dst)
+        self.assertFalse(self.dst.exists())
+
+    def test_sleep_outside_command_table_refused(self):
+        path=self.src/"global.c"
+        text=path.read_text()
+        row='  { "sleep", 100, action },\n'
+        self.assertEqual(text.count(row),1)
+        path.write_text(text.replace(row,"")+"\n"+row)
+        with self.assertRaisesRegex(ValueError,"sleep not in native cmdlist"):
+            rest.stage(self.src,self.dst)
+        self.assertFalse(self.dst.exists())
+
+    def test_missing_real_native_command_table_refused(self):
+        path=self.src/"global.c"
+        path.write_text(path.read_text().replace('cmdlist[] = {','fakecmd[] = {'))
+        with self.assertRaisesRegex(ValueError,"cmdlist table"):
+            rest.stage(self.src,self.dst)
+        self.assertFalse(self.dst.exists())
 
     def test_missing_true_native_function_pointer_denied(self):
         path=self.src/"command1.c"
