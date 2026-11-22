@@ -104,17 +104,22 @@ int hd_breath_record_step(const hd_breath_record *expected,
 {
     hd_breath_record updated;
     int value;
-    if (!next || !hd_breath_record_valid(expected) ||
-        expected->revision==UINT32_MAX || !now) return -1;
+    if (!next || !hd_breath_record_valid(expected)) return -1;
     updated=*expected;
 
+    /* A safe retreat to an interior never costs Breath or increments
+       revisions. Even a clock failure or exhausted revision space must
+       not trap a player inside wilderness. */
+    if (operation==HD_BREATH_OP_TRAVEL &&
+        !resting && wilderness==0) {
+        *next=updated;
+        return 0;
+    }
+    if (expected->revision==UINT32_MAX || !now) return -1;
+
     if (operation==HD_BREATH_OP_TRAVEL) {
-        if (resting || (wilderness!=0 && wilderness!=1))
+        if (resting || wilderness!=1)
             return -1;
-        if (!wilderness) {
-            *next=updated;
-            return 0;
-        }
         value=hd_breath_after_move((int)expected->current,1);
     } else if (operation==HD_BREATH_OP_RECOVER) {
         if (wilderness || (resting!=0 && resting!=1) ||
