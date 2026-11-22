@@ -204,3 +204,38 @@ and verifies the production PID and live binary are unchanged.
 The next required milestone is real socket gameplay with debit,
 recovery, atomic failure denial, save/reconnect and the actual colored
 Breath counter. Do not label this milestone complete yet.
+
+
+## Round 79G — Mounts as the purpose of wilderness Breath
+
+The intended end-state is **separate rider Breath and mount Endurance**:
+walking consumes the player's Breath, while riding a horse, warhorse, dire
+wolf, nightmare, griffin or dark dragon consumes mount Endurance instead.
+Mounts are independent of the universal Conjure companion and Necromancer
+raised-undead capacity. Terrain skills depend on the validated wilderness
+tile from wilderness.map; no mounts are allowed to bypass locked native
+exits or room permissions, even when described as flying.
+
+See docs/ROUND79G_MOUNTS_AND_BREATH.md for the proposed six mount profiles,
+commands, stabling, persistence, safe retreat and balance constraints.
+
+Native-independent files:
+- hd_mount_travel.h/.c: species profiles, destination terrain checks,
+  foot-Breath/mount-Endurance movement preview and successful-step charge.
+- test_mount_travel.c: exhaustion, terrain restrictions, safe retreat,
+  aborted movement, stale values and riding with exhausted foot Breath.
+- native_mount_command_audit.py: read-only private command/terrain audit.
+- private_mount_rules.sh: private ELF32 C test, audit and production safety.
+
+Quick standalone test (no native MUD integration):
+
+    cc -m32 -std=gnu89 -O1 -Wall -Wextra -Werror -I. \
+      hd_mount_travel.c hd_wilderness_breath.c test_mount_travel.c \
+      -o /tmp/hd-mount-travel-test
+    /tmp/hd-mount-travel-test
+
+The isolated Round 79G mount rules are **new and not yet validated on
+Linode**. No command, mount ownership, stabling, flying, movement speed,
+Endurance persistence or game-native Breath debit has been added to the
+running game. The atomic Breath-store source audit remains the gate before
+implementation. Do not publish private source reports or player data.
