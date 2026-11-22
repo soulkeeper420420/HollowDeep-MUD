@@ -28,8 +28,11 @@ if (os.geteuid()!=0 or
     not SOURCE.parent.name.startswith("hd-army-game-round79rest-")):
     raise SystemExit("Private root, network namespace and travel source required")
 exe=SOURCE/"frp.new"
-if exe.is_symlink() or not exe.is_file() or exe.open("rb").read(5)!=b"\x7fELF\x01":
+if exe.is_symlink() or not exe.is_file():
     raise SystemExit("Missing verified private ELF32 game")
+with exe.open("rb") as verified_binary:
+    if verified_binary.read(5)!=b"\x7fELF\x01":
+        raise SystemExit("Missing verified private ELF32 game")
 
 HERE=Path(__file__).resolve().parent
 REPO=HERE.parents[2]
