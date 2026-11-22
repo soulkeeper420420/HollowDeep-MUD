@@ -22,8 +22,8 @@ int main(void)
         for(m=1;m<=60;m++) {
             r=hd_encounter_risk(p,m);
             assert(r>=HD_ENCOUNTER_TRIVIAL && r<=HD_ENCOUNTER_DEADLY);
-            assert(r==hd_encounter_risk(m+1-(m>=60),p+1-(p>=60)) ||
-                   r!=HD_ENCOUNTER_INVALID);
+            if(m<60) assert(hd_encounter_risk(p,m+1)>=r);
+            if(p<60) assert(hd_encounter_risk(p+1,m)<=r);
         }
     puts("ROUND 79A: ENCOUNTER RISK RULES PASS (3600 VALID LEVEL PAIRS)");
     puts("NATIVE CONSIDER COMMAND: NOT YET INTEGRATED");
