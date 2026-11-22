@@ -1011,3 +1011,34 @@ add an explicit, session-safe resting state with rest/stand/reset
 semantics and one durable +15 award per eligible timed pulse. Avoid
 changing native creature ABI or old save formats. All private source
 excerpts/reports stay outside GitHub.
+
+
+### Round 79M staged — exact native action() and social command audit
+
+Round79L established the native update_ply() timing and the generic
+social-command routing of sleep/sit/stand to action. A normal +5 Breath
+pulse is already tested in isolated gameplay, but +15 recovery requires
+a real verified resting state that the current native source audit has
+not demonstrated. Implementing recovery from the social command name
+alone could let a player continue fighting or moving while getting
+a resting bonus.
+
+This milestone publishes a PRIVATE read-only action audit:
+- audit_native_rest_actions.py locates exactly one actual K&R/native
+  action() implementation among all private native C modules, extracts
+  its body and checks command-table mappings to reveal actual
+  side effects. The script also inspects native command fields and
+  relevant P-flag definitions, and refuses unsafe input.
+- test_audit_native_rest_actions.py checks action detection even when
+  comments/strings contain braces, ambiguous/missing definitions,
+  invalid ELF32 candidates, production-source paths and symlink input.
+- private_rest_actions_audit.sh reuses the Round79K accepted private
+  ELF32 tree and records the action report outside GitHub, with live
+  PID/binary and accepted private executable unchanged.
+
+**Round79M audit is staged, not yet executed on Linode.**
+Native +15 resting recovery, special/rest movement restrictions,
+mounts and mounts' separate Endurance are not installed. Review
+the private action report before modifying gameplay command routing,
+player session state, or the next native timer hook. No production
+deployment is authorized.
