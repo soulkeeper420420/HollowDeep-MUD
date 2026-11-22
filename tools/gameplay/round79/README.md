@@ -31,3 +31,53 @@ This code is currently **rules-only**, with no game command registered.
 
 The full milestone and planned next improvements are in
 `docs/ROUND79_GAMEPLAY_QOL.md`.
+
+
+## Round 79B — Readable status and ANSI choice
+
+The requested status line is:
+
+    HP 14/25 | MP 5/10 | Breath --
+
+With ANSI selected, HP is green/yellow/red according to remaining health,
+MP blue, and a verified Breath gauge cyan/yellow/red. Without ANSI, the
+identical plain-text values are sent with no escape bytes.
+
+The existing native creature record has HP and MP current/max fields but
+a numeric Breath field has **not been proven**. The pure display renderer
+does not invent a Breath value: it shows "Breath --" unless a genuine
+current/max resource is supplied. A breathing mechanic and persistence
+model need separate engine validation.
+
+Standalone source modules:
+
+- hd_status_hud.h/.c and test_status_hud.c
+- hd_ansi_choice.h/.c and test_ansi_choice.c
+- stage_ansi_creation.py and test_stage_ansi_creation.py
+- native_status_ansi_probe.py
+
+Quick tests:
+
+    cc -std=gnu89 -Wall -Wextra -Werror -I. \
+       hd_status_hud.c test_status_hud.c -o /tmp/hollowdeep-status-test
+    /tmp/hollowdeep-status-test
+    cc -std=gnu89 -Wall -Wextra -Werror -I. \
+       hd_ansi_choice.c test_ansi_choice.c -o /tmp/hollowdeep-ansi-test
+    /tmp/hollowdeep-ansi-test
+    python3 -m unittest -v test_stage_ansi_creation
+
+The strict ANSI staging tool only accepts a verified disposable private
+Round 78E source at /tmp/hd-army-game-round78-*/src and a NEW destination
+under /tmp/hd-army-game-round79-*/src. It adds a yes/no prompt after
+race selection, before password entry, and saves the answer in the
+existing PANSIC flag; it also enables PPROMP for newly created players.
+
+Its feature gate is STATUS_ANSI_PLAYTEST=1, so other builds retain the
+old creation flow. The existing private creation socket regression now
+answers YES for Necromancer and NO for Mage, and its saved-character
+probe checks the persisted ANSI flag.
+
+The status renderer is **not yet connected** to player.c's native prompt:
+run native_status_ansi_probe.py on the private source and inspect its
+prompt buffer and breath implementation before patching. Never overwrite
+production binaries, world files or character saves.
