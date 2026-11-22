@@ -1196,3 +1196,65 @@ interruption on action, cleanup on free/death and timed recovery via
 the existing atomic Breath storage. Registration and cleanup must
 preserve legacy ABI and all unmodified social emotes. There is
 still NO tested real +15 native resting gameplay at this stage.
+
+
+### Round79P: PRIVATE explicit REST +15 gameplay candidate staged
+
+**Round79P is an unverified new feature-gated ELF32 gameplay
+candidate, not a deployed or validated release.**
+
+Round79O's actual private native source report established the exact
+\`process_cmd()\` dispatch in \`command1.c\` after command resolution,
+permission checking and moderation. The \`hollowdeep_help.c\`
+command-function-pointer match is only an extern declaration.
+The native creature free/death lifecycle is present in the accepted
+private source and is checked before any injection.
+
+New isolated Round79P implementation:
+- \`hd79_rest_game.c/.h\` manage up to 512 explicitly owned, bounded,
+  **nonserialized** player rest sessions. The lookup requires the
+  same creature pointer, FD, name and room; damage revokes eligibility.
+- A dedicated \`rest\` command is inserted into the native command
+  table, without redefining old social \`sleep\`, \`sit\`, \`stand\`
+  or \`relax\` emotes. Repeated rest does not restart its clock.
+- Before real command execution in \`process_cmd()\`, all commands
+  except exact \`rest\`, \`look\`, \`l\`, \`help\` and \`skills\` clear
+  the session. Ordinary movement, attack, cast, save and quit
+  therefore interrupt rest before any game action.
+- The source stager locates exactly one native \`free_crt()\` and
+  \`die()\` K&R implementation and clears rest at the start of
+  these lifecycle handlers; stale session slots must not survive
+  memory release, death, or logout. If the signatures differ the
+  staging aborts rather than guessing.
+- The existing 45-second native Breath pulse obtains an authoritative
+  rest eligibility boolean and passes it to the already tested atomic
+  \`HD_BREATH_OP_RECOVER\` operation: +15 while truly resting and
+  eligible; fallback +5 otherwise. All changes are under
+  \`HD79_REST_PLAYTEST\` and Makefile \`REST_BREATH_PLAYTEST=1\`.
+- No native creature or room struct changes, no save-format edits,
+  no changes to Conjure/pets/mounts or production files.
+
+The staging test suite covers source isolation, command entry,
+normal movement restrictions, exact function-pointer dispatch,
+rest-session cleanup, two cleanup hooks in the same C source, unsafe
+paths, symlinks and multiple/missing C definitions.
+The new native ELF32 test replays Round79K's passing atomic movement
+tests and then exercises +15 from 80 to 95, single durable receipt
+per tick, command interruption with fallback +5, and session
+revocation on damage, relocation and explicit cleanup.
+A separate private real socket replay checks that the dedicated
+rest command is registered and that social actions interrupt it.
+**The short socket replay alone does NOT establish the +15 real-time
+timer rate; the ELF32 atomic receipt test proves that property only
+after it has passed.** A separate wall-clock socket test is required
+before claiming fully playable timed resting.
+
+The new standalone runner \`private_native_rest_game.sh\` stages only
+from the accepted Round79K ELF32 source in a new disposable
+\`/tmp/hd-army-game-round79rest-*/src\`, uses isolated fixtures and
+network namespace/chroot, and verifies production PID/binary and the
+accepted source executable hash remain unchanged.
+None of the new Round79P code has yet been run on Linode.
+Do not deploy, copy game binaries to production, touch live saves
+or restart hollowdeep.service. Keep the private logs and fixtures
+outside GitHub.
