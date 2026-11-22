@@ -493,3 +493,40 @@ Use a new pinned private checkout with this command:
       /tmp/hd-army-game-round79travel-VERIFIED/src
 
 Generated source excerpts remain PRIVATE and must not be added to GitHub.
+
+
+## Round79N: explicit rest-session eligibility and native dispatcher audit
+
+Round79M passed on Linode: 7/7 private source-audit tests; the
+actual native action() implementation is a generic social handler.
+The sleep, sit and stand commands are emotes, not a trustworthy
+resting pose. No dedicated rest/wake native commands or rest-state
+P-flag are registered. Production and private ELF32 hashes unchanged.
+
+The pending Round79N private milestone provides two independent
+pieces of verification:
+
+1. hd79_rest_session.h/.c and test_hd79_rest_session.c provide
+   an engine-independent session model with no player-save ABI changes.
+   A genuine rest must last at least 45 uninterrupted seconds before
+   any +15 rate becomes eligible, and the durable Breath receipt
+   still must be due for its normal 45-second tick. Repeated rest is
+   idempotent. An interrupt or new login invalidates old rest state.
+   This pure policy does NOT alter native gameplay or save Breath.
+2. audit_native_rest_dispatch.py and
+   test_audit_native_rest_dispatch.py inspect the private native
+   command dispatcher and lifecycle references so the future native
+   patch can start/stop rest on real actions, movement, combat,
+   character logout, death and disconnection.
+
+Run the consolidated private-only verifier:
+
+    bash tools/gameplay/round79/private_rest_dispatch_and_policy.sh \
+      /root/hollowdeep-dev/round79n-PRIVATE \
+      /tmp/hd-army-game-round79travel-VERIFIED/src
+
+The private-rest-dispatch-report.txt stays root-only on Linode.
+Do not upload private native source excerpts, credentials or player
+saves to GitHub. The real +15 Breath recovery and new rest command
+have NOT been implemented until the native command and lifecycle
+hooks are inspected and gameplay socket tests pass.
