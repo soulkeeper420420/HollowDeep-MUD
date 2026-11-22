@@ -26,7 +26,8 @@ def source_dir(raw):
         not root.parent.name.startswith(
             ("hd-army-game-round78-",
              "hd-army-game-round79-",
-             "hd-army-game-round79hud-")) or
+             "hd-army-game-round79hud-",
+             "hd-army-game-round79rest-")) or
         root.resolve(strict=True)!=root.absolute()):
         raise ValueError("Not a known disposable private ELF32 source")
     exe=root/"frp.new"
