@@ -108,8 +108,8 @@ class TravelStageTests(unittest.TestCase):
     def test_k_and_r_tab_and_spacing_clock_variant(self):
         path=self.src/"player.c"
         source=path.read_text()
-        original="  t = time(0);\\n  ply_ptr->lasttime[LT_HOURS].interval +="
-        variant="\\tt\\t=\\ttime ( 0 ) ;\\n\\tply_ptr->lasttime[LT_HOURS].interval\\t+="
+        original="  t = time(0);\n  ply_ptr->lasttime[LT_HOURS].interval +="
+        variant="\tt\t=\ttime ( 0 ) ;\n\tply_ptr->lasttime[LT_HOURS].interval\t+="
         self.assertEqual(source.count(original),1)
         path.write_text(source.replace(original,variant))
         mod.stage(self.src,self.dst)
@@ -124,7 +124,7 @@ class TravelStageTests(unittest.TestCase):
         source=path.read_text()
         anchor="  t = time(0);"
         self.assertEqual(source.count(anchor),1)
-        path.write_text(source.replace(anchor,anchor+"\\n"+anchor))
+        path.write_text(source.replace(anchor,anchor+"\n"+anchor))
         with self.assertRaisesRegex(ValueError,"verified update_ply native tick"):
             mod.stage(self.src,self.dst)
         self.assertFalse(self.dst.exists())
@@ -134,7 +134,7 @@ class TravelStageTests(unittest.TestCase):
         source=path.read_text()
         source=source.replace(
             "  ply_ptr->lasttime[LT_HOURS].interval +=",
-            "  ply_ptr->lasttime[LT_HOURS].ltime = t;\\n"
+            "  ply_ptr->lasttime[LT_HOURS].ltime = t;\n"
             "  ply_ptr->lasttime[LT_HOURS].interval +=")
         path.write_text(source)
         with self.assertRaisesRegex(ValueError,"LT_HOURS recovery adjacency"):
