@@ -102,3 +102,38 @@ wire the display into player.c without breaking existing prompt behavior
 or inventing a Breath meter.
 
 No production restart or deployment is performed by this script.
+
+
+## Round 79C: Breath wilderness travel meter
+
+Breath is now designed as **wilderness movement stamina**, not underwater
+oxygen. Preliminary pure native-C rules define 100/100 maximum, -2 only on
+successful moves INTO a wilderness room, +5 on a verified timed recovery
+tick, +15 if resting on that same tick, and free travel to non-wilderness
+rooms even when exhausted. No meter changes for indoor walking, blocked
+exits, look, map redraw, login or teleport. Native runtime implementation
+must honor the same policy and checkpoint the meter across reconnect.
+
+The standalone test also feeds a real Breath value into the existing
+colored/plain status renderer:
+
+    HP 14/25 | MP 5/10 | Breath 15/100
+
+From this directory:
+
+    cc -std=gnu89 -Wall -Wextra -Werror -I. \
+       hd_status_hud.c hd_wilderness_breath.c \
+       test_wilderness_breath.c \
+       -o /tmp/hollowdeep-breath-rules
+    /tmp/hollowdeep-breath-rules
+
+Inspect the exact private native movement, recovery and zone-identification
+paths before staging native changes:
+
+    python3 native_wilderness_breath_probe.py \
+       /tmp/hd-army-game-round78-VibwvrvC/src
+
+Read the complete acceptance requirements in
+docs/ROUND79_GAMEPLAY_QOL.md. The standalone C code **is not yet hooked
+into native wilderness travel or saved-player persistence**. Do not publish
+any private audit/source output, real world data, or game credentials.
