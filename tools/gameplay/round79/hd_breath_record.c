@@ -40,7 +40,7 @@ static int read_hex(const char *in, unsigned n, uint32_t *out)
 int hd_breath_record_valid(const hd_breath_record *s)
 {
     return s && epoch_ok(s->epoch) && s->revision &&
-           s->current<=HD_BREATH_MAX;
+           s->last_recover && s->current<=HD_BREATH_MAX;
 }
 int hd_breath_record_new(hd_breath_record *out,const char *epoch,
                          uint32_t now)
