@@ -1444,3 +1444,49 @@ execute on login/logout rather than on idle connected updates,
 and the verified native periodic event loop may need a new
 feature-gated hook. Do not fake the clock or change production.
 Mounts, Endurance and stables remain pending.
+
+
+### Round79Q FINAL — real wall-clock +15 socket recovery PASS
+
+The user's private Linode output confirms the full Round79Q
+socket-only completion:
+
+- The user inadvertently pasted earlier PASS output into Bash,
+  producing harmless "command not found" and syntax-error messages
+  for noncommands like "PASS:", "===", and "ROUND79P:".
+  These are shell-use errors, not native game or regression failures.
+- New Python syntax preflight: **3/3 PASS**.
+- Private Round79Q combined unit regressions: **18 tests PASS**.
+- Native \`update_ply()\` references confirmed in
+  \`command4.c:137\`, \`command5.c:987\`, \`player.c:348/431/443\`
+  and the active player update \`update.c:129\`:
+  \`update_ply(Ply[i].ply);\`. These are source audit locations
+  within the accepted private ELF32 build.
+- Existing private Round79P socket replay also passed: native
+  rest command, actual wilderness movement, HUD, save/reconnect.
+- The connected socket, after genuine wilderness Breath spending,
+  verified a **single exact +15 Breath recovery on a natural
+  uninterrupted >=45-second rest timer**, without immediate
+  duplicate award. The private replay printed:
+  \`PASS: real connected 45-second rest tick grants exactly +15
+  with no immediate duplicate\`.
+- Final runner marker:
+  \`ROUND79Q: PRIVATE REAL WALL-CLOCK REST +15 SOCKET PASS\`.
+- Production service PID and live executable SHA256, as well as
+  accepted private ELF32 candidate binary hash, were checked
+  unchanged. **Production deployment: NONE.**
+
+**Round79K–79Q private player Breath and explicit rest system is
+accepted**: wilderness travel -2 on foot, normal passive +5 per
+eligible 45-second interval, explicit rest +15 only after sufficient
+uninterrupted rest and a durable due recovery tick, authoritative
+one-receipt-per-interval persistence, command interruptions,
+save/logout/reconnect and real timed socket checks all passed in
+private ELF32 gameplay. This is NOT an authorization to replace
+the production MUD executable, restart the service or edit the
+live world/player saves.
+
+Next independent project track: durable epoch-bound mount roster,
+single active mount, separate Endurance, safe stables and validated
+terrain/exit movement. Existing Round79G mount profiles are pure
+rules, not a native playable mount implementation.
