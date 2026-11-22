@@ -3,9 +3,11 @@
  * then exercise rest->+15, command-interruption->+5 and lifecycle reset.
  * Uses only synthetic players, private files and the existing fixture.
  */
-#define main hd79_previous_travel_main
-#include "test_native_breath_travel.c"
-#undef main
+/* Private runner materializes the previously tested Round79K fixture
+ * as travel_base.c with only its outer main() renamed. Its nested
+ * synthetic player fixture retains its own legacy_main alias.
+ */
+#include "travel_base.c"
 #include "hd79_rest_game.h"
 
 int main(void)
