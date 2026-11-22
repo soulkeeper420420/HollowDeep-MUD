@@ -154,6 +154,63 @@ class RestStageTests(unittest.TestCase):
         self.assertEqual(staged.count("#ifdef HD79_REST_PLAYTEST"),2)
         self.assertTrue((self.dst/"frp.new").is_file())
 
+    def test_native_tabbed_special_dispatch_guard_is_patched(self):
+        native=self.src/"command1.c"
+        old="        if(cmdlist[cmdno].cmdno < 0)"
+        replacement="\tif (\tcmdlist[cmdno].cmdno\t<\t0 )  "
+        body=native.read_text()
+        self.assertEqual(body.count(old),1)
+        native.write_text(body.replace(old,replacement))
+        rest.stage(self.src,self.dst)
+        output=(self.dst/"command1.c").read_text()
+        hook="hd79_rest_before_command(Ply[fd].ply,cmdlist[cmdno].cmdstr);"
+        self.assertEqual(output.count(hook),1)
+        self.assertLess(output.index("hd_staff_blocks_command("),
+                        output.index(hook))
+        self.assertLess(output.index(hook),output.index(replacement))
+        self.assertLess(output.index(hook),
+                        output.index("return((*cmdlist[cmdno].cmdfn)"))
+
+    def test_ambiguous_special_dispatch_branches_refused(self):
+        native=self.src/"command1.c"
+        body=native.read_text()
+        old="        if(cmdlist[cmdno].cmdno < 0)"
+        self.assertEqual(body.count(old),1)
+        native.write_text(body.replace(old,old+"\n"+old))
+        with self.assertRaisesRegex(ValueError,
+                                    "process_cmd before special dispatch"):
+            rest.stage(self.src,self.dst)
+        self.assertFalse(self.dst.exists())
+
+    def test_special_dispatch_before_moderation_refused(self):
+        native=self.src/"command1.c"
+        body=native.read_text()
+        before=(
+            "        if(hd_staff_blocks_command(Ply[fd].ply, "
+            "cmdlist[cmdno].cmdno)) return 0;\n"
+            "        if(cmdlist[cmdno].cmdno < 0)"
+        )
+        after=(
+            "        if(cmdlist[cmdno].cmdno < 0)\n"
+            "        if(hd_staff_blocks_command(Ply[fd].ply, "
+            "cmdlist[cmdno].cmdno)) return 0;"
+        )
+        self.assertIn(before,body)
+        native.write_text(body.replace(before,after))
+        with self.assertRaisesRegex(ValueError,"authorization/dispatch ordering"):
+            rest.stage(self.src,self.dst)
+        self.assertFalse(self.dst.exists())
+
+    def test_unrelated_function_special_guard_is_ignored(self):
+        native=self.src/"command1.c"
+        native.write_text(native.read_text()+
+            "\nint other_function(void) {\n"
+            "        if(cmdlist[cmdno].cmdno < 0) return 0;\n"
+            "        return 0;\n}\n")
+        rest.stage(self.src,self.dst)
+        output=(self.dst/"command1.c").read_text()
+        self.assertEqual(output.count("hd79_rest_before_command(Ply[fd].ply"),1)
+
     def test_missing_true_native_function_pointer_denied(self):
         path=self.src/"command1.c"
         path.write_text(path.read_text().replace(
