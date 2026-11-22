@@ -41,6 +41,8 @@ static void empty_and_partial(void)
     char first[65],second[65];
     assert(hd79_mount_roster_new(&s,EPOCH)==1);
     assert(hd79_mount_wire_encode(&s,first,second)==0);
+    assert(!strncmp(first,
+        "4d0100001234567890abcdef1234567800000001",40));
     assert(hd79_mount_wire_decode(first,second,&t)==0);
     assert(t.count==0 && t.active_id==0 && t.revision==1);
     assert(!strcmp(t.epoch,EPOCH));
