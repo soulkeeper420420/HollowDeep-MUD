@@ -141,3 +141,45 @@ Round79P's privately verified native Breath and rest command,
 but no native mount/Endurance/stable implementation has
 yet been accepted. Round79Q real connected wall-clock +15
 recovery is still unverified. Production remains unchanged.
+
+
+## Round79Q acceptance and Round79R native mount foundation (November 21, 2026)
+
+The earlier top-of-document note is historical: the user has now
+verified the complete private Round79K–Q Breath/rest subsystem.
+In particular, Round79Q passed 18 private regressions and
+**real wall-clock +15 resting Breath recovery on a connected
+socket**, with an exact single award and no immediate duplicate.
+Native \`update.c:129\` calls \`update_ply(Ply[i].ply)\`. The
+accepted private ELF32 source is:
+\`/tmp/hd-army-game-round79rest-JQgo3wi5/src\`.
+Production service PID, live executable and accepted private
+ELF32 binary remained unchanged; **deployment NONE**.
+
+Round79R begins a NEW independent, read-only mount track:
+- Reuse the existing Round79G pure C species/terrain planner
+  for Horse, Warhorse, Dire wolf, Nightmare, Griffin and
+  Dark dragon. Mounted wilderness travel spends mount Endurance
+  rather than character Breath; one active mount; no free
+  travel, command spam or bypass of native exit checks.
+- Extend \`native_mount_command_audit.py\` to accept the
+  verified private Round79P native ELF32 rest source path;
+  inspect actual \`global.c\`, \`wilderness.c\`, \`mtype.h\`
+  and \`mstruct.h\` for native command collisions, potential
+  mount flags and movement/terrain semantics.
+- Six new source-audit safety regressions cover private ELF32
+  acceptance, relevant symbol display and rejection of live
+  source, ELF64, missing native headers and symlinked input.
+- \`private_mount_foundation_round79r.sh\` compiles existing
+  mount rules as private ELF32, runs these regressions,
+  writes only root-private reports and verifies production PID,
+  executable and accepted private ELF32 hash unchanged.
+
+**Round79R is staged, not yet executed on Linode.**
+This does **not** add mount ownership, stable retrieval, mounted
+native movement, persistent Endurance or flying gameplay.
+The AtlasMUD screenshot flag \`MOUNT\` at displayed position
+75 is just a feature-design clue, not a HollowDeep-compatible
+bit position. Any new persistent mount implementation must use
+verified native structure/serialization rules and durable
+character-epoch-bound receipts, with no unapproved live changes.
