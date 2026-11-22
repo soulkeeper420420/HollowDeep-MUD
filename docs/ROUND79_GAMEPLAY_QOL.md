@@ -328,3 +328,25 @@ Only resume Warlock and help regressions and run the focused wilderness
 movement source audit against the already built private ELF32 HUD candidate;
 do not needlessly recompile the tested native game or replay passing class
 creation tests. Actual Breath depletion and persistence are still pending.
+
+
+### Round 79E final private regression verification
+
+Linode's targeted retest verified, after fixing the strict disposable-source
+directory allowlist:
+- Private-path security regressions: 5 tests passed.
+- Native Warlock creation/reconnect, class isolation: PASS.
+- Native Necromancer help and skills regression: PASS.
+- Native status HUD and saved ANSI preference had already passed in the
+  earlier private ELF32 build and character-creation/reconnect socket test.
+- Source-only wilderness movement handler inspection: completed; actual
+  Breath debit and durable storage remain pending.
+- Production binary and service PID remained unchanged; deployment: NONE.
+
+The generated exact wilderness movement inspection report remains in the
+private Linode test directory and must not be committed to GitHub. Review
+that report before selecting the movement completion/debit site, resource
+checkpoint, failure/rollback handling and timed recovery integration.
+
+The playable Breath meter is NOT complete. Do not conflate the completed
+HUD and ANSI functionality with native Breath travel and persistence.
