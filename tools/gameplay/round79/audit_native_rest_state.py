@@ -12,8 +12,8 @@ from pathlib import Path
 import re
 import sys
 
-MAX_LINES=440
-MAX_MATCHES_PER_FILE=30
+MAX_LINES=490
+MAX_MATCHES_PER_FILE=14
 MAX_TEXT_WIDTH=205
 REST=re.compile(
     r"\b(rest|resting|sleep|sleeping|sit|sitting|stand|standing|wake|waking|"
@@ -97,7 +97,7 @@ def focus(source,cfiles):
             print("update_ply definitions:",len(updates))
             if len(updates)==1:
                 begin=updates[0]
-                chosen.update(range(max(0,begin-2),min(len(lines),begin+115)))
+                chosen.update(range(max(0,begin-2),min(len(lines),begin+100)))
         if file.name=="hd79_breath_travel_runtime.c":
             pulses=[i for i,line in enumerate(lines)
                     if "int hd79_breath_pulse(" in line]
@@ -115,7 +115,7 @@ def focus(source,cfiles):
                   ",".join("%s:%d"%(name,i+1)
                            for i,name in command_defs) or "none")
             for i,_ in command_defs:
-                chosen.update(range(max(0,i-2),min(len(lines),i+65)))
+                chosen.update(range(max(0,i-2),min(len(lines),i+50)))
         if file.name in ("mtype.h","mstruct.h"):
             for i,line in enumerate(lines):
                 if ("lasttime" in line or "status" in line.lower() or
