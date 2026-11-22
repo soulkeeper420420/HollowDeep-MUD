@@ -31,9 +31,17 @@ if exe.is_symlink() or not exe.is_file() or exe.open("rb").read(5)!=b"\x7fELF\x0
 
 HERE=Path(__file__).resolve().parent
 REPO=HERE.parents[2]
-NECRO=REPO/"necromancer"
-prior=runpy.run_path(str(NECRO/"corpse/gameplay_smoke.py"))
-cache=runpy.run_path(str(NECRO/"cache/cache_gameplay.py"))
+NECRO=REPO/"tools"/"necromancer"
+# Resolve the repository's actual committed test helpers before creating
+# any fixture or entering the disposable native game. Refuse silently
+# falling back to a real server source tree.
+HELPERS=(NECRO/"corpse/gameplay_smoke.py",
+         NECRO/"cache/cache_gameplay.py",
+         NECRO/"petruntime/gameplay/help")
+if not all(p.exists() and not p.is_symlink() for p in HELPERS):
+    raise RuntimeError("Missing pinned tools/necromancer private socket helpers")
+prior=runpy.run_path(str(HELPERS[0]))
+cache=runpy.run_path(str(HELPERS[1]))
 world=Path(tempfile.mkdtemp(prefix="hd79k-breath-socket-",dir="/tmp"))
 print("PRIVATE SOCKET WORLD:",world,flush=True)
 for folder in ("rooms","player","log","objmon","post",
