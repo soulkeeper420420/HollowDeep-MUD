@@ -960,3 +960,25 @@ teleports/GM relocation, per-step save throughput, mounted Endurance,
 ownership, stables and flying mount restrictions. No private test
 fixture, user data, server configuration or operational logs are
 published to GitHub.
+
+
+### Round 79L first private audit test: callback source omitted
+
+First Round79L Linode run was limited to the Python source-audit
+unit test. The private fixture exposed a native rest() handler setting
+a pose flag, a stand() handler clearing it, the update_ply() time
+statement, and a separately defined hd79_breath_pulse(). The test
+failed because the audit scanned for REST/SLEEP words before entering
+each source file, so it omitted the existing Breath callback source
+(which does not itself contain those tokens).
+
+A second issue was a ResourceWarning for a readable ELF32 executable
+file handle that was not closed immediately after the first five-byte
+identity check.
+
+The patched audit always includes the Breath pulse implementation,
+prints the native update_ply() and Breath callback before the bounded
+command excerpts, and uses an explicit with block to close the ELF32
+file. The test runner now treats ResourceWarnings as errors.
+This is an **audit/reporting fix only**. No new rest recovery logic
+has been installed or gameplay-tested. Production was not modified.
