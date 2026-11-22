@@ -11,9 +11,9 @@ from pathlib import Path
 import re
 import sys
 
-EXPECTED=("hd-army-game-round79store-","hd-army-game-round79hud-")
-MAX_OUTPUT_LINES=1050
-MAX_FUNCTION_LINES=280
+EXPECTED=("hd-army-game-round79store-",)
+MAX_OUTPUT_LINES=1200
+MAX_FUNCTION_LINES=210
 PRINT_WIDTH=210
 
 FUNCTIONS=(
@@ -26,7 +26,7 @@ FUNCTIONS=(
 # Match K&R declarations as well as modern C declarations; do not match
 # call sites because declarations must start with a return type on the line.
 DECL=re.compile(
-    r"^\s*(?:(?:static|extern)\s+)?(?:int|void|long|char\s*\*|"
+    r"^\s*(?:static\s+)?(?:int|void|long|char\s*\*|"
     r"creature\s*\*|room\s*\*|short)\s+([A-Za-z_][A-Za-z_0-9]*)\s*\(",
     re.M,
 )
@@ -134,6 +134,22 @@ def main():
                     end=min(len(lines),i+MAX_FUNCTION_LINES)
                     print("-- %s:%d (bounded definition window) --"%(file,i+1))
                     emit(file,lines,range(max(0,i-4),end),used)
+                    # For very long K&R functions, sample the actual
+                    # destination and room-commit operations beyond the
+                    # opening 210 lines without dumping the whole source.
+                    if name in ("move","go"):
+                        extra=[]
+                        selectors=re.compile(
+                            r"\b(?:add_ply_rom|del_ply_rom|rom_num|"
+                            r"first_ext|load_rom|XLOCK|XSECRT|XINVIS|"
+                            r"return|break|ROOMPATH|go\s*\()\b",
+                            re.I)
+                        for j in range(end,min(len(lines),i+700)):
+                            if selectors.search(lines[j]):
+                                extra.extend(range(max(end,j-1),min(len(lines),j+3)))
+                            if len(extra)>200:break
+                        print("-- additional destination/commit references --")
+                        emit(file,lines,extra,used)
         for name,patterns in ANCHORS.items():
             p=root/name
             if not p.exists() or p.is_symlink():
@@ -148,7 +164,7 @@ def main():
                 matches+=indices[:3]
             selections=set()
             for i in matches:
-                for j in range(max(0,i-6),min(len(lines),i+27)):
+                for j in range(max(0,i-4),min(len(lines),i+14)):
                     selections.add(j)
             emit(name,lines,selections,used)
         if not functions.get("move") or not functions.get("go"):
