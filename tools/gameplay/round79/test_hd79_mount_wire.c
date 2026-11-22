@@ -102,6 +102,9 @@ static void stable_bounds_and_revision(void)
     s.epoch[0]='z';
     assert(hd79_mount_wire_encode(&s,a,b)==-1);
     s=snapshot;
+    /* Restore the largest representable room after the oversized
+     * value's intended rejection, then test full revision range. */
+    s.entries[0].stable_room=HD79_MOUNT_MAX_STABLE_ROOM;
     s.revision=UINT32_MAX;
     assert(hd79_mount_wire_encode(&s,a,b)==0);
     assert(hd79_mount_wire_decode(a,b,&snapshot)==0);
