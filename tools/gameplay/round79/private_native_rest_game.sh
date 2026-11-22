@@ -68,6 +68,22 @@ finalize() {
 trap finalize EXIT
 
 echo "=== ROUND79P: PRIVATE NATIVE REST +15 BREATH ==="
+echo "=== 0. PYTHON SYNTAX PREFLIGHT (NO GAME MODIFICATION) ==="
+python3 - "$HERE" <<'PY'
+import ast
+from pathlib import Path
+import sys
+here=Path(sys.argv[1])
+names=("stage_rest_breath.py","test_stage_rest_breath.py",
+       "check_breath_rest_socket.py",
+       "audit_native_rest_actions.py",
+       "audit_native_rest_dispatch.py")
+for name in names:
+    path=here/name
+    ast.parse(path.read_text(encoding="utf-8"),filename=str(path))
+    print("PASS: syntax",name)
+PY
+
 echo "=== 1. FAIL-CLOSED NATIVE REST STAGING REGRESSIONS ==="
 (cd "$HERE" && python3 -W error::ResourceWarning -m unittest -q \
   test_stage_rest_breath test_audit_native_rest_actions \
