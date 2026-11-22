@@ -115,3 +115,29 @@ The native-independent hd_mount_travel.h/.c and test_mount_travel.c
 contain species profiles, terrain movement permissions and the selected
 resource to charge. They are **not an implementation of native mounts,
 ownership, flight, combat, stables or durable save transactions**.
+
+
+## AtlasMUD flag screenshot reference (November 21, 2026)
+
+The user-supplied AtlasMUD monster flag screen includes a label
+\`MOUNT\` at displayed position 75, alongside \`HIREABLE\` (54),
+\`HIRED\` (55) and \`NOWANDER\` (76). This is useful as
+**design inspiration**, not as a verified Atlas riding, stable
+or Endurance implementation. Player \`dragon\`, \`bat\` and
+\`gray wolf\` transformation labels are separate concepts,
+and monster \`BREATH TOG 1/2\` cannot be mapped to HollowDeep's
+100-point player Breath travel resource.
+
+HollowDeep's mount system must still use independent epoch-bound
+ownership, one active mount, separate Endurance and the validated
+native exit/terrain/atomic save path rather than repurposing
+unknown legacy flags. See
+[Atlas screenshot notes](ATLAS_FLAG_SCREENSHOT_NOTES.md) for the
+full observed flag categories and recommended milestones.
+
+The Round79G status statement above is **historical**: later
+[Round79 gameplay notes](ROUND79_GAMEPLAY_QOL.md) document
+Round79P's privately verified native Breath and rest command,
+but no native mount/Endurance/stable implementation has
+yet been accepted. Round79Q real connected wall-clock +15
+recovery is still unverified. Production remains unchanged.
