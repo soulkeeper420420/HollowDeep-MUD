@@ -8,6 +8,12 @@
 #include <stdint.h>
 
 static const char *EPOCH="6a11bb22cc33dd44ee55ff66";
+static int same_record(const hd_breath_record *a,const hd_breath_record *b)
+{
+    return !strcmp(a->epoch,b->epoch) && a->revision==b->revision &&
+           a->last_recover==b->last_recover && a->current==b->current;
+}
+
 static void assert_serialization(const hd_breath_record *s)
 {
     char data[65];
@@ -48,7 +54,7 @@ int main(void)
     untouched=next;
     assert(hd_breath_record_step(&now,&next,
         HD_BREATH_OP_TRAVEL,1,0,2000)==-1);
-    assert(!memcmp(&next,&untouched,sizeof next));
+    assert(same_record(&next,&untouched));
 
     /* No Breath penalty on successful move to an ordinary interior. */
     assert(hd_breath_record_step(&now,&next,
@@ -66,7 +72,7 @@ int main(void)
     untouched=next;
     assert(hd_breath_record_step(&now,&next,
         HD_BREATH_OP_RECOVER,0,1,2000)==-1);
-    assert(!memcmp(&next,&untouched,sizeof next));
+    assert(same_record(&next,&untouched));
     assert(hd_breath_record_step(&now,&next,
         HD_BREATH_OP_RECOVER,0,0,2001)==0);
     assert(next.current==20);
@@ -110,7 +116,7 @@ int main(void)
     untouched=decoded;
     assert(hd_breath_record_step(&next,&decoded,
         HD_BREATH_OP_TRAVEL,1,0,2002)==-1);
-    assert(!memcmp(&decoded,&untouched,sizeof decoded));
+    assert(same_record(&decoded,&untouched));
     assert(hd_breath_record_step(&now,&decoded,99,1,0,2002)==-1);
     assert(hd_breath_record_step(&now,&decoded,
         HD_BREATH_OP_TRAVEL,2,0,2002)==-1);
