@@ -183,3 +183,30 @@ The AtlasMUD screenshot flag \`MOUNT\` at displayed position
 bit position. Any new persistent mount implementation must use
 verified native structure/serialization rules and durable
 character-epoch-bound receipts, with no unapproved live changes.
+
+
+## Round79R initial private test — prefixed mount flag scanner fix
+
+The first private Round79R Linode run stopped before the pure ELF32
+mount-rule compilation and native command/flag audit. Five of the six
+synthetic source-audit tests passed, but
+\`test_mount_command_and_flags_reported\` failed because its synthetic
+\`mtype.h\` fixture defined \`PMOUNT 75\` while the read-only scanner
+looked only for the standalone \`mount\` token. A word-boundary
+search does not match the \`mount\` substring in \`PMOUNT\`.
+
+The scanner now additionally recognizes *explicitly spelled*
+\`PMOUNT\`, \`CMOUNT\`, \`OMOUNT\` and \`MMOUNT\` symbols when present,
+without assuming any actually exist in HollowDeep. Two new tests
+check those candidate spellings and confirm that no missing mount
+flag is fabricated. The audit suite now contains **eight** tests.
+
+**The number 75 in the unit fixture is synthetic, not proof of
+HollowDeep's C flag positions and not evidence Atlas's own MOUNT
+position may be used as a HollowDeep offset.**
+
+The prior attempt produced:
+\`FAILED (failures=1)\` and \`PRODUCTION DEPLOYMENT: NONE\`.
+It did not reach native source audit or mount/Endurance rule
+compilation. Run the corrected private Round79R tool in a new
+pinned checkout before claiming source-audit or ELF32 PASS.
