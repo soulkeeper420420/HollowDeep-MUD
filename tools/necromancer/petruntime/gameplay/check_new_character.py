@@ -225,6 +225,17 @@ try:
 
             skills=command(client,'skills')
             require(skills,'conjure [all classes]')
+            if 'HD79_STATUS_HUD_PLAYTEST' in (src/'player.c').read_text(encoding='latin-1'):
+                cleaned=re.sub(r'\x1b\[[0-9;]*m','',skills)
+                require(cleaned,' | MP ')
+                require(cleaned,' | Breath --')
+                assert re.search(r'HP \d+/\d+ \| MP \d+/\d+ \| Breath --',cleaned)
+                if necro:
+                    require(skills,'\x1b[1;32mHP ')
+                    print('PASS: ANSI colorized HP/MP/unknown Breath HUD',flush=True)
+                else:
+                    assert '\x1b[' not in skills, 'ANSI leaked into plain status'
+                    print('PASS: plain HP/MP/unknown Breath HUD without ANSI',flush=True)
 
             if necro:
                 require(skills,'raise corpse [eligible]')
