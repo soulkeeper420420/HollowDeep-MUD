@@ -101,6 +101,12 @@ fixture=ast.literal_eval(found[0])["test_pet_store.c"]
 if not isinstance(fixture,str) or "int main" not in fixture:
     raise RuntimeError("Native fixture malformed")
 (out/"test_pet_store.c").write_text(fixture)
+previous=(repo/"tools/gameplay/round79/test_native_breath_travel.c").read_text()
+signature="int main(void)"
+if previous.count(signature)!=1:
+    raise RuntimeError("Verified Round79K native fixture entrypoint drift")
+(out/"travel_base.c").write_text(
+    previous.replace(signature,"int hd79_previous_travel_main(void)",1))
 PY
 
 echo "=== 5. COMPILE NATIVE ELF32 REST +15 ATOMIC FIXTURE ==="
