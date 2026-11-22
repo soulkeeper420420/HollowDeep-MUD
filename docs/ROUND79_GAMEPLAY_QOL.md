@@ -931,3 +931,32 @@ Round79K finished until the final
 `ROUND 79K: SOCKET BREATH TRAVEL AND HUD PASS` line appears.
 Resting +15, mount Endurance, ownership/stables and dragon flight
 remain unimplemented, as does any production deployment.
+
+
+### Round 79K FINAL PRIVATE SOCKET ACCEPTANCE — PASS
+
+The user's final private Linode result on the pinned Round79K socket-only
+runner reports:
+- 8/8 private socket-support/reconnect regression tests PASS.
+- Reused the previously compiled and fixture-verified private ELF32 native
+  game. Full private socket replay reported:
+  \`ROUND 79K: PRIVATE SOCKET BREATH TRAVEL + HUD PASS\`
+  and \`ROUND 79K: SOCKET BREATH TRAVEL AND HUD PASS\`.
+- Real directional and named wilderness movement spent Breath by exact
+  2-point steps (100 -> 98 -> 96 -> 94); interior retreat and failed exits
+  did not spend Breath.
+- Real ANSI/plain numeric HP/MP/Breath prompts worked.
+- Real player save, logout, re-login restored both the saved room
+  (Necromancer Trial Annex) and Breath 94/100.
+- The runner verified the production service PID, live executable hash,
+  and private ELF32 baseline hash unchanged.
+- **PRODUCTION DEPLOYMENT: NONE.**
+
+Round79K is therefore accepted for *isolated gameplay behavior* and
+durable Breath storage, NOT for production rollout. Known remaining
+integration gates include rest-specific +15 recovery, crash windows
+between precommitting position/Breath and followers/traps, unhooked
+teleports/GM relocation, per-step save throughput, mounted Endurance,
+ownership, stables and flying mount restrictions. No private test
+fixture, user data, server configuration or operational logs are
+published to GitHub.
