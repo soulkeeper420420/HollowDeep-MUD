@@ -245,3 +245,57 @@ The next independent step should define a bounded **epoch-bound**
 mount roster and one-active-mount transition policy and test
 ownership/Endurance/rest/relog/stabling separately from the live
 game before integrating with atomic save receipts.
+
+
+## Round79S staged — epoch-bound mount roster and stable policy
+
+After Round79R's real source audit PASS, a pure, versioned
+policy foundation has been published:
+- \`hd79_mount_roster.h/.c\` models one player's roster of up to
+  **six** mounts, each with an owner-local ID, species, current
+  Endurance and verified stable-room ID. The roster is
+  identified by the accepted 24-character character epoch and
+  has a monotonically increasing revision.
+- Awarding, boarding, dismounting, stable entry/retrieval and
+  movement each validate the expected character epoch.
+  Malformed records, forged active IDs, invalid species,
+  duplicate/stale operations, revision overflow and
+  unsupported ownership transitions fail without modifying
+  their output. Only **one** mount can be actively boarded.
+- Stable deposit requires verified player location **and**
+  physical presence of the eligible owned mount; retrieve
+  requires return to the **same** verified stable.
+  Remote retrieval or mounting a stabled mount is denied.
+  Board/dismount/deposit/retrieve do not refill Endurance.
+- \`hd79_mount_travel()\` accepts the existing Round79G terrain
+  plan and an external authoritative native-movement result;
+  only a successful validated wilderness move can reduce
+  the currently ridden mount's Endurance. Character Breath
+  remains unchanged while mounted; exit to a safe interior
+  is free even when the mount is exhausted.
+- \`test_hd79_mount_roster.c\` checks epoch mismatch/forgery,
+  six owned mounts, one active, verified stable locality,
+  exact Endurance deduction, replay of stale movement
+  previews, denied terrain, exhausted mount retreat and
+  overflow refusal. A new root-only runner,
+  \`private_mount_roster_round79s.sh\`, compiles it alongside
+  the existing mount and Breath planning rules as ELF32,
+  tests the result and verifies production/service and
+  accepted private ELF32 binary hashes are unchanged.
+
+**Round79S has been staged in GitHub but not yet tested on Linode.**
+This is not native ownership, a stable command, an item, an
+actual ridden creature, a save or a mount reward implementation.
+The policy API performs **no disk I/O**. It intentionally
+defers persistent encoding and atomic CAS integration into
+the native \`hd_player_store.c\` player receipt/snapshot
+contract to a separate step. A candidate native mount/save
+checkpoint must be tested for competing processes, failure
+injection, stale epoch, disconnect/death, denied movement,
+and recovery after uncertain rename before player gameplay.
+
+The six-mount cap is a **prototype policy bound**, not a
+final product cap. Mount species/endurance/costs remain
+provisional from Round79G. Any eventual stable location must
+be approved based on the private builder/world data rather
+than guessed from the Atlas screenshot. No live deployment.
