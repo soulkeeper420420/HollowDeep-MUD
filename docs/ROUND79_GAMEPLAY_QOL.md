@@ -1155,3 +1155,19 @@ service. It is **not** proof of +15 native resting behavior.
 The following implementation must add an exact explicit rest command,
 session-state ownership/cleanup and timer-gated +15 receipt updates,
 then compile/test the real private ELF32 native socket path.
+
+
+### Round79O first private test — assertion heading case fix
+
+First private Linode Round79O attempt executed seven synthetic
+native command-trace regression tests, of which six passed and one
+failed solely because a case-sensitive Python assertion expected
+"actual native function-pointer dispatch sites: 1" while the actual
+tracer printed "ACTUAL native function-pointer dispatch sites: 1".
+The captured synthetic trace itself found exactly one dispatch
+callback at io.c:7 inside interpret(), and reported login/logout
+and death/combat context correctly. The test assertion was corrected
+to match the tracer's existing heading; no native code or gameplay
+behavior was changed. The actual private Linode C source audit did
+not run in this attempt, and its PASS result remains pending.
+Production deployment: NONE.
