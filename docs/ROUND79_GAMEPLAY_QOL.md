@@ -144,3 +144,56 @@ save/reconnect preference, plain text no escape bytes, existing Mage,
 Necromancer and Warlock creation, and unchanged legacy saves.
 
 The live service, world, character saves and database remain untouched.
+
+
+## Round 79C — Breath is wilderness travel stamina (confirmed design)
+
+The player has specified that **Breath is spent while moving through the
+wilderness**, not an underwater oxygen meter. The status prompt should read
+e.g. "HP 14/25 | MP 5/10 | Breath 98/100" and use ANSI warning colors when
+PANSIC is enabled. The native PBRWAT water-breathing flag remains unrelated.
+
+Initial gameplay tuning (subject to private native balance testing):
+- New characters begin with Breath 100/100.
+- Exactly 2 Breath is consumed **only after a successful movement to a
+  wilderness room**, including entry from a town. A blocked exit or rejected
+  movement must never drain it. A teleport, look, login or map redraw must
+  not count as a walking step.
+- Movement into ordinary rooms, including leaving wilderness for an indoor
+  safe area, costs 0 and must always be permitted even at 0 Breath.
+- At 0 or 1 Breath, further ordinary moves into wilderness are denied with
+  clear feedback. The player can rest or recover, not get permanently stuck.
+- Recovery on the existing *native timed recovery tick* is +5 normally
+  and +15 if resting. These are per-tick values; actual tick duration
+  and secure resting state must be verified before hooking the engine.
+  Repeated "rest" commands must not grant unlimited recovery.
+- Breath can never be negative or exceed 100. Breath is not HP and does
+  not directly damage, kill, change MP, award XP, or alter monster AI.
+- Determine wilderness classification from actual native room metadata /
+  verified wilderness-room ranges. Do not guess from a new map drawing
+  or silently treat all high room IDs as wilderness.
+- A player save/reconnect or server restart must **not** refill the meter
+  just to circumvent an exploration limit. Verify an ABI-safe durable
+  character-state slot/receipt before enabling native usage.
+- Ordinary Mage, Necromancer, Warlock, Conjure, existing wilderness map,
+  room exits and native player saves must continue to work.
+
+Source-only preliminary implementation:
+- hd_wilderness_breath.h/.c: bounded movement gate, successful-step charge
+  and timed recovery, with no direct native game dependencies.
+- test_wilderness_breath.c: 50 moves to exhaustion, denial of deeper
+  wilderness, free retreat, resting/regeneration, indoor immunity, invalid
+  input rejection and integration with the plain/colored status formatter.
+- native_wilderness_breath_probe.py: read-only audit of movement,
+  regeneration and room-zone classification in the disposable ELF32
+  Round 78/79 source.
+
+The *rules library is not a native movement hook*. Mandatory acceptance
+before gameplay use: private source audit; clear definition of successful
+movement; native regeneration cadence; atomic/ABI-safe persistence;
+native ELF32 compile; 100-room wilderness route replay; blocked exits;
+safe retreat at exhaustion; timed recovery without command spam;
+logout/reconnect; ANSI YES/NO display; existing class/conjure/corpse
+regressions; production PID and binary unchanged.
+
+No production deployment or service restart has been authorized.
