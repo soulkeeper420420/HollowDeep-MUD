@@ -1396,3 +1396,51 @@ connected idle socket actually triggers the +15 award after the
 natural native timer. Round79Q must verify that wall-clock timer
 using the already compiled private ELF32 game. No claims about
 live deployment or mounted Endurance are made.
+
+
+### Round79Q staged — wall-clock +15 recovery on a real connected socket
+
+Round79P is privately accepted: 32 staging/action regressions,
+recompiled ELF32 native atomic +15 (Breath 80 -> 95),
+explicit interruption +5 fallback, and an isolated real MUD
+socket's rest, social interruption, wilderness travel,
+save/logout/reconnect all PASS. No live deployment occurred.
+
+A remaining acceptance gap is whether the ordinary connected MUD
+event loop actually invokes hd79_breath_pulse() after real wall-clock
+time, not just in a synthetic C fixture. Round79Q therefore adds:
+- round79q_real_rest_tick.py: after Round79P's saved 94/100
+  reconnect, use only ordinary, real native wilderness movement
+  to reduce Breath to <=80, retreat indoors, issue the real
+  rest command and sample its read-only numeric HUD during a
+  bounded 125-second wall-clock window. Require an individual
+  **exact +15** recovery jump, not a final capped total, and
+  reject merged/double +5, invalid HUD or duplicate immediate
+  recovery events. Note that a +5 may legitimately happen
+  early while resting less than 45 seconds; that alone is
+  not acceptance for the accelerated bonus.
+- test_round79q_real_rest_tick.py: unit-test strict HUD parsing,
+  delta recognition, out-of-range and clipped-value denial,
+  and correct opt-in socket wiring.
+- check_breath_rest_socket.py: opt-in via
+  HD79Q_TIMED_REST=1 after the accepted saved-room/Breath
+  reconnect. Normal Round79P socket coverage is retained.
+- private_real_rest_tick_only.sh: reuse already accepted ELF32
+  /tmp/hd-army-game-round79rest-*/src, no private rebuild;
+  launch the existing synthetic fixture in an isolated network
+  namespace and chroot, check real natural rest timer,
+  print all occurrences of update_ply() in the private
+  native C source as read-only diagnostics, and recheck
+  the production service PID, binary SHA-256 and accepted
+  private executable SHA-256.
+
+**Round79Q has been staged in GitHub but has NOT been executed
+on Linode.** There is no confirmed real wall-clock +15 socket
+recovery yet. The original Round79P full ELF32 compile and
+native atomic +15 fixture remain accepted.
+If the socket test fails to see a real tick, inspect the private
+update_ply() call-site trace: native player callbacks might only
+execute on login/logout rather than on idle connected updates,
+and the verified native periodic event loop may need a new
+feature-gated hook. Do not fake the clock or change production.
+Mounts, Endurance and stables remain pending.
