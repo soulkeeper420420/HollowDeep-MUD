@@ -613,3 +613,59 @@ interruption, not the duration of a real 45-second server tick;
 the native atomic receipt fixture establishes the +15 value.
 Do not publish source excerpts, fixture data or logs to GitHub.
 No production deployment is performed.
+
+
+## Round79P accepted; Round79Q true connected 45-second resting recovery
+
+The accepted Linode Round79P run completed:
+- 32 safety/dispatch regression tests PASS
+- New disposable private ELF32 rest-mode source staged
+- Pure 45-second rest-state policy PASS
+- Native atomic Breath receipt +15 from 80->95 PASS;
+  after interruption, separate headroom test verified +5
+- Full ELF32 private game compiled, real isolated socket rest
+  registration, anti-spam, social interruption, movement, HUD,
+  saved Annex room and Breath 94 after reconnect PASS
+- Production PID, executable and accepted private baseline unchanged
+
+The ONLY remaining resting acceptance is the real elapsed-time
++15 recovery award with a connected player. The prior atomic
+fixture directly invoked the Breath callback, so it cannot prove
+the MUD schedules that callback while connected.
+
+Round79Q is a socket-only test of the already accepted private
+Round79P executable, with no new MUD compilation or game patch.
+The helper round79q_real_rest_tick.py reduces Breath through
+legitimate native wilderness movement, enters a real rest session,
+then observes individual native recovery jumps with read-only
+skills commands over a bounded wall-clock window. It accepts
+exactly +15 with sufficient headroom and no immediate duplicate;
+earlier +5 normal pulses do not count. A +15 granted before
+45 seconds is rejected.
+
+private_real_rest_tick_only.sh runs the unit tests, prints a
+read-only audit of exact native update_ply call sites, then
+runs the same proved private chroot/network socket world with
+HD79Q_TIMED_REST=1. It guards the original accepted ELF32
+executable SHA256 and production service PID/binary. Its
+private timed-rest-socket.log stays outside GitHub.
+
+Use a new root-only /root/hollowdeep-dev/round79q-* checkout,
+pinned to its published commit; SOURCE must be the accepted
+Round79P private /tmp/hd-army-game-round79rest-JQgo3wi5/src.
+Run:
+
+    bash tools/gameplay/round79/private_real_rest_tick_only.sh \
+      /root/hollowdeep-dev/round79q-PRIVATE \
+      /tmp/hd-army-game-round79rest-JQgo3wi5/src
+
+Expected ONLY if validated:
+ROUND79Q: PRIVATE REAL WALL-CLOCK REST +15 SOCKET PASS.
+
+This test may reveal that update_ply() is only called on login
+or logout, rather than periodically while a player is connected.
+If so, do NOT mark Round79Q PASS. The next change must inspect
+and hook the actual native periodic active-player update with
+the same 45-second atomic recovery/anti-spam gates in a new
+disposable build. Do not modify production before explicit
+approval. Mounts/Endurance/stables are still pending.
