@@ -17,8 +17,10 @@ case "$SOURCE" in /tmp/hd-army-game-round79trustedspawn-*/src) ;; *) echo "REFUS
 [[ "$(od -An -tx1 -N5 "$SOURCE/frp.new" | tr -d ' \n')" == 7f454c4601 ]] || {
   echo "REFUSED: accepted native source not ELF32"; exit 2;
 }
-grep -Fq 'num/MFILESIZE' "$SOURCE/files4.c"
-grep -Fq 'sizeof(creature)' "$SOURCE/files4.c"
+# The native loader is compiled into this ELF32 engine; historical Mordor
+# placed the loader in mordb/files4.c, but HollowDeep private stage need not
+# include that translation unit. Verify MFILESIZE/CMAX via *compiled headers*
+# rather than assuming a particular native source filename exists.
 LIVE=/srv/hollowdeep/world/src_3.00/frp.new
 PID="$(systemctl show hollowdeep.service -p MainPID --value)"
 LIVE_SHA="$(sha256sum "$LIVE" | cut -d' ' -f1)"

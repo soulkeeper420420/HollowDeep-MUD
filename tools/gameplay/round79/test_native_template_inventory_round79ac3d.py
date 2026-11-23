@@ -64,12 +64,28 @@ class TemplateInventoryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             scan.parse_abi("unverified")
         with self.assertRaises(ValueError):
-            scan.parse_abi("HD79_NATIVE_ABI 1000 0 300 301 302 304 1")
+            scan.parse_abi("HD79_NATIVE_ABI 1000 0 300 301 302 304 1 100 3000")
+        with self.assertRaises(ValueError):
+            scan.parse_abi("HD79_NATIVE_ABI 1184 0 300 301 302 304 1")
 
     def test_abi_exact_offsets(self):
         self.assertEqual(
-            scan.parse_abi("HD79_NATIVE_ABI 1184 0 300 301 302 304 1"),
+            scan.parse_abi("HD79_NATIVE_ABI 1184 0 300 301 302 304 1 100 3000"),
             OFFSETS)
+
+    def test_reject_changed_native_index_limits(self):
+        with self.assertRaisesRegex(ValueError,"indexing ABI"):
+            scan.parse_abi("HD79_NATIVE_ABI 1184 0 300 301 302 304 1 99 3000")
+        with self.assertRaisesRegex(ValueError,"indexing ABI"):
+            scan.parse_abi("HD79_NATIVE_ABI 1184 0 300 301 302 304 1 100 2999")
+
+    def test_runner_does_not_require_nonexistent_source(self):
+        here=Path(__file__).resolve().parent
+        script=(here/"private_native_template_inventory_round79ac3d.sh").read_text()
+        self.assertNotIn('$SOURCE/files4.c',script)
+        probe=(here/"native_template_abi_round79ac3d.c").read_text()
+        self.assertIn("MFILESIZE,CMAX",probe)
+        self.assertIn("MONSTER,MFILESIZE,CMAX",probe)
 
     def test_skip_private_player_subtrees(self):
         (self.mon/"m00").write_bytes(b"")

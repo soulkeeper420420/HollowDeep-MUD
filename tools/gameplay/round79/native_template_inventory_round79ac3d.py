@@ -14,7 +14,7 @@ RECORD=1184
 GROUP=100
 MAX_ID=3000
 MAX_PRINT=120
-ABI=re.compile(r"HD79_NATIVE_ABI (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+)")
+ABI=re.compile(r"HD79_NATIVE_ABI (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+)")
 EXCLUDE={"player","players","pfile","pfiles","save","saves",
          "accounts","secrets","backup","backups","logs"}
 NAMES=(("warhorse",r"\bwar[\s-]*horse\b"),
@@ -29,9 +29,10 @@ MATCH=[(label,re.compile(regex,re.I)) for label,regex in NAMES]
 def parse_abi(data):
     m=ABI.fullmatch(data.strip())
     if not m: raise ValueError("Unrecognized ELF32 native layout")
-    size,name,kind,level,hpmax,hpcur,monster=map(int,m.groups())
-    if size!=RECORD or name!=0 or monster!=1:
-        raise ValueError("Unexpected native creature size/name/type ABI")
+    size,name,kind,level,hpmax,hpcur,monster,records_per_file,creature_max=map(int,m.groups())
+    if (size!=RECORD or name!=0 or monster!=1 or
+        records_per_file!=GROUP or creature_max!=MAX_ID):
+        raise ValueError("Unexpected native creature size/type/indexing ABI")
     if not (80<=kind<size and 80<=level<size and
             80<=hpmax<size-1 and 80<=hpcur<size-1 and hpmax!=hpcur):
         raise ValueError("Invalid native field offsets")
