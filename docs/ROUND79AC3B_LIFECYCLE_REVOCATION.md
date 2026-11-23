@@ -59,7 +59,7 @@ original named, typed parameters; prototypes and ambiguous matches fail closed.
 Three regression tests cover native inline braces, multiline parameters,
 and rejection of a declaration without a body.
 
-**R2 private Linode ELF32/native socket tests pending.** No production change.
+**R2 was not accepted**; R3 superseded its signature handling. No production change.
 
 ## Round79AC3B R3 classic K&R function definitions
 
@@ -72,5 +72,6 @@ checks each named parameter's declared type and pointer status, permits
 whitespace and declaration reordering, and rejects prototypes, wrong types,
 missing declarations or duplicate definitions. Four regressions cover these.
 
-R3 full native ELF32 compilation and isolated socket replay are **pending**.
-No production deployment or mount gameplay activation.
+R3 private Linode validation: **PASS (exit code 0)**. Source staged at `/tmp/hd-army-game-round79lifecycle-hc75BLEp/src` and private results at `/root/hollowdeep-dev/round79ac3b-66QWzPGO` (logs never published). Full native ELF32 game build, identity revocation, all-token clearing, native stablecheck/Breath socket and logout/reconnect regressions passed. Production PID, binary, and accepted private ELF32 baseline remained unchanged.
+
+No production deployment or mount gameplay activation. Trusted mount spawner, native entity registration, and reconnect recovery remain future gates.
