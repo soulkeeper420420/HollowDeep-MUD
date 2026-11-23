@@ -1,0 +1,49 @@
+# HollowDeep MUD — Round79AC3B native lifecycle revocation (private candidate)
+
+Round79AC3A audited the native source: 19 references to `del_crt_rom`,
+24 to `free_crt`, 20 to `del_ply_rom`, and no unexpected calls into the
+Round79AC2 mount entity-binding registry. Round79AC3B targets those **central
+implementations**, rather than patching each scattered gameplay callsite.
+
+## Behavior when the private gate is enabled
+
+`MOUNT_LIFECYCLE_PLAYTEST=1` requires `MOUNT_WORLD_IDENTITY_PLAYTEST=1`.
+
+- Native `add_crt_rom` and `del_crt_rom` revoke the process-local token for
+  that exact monster pointer before moving or removing it.
+- Native `add_ply_rom` and `del_ply_rom` revoke owner bindings before player
+  room entry, room exit, teleport or logout. Until trusted rehydration exists,
+  this intentionally may revoke even on ordinary movement.
+- Native `free_crt` revokes a creature's monster and owner binding before
+  the creature allocation is destroyed. Handles reuse on logout and deletion.
+- Native `free_rom` conservatively clears **every** transient binding before
+  a room is released. This fails closed if the room is destroyed unexpectedly.
+- Hooks never read/write player or world persistence and never award,
+  spawn, board, stable, retrieve or move mounts.
+- The accepted `hd79_mount_world_identity.h/.c` gain a server-only
+  `hd79_world_mount_unbind_all` helper, clearing only memory in this process.
+
+## Validation
+
+The Python patcher must:
+- accept a pre-existing accepted private Round79AC2 ELF32 source at
+  `/tmp/hd-army-game-round79worldproof-*/src`;
+- copy it to a new `/tmp/hd-army-game-round79lifecycle-*/src`;
+- locate all six exact native function signatures; refuse drift;
+- leave command dispatch, player save, wilderness and original source unchanged;
+- add the flag before `frp.new` Makefile prerequisites.
+
+The private runner tests source boundaries, compiles pure native identity
+tests as ELF32 including all-token revocation, fully rebuilds the ELF32 MUD
+with lifecycle hooks, and replays read-only stablecheck/Breath native socket
+regressions in a separate namespace.
+
+**Limits:** This is a *revocation foundation*, not a complete trusted mount
+lifecycle: no authoritative spawner, no validated mount NPC ownership in
+playable gameplay, no login rehydration, no full combat/death-path replay.
+Do not enable boarding, stabling, retrieval or ridden movement from this
+candidate. No production deployment.
+
+Acceptance requires Linode runner exit 0 before publishing to
+`round79-gameplay-qol`, which will then trigger Discord `#change-log`.
+Private logs and synthetic player fixture files must stay off GitHub.
