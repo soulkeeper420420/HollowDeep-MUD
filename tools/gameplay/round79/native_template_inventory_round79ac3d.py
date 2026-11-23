@@ -12,7 +12,9 @@ import sys
 
 RECORD=1184
 GROUP=100
-MAX_ID=3000
+# Hard safety ceiling only. The actual number of native loadable templates
+# comes from the compiled ELF32 CMAX (1000 for this HollowDeep build).
+MAX_TEMPLATE_SLOTS=3000
 MAX_PRINT=120
 ABI=re.compile(r"HD79_NATIVE_ABI (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+)")
 EXCLUDE={"player","players","pfile","pfiles","save","saves",
@@ -31,12 +33,13 @@ def parse_abi(data):
     if not m: raise ValueError("Unrecognized ELF32 native layout")
     size,name,kind,level,hpmax,hpcur,monster,records_per_file,creature_max=map(int,m.groups())
     if (size!=RECORD or name!=0 or monster!=1 or
-        records_per_file!=GROUP or creature_max!=MAX_ID):
+        records_per_file!=GROUP or creature_max<GROUP or
+        creature_max>MAX_TEMPLATE_SLOTS or creature_max%GROUP!=0):
         raise ValueError("Unexpected native creature size/type/indexing ABI")
     if not (80<=kind<size and 80<=level<size and
             80<=hpmax<size-1 and 80<=hpcur<size-1 and hpmax!=hpcur):
         raise ValueError("Invalid native field offsets")
-    return kind,level,hpmax,hpcur
+    return kind,level,hpmax,hpcur,creature_max
 
 def verified_dir(path):
     root=Path(path)
@@ -62,11 +65,16 @@ def discover(root):
 
 def inspect(directory,offsets):
     directory=verified_dir(directory)
-    kind_off,level_off,hpmax_off,hpcur_off=offsets
+    if len(offsets)!=5:
+        raise ValueError("Missing authoritative native CMAX")
+    kind_off,level_off,hpmax_off,hpcur_off,creature_max=offsets
+    if (creature_max<GROUP or creature_max>MAX_TEMPLATE_SLOTS or
+        creature_max%GROUP!=0):
+        raise ValueError("Invalid authoritative native CMAX")
     files=0
     living=0
     candidates=[]
-    for group in range((MAX_ID+GROUP-1)//GROUP):
+    for group in range(creature_max//GROUP):
         name=directory/("m%02d"%group)
         if name.is_symlink(): raise ValueError("Symlinked native monster file")
         if not name.exists(): continue
@@ -101,10 +109,11 @@ def inspect(directory,offsets):
     if not files: raise ValueError("No native template records found")
     return files,living,candidates
 
-def report(directory,files,living,matches):
+def report(directory,files,living,matches,creature_max):
     lines=["=== ROUND79AC3D: READ-ONLY NATIVE CREATURE CATALOG ===",
         "Native directory: "+str(directory),
         "Verified record bytes: "+str(RECORD),
+        "Native loadable slots (compiled CMAX): "+str(creature_max),
         "Native files: "+str(files),
         "Living native monsters: "+str(living),
         "Name-match candidates (NOT authorized): "+str(len(matches))]
@@ -128,7 +137,7 @@ def main():
         offsets=parse_abi(x.abi.read_text(encoding="ascii"))
         directory=discover(x.world_root)
         files,living,matches=inspect(directory,offsets)
-        print(report(directory,files,living,matches))
+        print(report(directory,files,living,matches,offsets[4]))
     except (ValueError,OSError) as exc:
         print("ROUND79AC3D: AUDIT REFUSED:",exc,file=sys.stderr)
         return 1
