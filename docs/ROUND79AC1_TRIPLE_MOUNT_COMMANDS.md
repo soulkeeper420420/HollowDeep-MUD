@@ -1,4 +1,4 @@
-# Round79AC1: three-receipt native mount commands (pending Linode validation)
+# Round79AC1: three-receipt native mount commands (accepted private ELF32 validation)
 
 ## Feature flag
 `MOUNT_TRIPLE_COMMAND_PLAYTEST=1` requires `MOUNT_PRESENCE_STORE_PLAYTEST=1`
@@ -29,5 +29,10 @@ dismount, then reconcile after-rename dismount once and check no Endurance
 change, preserved Breath and no repeat writes. All private, no live data.
 
 ## Promotion policy
-Candidate branch only until full Linode ELF32 and socket results PASS. Do
-not publish private logs, credentials, fixture player files, or server config.
+Accepted on Linode, exit code 0: mock command and triple-dismount failures PASS;
+actual native ELF32 player-file rollback/recovery PASS; full ELF32 native game
+build PASS; isolated stablecheck, native mount listing, Breath persistence and
+logout/reconnect socket replays PASS. Results remain private at
+`/root/hollowdeep-dev/round79ac-tUTmg1Qu`.
+Do not publish private logs, credentials, fixture player files, or server config.
+Production deployment: NONE.

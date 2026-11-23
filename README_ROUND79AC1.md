@@ -1,7 +1,9 @@
 # HollowDeep MUD — Round 79AC1: native three-receipt dismount commands
 
-Private ELF32 candidate only; no production deployment, player-save/world
-modification, service restart, or mount award/boarding/stabling/retrieval.
+Accepted private ELF32 milestone on 2026-11-22: native atomic dismount,
+full native MUD build, mock failure regressions, and isolated socket PASS.
+No production deployment, player-save/world modification, service restart,
+or mount award/boarding/stabling/retrieval.
 
 This milestone upgrades the player command adapter from the legacy two-receipt
 read/dismount path to the accepted Round79AB three-receipt store. `mount list`
