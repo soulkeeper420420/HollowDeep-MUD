@@ -29,9 +29,13 @@ int hd79_mount_store_commit(const char *name, void *expected,
     return hd79_mount_transaction(name,expected,next,out);
 }
 '''
-MAKE='''ifeq ($(MOUNT_STABLECHECK_PLAYTEST),1)
+MAKE='''OBJECTS = main.o
+ifeq ($(MOUNT_STABLECHECK_PLAYTEST),1)
 CFLAGS += -DHD79_MOUNT_STABLECHECK_PLAYTEST
+OBJECTS += hd79_stable_registry.o hd79_stablecheck.o
 endif
+frp.new: $(OBJECTS)
+\t$(CC) $(OBJECTS) -o frp.new
 '''
 
 class NativePresenceStage(unittest.TestCase):
@@ -125,5 +129,11 @@ class NativePresenceStage(unittest.TestCase):
         m=(self.dst/'Makefile').read_text()
         self.assertIn('MOUNT_PRESENCE_STORE_PLAYTEST requires MOUNT_STORE_PLAYTEST',m)
         self.assertIn('OBJECTS += hd79_mount_presence.o',m)
+        # Regression: append-at-end used to link a missing .o because the
+        # frp.new prerequisites had already been expanded by GNU Make.
+        self.assertLess(m.index('OBJECTS += hd79_mount_presence.o'),
+                        m.index('frp.new: $(OBJECTS)'))
+        self.assertLess(m.index('OBJECTS += hd79_stable_registry.o'),
+                        m.index('OBJECTS += hd79_mount_presence.o'))
 
 if __name__=='__main__':unittest.main()

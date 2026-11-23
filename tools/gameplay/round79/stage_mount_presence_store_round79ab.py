@@ -113,14 +113,23 @@ def patched(source):
            '#else\n'
            '    return hd79_mount_transaction(name,expected,next,out);\n'
            '#endif','legacy atomic commit denial')
-    m+='\n# Round79AB: 3-receipt mount location atomic store; NOT GAMEPLAY.\n' \
-       'ifeq ($(MOUNT_PRESENCE_STORE_PLAYTEST),1)\n' \
-       'ifneq ($(MOUNT_STORE_PLAYTEST),1)\n' \
-       '$(error MOUNT_PRESENCE_STORE_PLAYTEST requires MOUNT_STORE_PLAYTEST)\n' \
-       'endif\n' \
-       'CFLAGS += -DHD79_MOUNT_PRESENCE_STORE_PLAYTEST\n' \
-       'OBJECTS += hd79_mount_presence.o\n' \
-       'endif\n'
+    # A GNU Make target expands $(OBJECTS) when its prerequisite rule
+    # is parsed, not later when the linker recipe runs. This feature
+    # gate MUST precede the already-working frp.new dependency rule.
+    # Round79Z's registered stable objects provide a pinned anchor.
+    stable_gate=('OBJECTS += hd79_stable_registry.o hd79_stablecheck.o\n'
+                 'endif\n')
+    presence_gate=('\n# Round79AB: atomic three-receipt store; no gameplay.\n'
+                   'ifeq ($(MOUNT_PRESENCE_STORE_PLAYTEST),1)\n'
+                   'ifneq ($(MOUNT_STORE_PLAYTEST),1)\n'
+                   '$(error MOUNT_PRESENCE_STORE_PLAYTEST requires MOUNT_STORE_PLAYTEST)\n'
+                   'endif\n'
+                   'CFLAGS += -DHD79_MOUNT_PRESENCE_STORE_PLAYTEST\n'
+                   'OBJECTS += hd79_mount_presence.o\n'
+                   'endif\n')
+    if m.count(stable_gate)!=1:
+        raise ValueError('Accepted stable Makefile prerequisite anchor drift')
+    m=m.replace(stable_gate,stable_gate+presence_gate,1)
     return {'hd_player_store.c':p,'hd79_mount_store.inc':s,'Makefile':m}
 
 def stage(source,dest):
