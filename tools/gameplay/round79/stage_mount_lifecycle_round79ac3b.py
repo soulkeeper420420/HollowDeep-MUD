@@ -73,11 +73,11 @@ def private(root,prefix,exists):
     return root
 
 def add_hook(body,fn,params,stmt):
-    # Accepted Mordor 3.00 uses native, one-line function signatures,
-    # brace on the next line. Refuse rather than guessing at drift.
-    exp=re.compile(r"(?m)^[ \t]*void[ \t]+"+re.escape(fn)+
-                   r"[ \t]*\([ \t]*"+params+
-                   r"[ \t]*\)[ \t]*\r?\n[ \t]*\{")
+    # Require exact void name and typed parameters, but native HollowDeep
+    # may put the opening brace on the same line, a later line, or split
+    # the function declaration across lines. Do NOT match prototypes.
+    exp=re.compile(r"(?m)^[ \t]*void\s+"+re.escape(fn)+
+                   r"\s*\(\s*"+params+r"\s*\)\s*\{")
     ms=list(exp.finditer(body))
     if len(ms)!=1:
         raise ValueError("Native lifecycle function signature drift: "+fn)

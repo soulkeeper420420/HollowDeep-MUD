@@ -121,6 +121,54 @@ class LifecycleStage(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Symlink'):
             stage.stage(self.src,self.dst)
 
+    def test_native_same_line_open_braces(self):
+        # Native source may place a function body brace on the same line.
+        for filename,names in (('room.c',
+              ('add_crt_rom','del_crt_rom','add_ply_rom','del_ply_rom')),
+              ('files1.c',('free_crt','free_rom'))):
+            p=self.src/filename
+            body=p.read_text()
+            for fn in names:
+                # Change ONLY the one definition, not unrelated braces.
+                pattern=r'(void\s+'+fn+r'\s*\([^)]*\))\s*\n\s*\{'
+                import re
+                result,count=re.subn(pattern,r'\1 {',body,count=1)
+                self.assertEqual(count,1,fn)
+                body=result
+            p.write_text(body)
+        stage.stage(self.src,self.dst)
+        out=(self.dst/'room.c').read_text()
+        self.assertEqual(out.count('hd79_world_mount_unbind_creature(crt_ptr);'),2)
+        self.assertEqual(out.count('hd79_world_mount_unbind_owner(ply_ptr);'),2)
+        self.assertEqual((self.dst/'files1.c').read_text().count(
+                         'hd79_world_mount_unbind_all();'),1)
+
+    def test_multiline_native_function_parameters(self):
+        p=self.src/'room.c'
+        original=p.read_text()
+        name='void add_crt_rom(creature *crt_ptr, room *rom_ptr, int num )'
+        multiline=('void\nadd_crt_rom(\n'
+                   ' creature *crt_ptr,\n room *rom_ptr,\n int num\n)')
+        self.assertEqual(original.count(name),1)
+        p.write_text(original.replace(name,multiline))
+        stage.stage(self.src,self.dst)
+        self.assertIn('hd79_world_mount_unbind_creature(crt_ptr);',
+                      (self.dst/'room.c').read_text())
+
+    def test_prototype_alone_cannot_be_hooked(self):
+        p=self.src/'room.c'
+        src=p.read_text()
+        import re
+        src,n=re.subn(
+            r'void\s+add_crt_rom\s*\([^)]*\)\s*\{[^}]*\}',
+            'void add_crt_rom(creature *crt_ptr, room *rom_ptr, int num);',
+            src,count=1)
+        self.assertEqual(n,1)
+        p.write_text(src)
+        with self.assertRaisesRegex(ValueError,'add_crt_rom'):
+            stage.stage(self.src,self.dst)
+        self.assertFalse(self.dst.exists())
+
     def test_native_signature_drift(self):
         p=self.src/'files1.c'
         p.write_text(p.read_text().replace('void free_crt(', 'void delete_crt('))

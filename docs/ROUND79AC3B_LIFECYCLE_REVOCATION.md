@@ -47,3 +47,16 @@ candidate. No production deployment.
 Acceptance requires Linode runner exit 0 before publishing to
 `round79-gameplay-qol`, which will then trigger Discord `#change-log`.
 Private logs and synthetic player fixture files must stay off GitHub.
+
+## Round79AC3B R2 signature-format repair
+
+R1's 12 staging tests passed but the native source was rejected before the
+ELF32 build: `Native lifecycle function signature drift: add_crt_rom`.
+The patcher had required a newline between the closing parameter `)`
+and the function body's opening `{`. R2 permits same-line or multiline
+C whitespace, while still requiring one exact `void` definition and the
+original named, typed parameters; prototypes and ambiguous matches fail closed.
+Three regression tests cover native inline braces, multiline parameters,
+and rejection of a declaration without a body.
+
+**R2 private Linode ELF32/native socket tests pending.** No production change.
