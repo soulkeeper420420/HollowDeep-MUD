@@ -40,8 +40,7 @@ without a later verified runtime rehydration and explicit lifecycle gates.
   path is verified to revoke bindings and the trusted spawner is implemented.
 - The new Makefile object is gated and registered before the target rule.
 
-Linode full ELF32 private build and socket replay are pending. Do not promote
-until the tester reports exit code 0; keep fixture logs private.
+Linode accepted private R2 ELF32 build, native identity tests and socket replay: **PASS**, exit code 0. Eight staging checks and the live-room identity tests passed; read-only stablecheck, Breath save/reconnect, and native socket quit passed. Private results: `/root/hollowdeep-dev/round79ac2-HIdnygXK` (never publish logs or fixture data).
 
 ## Round79AC2 R2 native ELF32 include repair
 
@@ -53,6 +52,6 @@ mount command and `stablecheck` objects. Compiler errors were unknown
 as those working objects and moves the mock creature definitions to a dedicated
 mock `hd_player_store.h` so pure ELF32 tests will catch this regression.
 
-R2 requires a fresh complete private ELF32 game and socket replay on Linode.
+R2 validated on a fresh complete private ELF32 game and isolated socket replay on Linode: **PASS**, exit code 0. Production PID, binary, and accepted ELF32 baseline remained unchanged.
 No live gameplay hooks or mount awards are enabled, and no production change
-is authorized by this source-only candidate.
+is authorized by this accepted source-only milestone.

@@ -1,4 +1,4 @@
-# HollowDeep Round79AC2 — native mount identity (private candidate)
+# HollowDeep Round79AC2 — native mount identity (accepted private ELF32)
 
 An internal, process-local world-entity attestation gate. No new player
 commands and no mount spawn or award. Bind and verify only through server-side
@@ -12,3 +12,5 @@ regressions. Production remains unchanged.
 
 Next gate: explicit native mount creation/lifecycle, logout and destruction
 revocation, and reliable reconnect recovery, before boarding/stable/retrieve.
+
+Round79AC2 R2 accepted on Linode, 2026-11-22: native ELF32 policy, entire ELF32 game build, isolated stablecheck/Breath socket and no-production-change regression **PASS**, exit code 0. No game deployment. Boarding/stable/retrieve remain disabled until trusted spawn/deletion/logout hooks are validated.
