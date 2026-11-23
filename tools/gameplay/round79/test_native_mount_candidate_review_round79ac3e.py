@@ -74,6 +74,19 @@ class NativeRiskTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"offset out of bounds"):
             risk.decode_traits(TRAITS.replace(" 400 16"," 1190 16"))
 
+    def test_variable_array_lengths_drive_actual_record_read(self):
+        # Inspect the end of each native-sized array, not fixture lengths.
+        fields=risk.decode_traits(
+            "HD79_AC3E 1184 310 312 314 316 318 400 32 440 48 500 64")
+        row=bytearray(self.record("horse"))
+        row[431]=1           # Last flags byte (32-byte compiled array)
+        row[487]=2           # Last spells byte (48-byte compiled array)
+        row[563]=3           # Last carry byte (64-byte compiled array)
+        result=risk.review_entry(
+            (0,"horse","horse",8,50,50),bytes(row),ABI,fields)
+        self.assertEqual(result[11:14],(1,1,1))
+        self.assertEqual(result[-2],"MANUAL_MAGIC_REVIEW")
+
     def test_readonly_review_never_approves(self):
         (self.db/"m00").write_bytes(self.record("traveling horse"))
         record=risk.native_record(self.db,0,1000)
