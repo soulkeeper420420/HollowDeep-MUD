@@ -30,3 +30,7 @@ combat; they are not game-balanced or player-accessible.
 constitute full mount gameplay acceptance and must not be used to promote
 the candidate to `round79-gameplay-qol` until all integration gates in
 `docs/ROUND79AD_FASTTRACK.md` pass.
+
+## Private foundation verified on Linode
+
+**PASS (exit 0)**: six-species mock/native authority, strict staging, real ELF32 whole-game link, policy planner, socket stablecheck/Breath/logout regressions. The accepted source and production service stayed unchanged. Full playable mount integration **remains pending**, so the candidate is deliberately **unaccepted**. Private logs are retained only at `/root/hollowdeep-dev/round79ad-3fwvyedF`.

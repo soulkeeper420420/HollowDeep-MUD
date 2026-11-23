@@ -54,3 +54,15 @@ The single private runner compiles the planner against actual accepted ELF32
 roster/presence/travel sources, then compiles the complete engine and replays
 the isolated stablecheck/Breath socket baseline. Native integrated gameplay,
 mount-death persistence and atomic movement are still pending.
+
+## Linode private foundation verification — PASS (not gameplay acceptance)
+
+The exact initial candidate `1e17f5c2ae5a84977c044647ad0f1df8bf9033f7` was validated on Linode. Exit code **0**. The single runner confirmed six inert native species and denied forged/dead/stabled owners and invalid receipts; real native-pointer binding/rollback; pure board, dismount, stable, retrieve, mounted Endurance and free-retreat transition planner; full 32-bit ELF32 engine linkage; existing native stablecheck, spent Breath logout/reconnect and socket REST/HUD regressions. Production PID/binary and accepted private ELF32 baseline were unchanged.
+
+Private staged source: `/tmp/hd-army-game-round79adfleet-J8jHd6Io/src`.
+Private results: `/root/hollowdeep-dev/round79ad-3fwvyedF`.
+Neither path, log payload, source-world data nor credentials are published as files on GitHub.
+
+**DO NOT PROMOTE:** The runner itself correctly reports `FULL GAMEPLAY BOARD/STABLE/RETRIEVE/DEATH/RESTORE/TRAVEL: NOT YET IMPLEMENTED`. These are not yet real player commands; no durable death receipt or authorized reconnect recreation; no atomic move+Endurance checkpoint. No production deployment.
+
+Next implementation on this candidate branch: durable death event contract and exact-CAS native owner transition, all six species' isolated socket combat/logout/return, stable authority and movement. The same private ELF32 runner must be extended to verify these before any acceptance.
