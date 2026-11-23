@@ -2,6 +2,7 @@
  * No gameplay commands call this file. NO physical mount is auto-awarded,
  * summoned, spawned, boarded, stabled or revived by this module.
  */
+#include "hd_player_store.h"
 #include "mextern.h"
 #include "hd79_mount_world_identity.h"
 #include <string.h>

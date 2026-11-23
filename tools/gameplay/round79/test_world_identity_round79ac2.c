@@ -1,5 +1,5 @@
 /* Round79AC2 explicit live-room + process binding; no actual native spawn. */
-#include "ac2-mock/mextern.h"
+#include "ac2-mock/hd_player_store.h"
 #include "hd79_mount_world_identity.h"
 #include <assert.h>
 #include <stdio.h>

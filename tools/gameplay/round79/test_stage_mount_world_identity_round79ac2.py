@@ -45,6 +45,17 @@ class StageTests(unittest.TestCase):
                         m.index('frp.new: $(OBJECTS)'))
         self.assertIn('requires MOUNT_TRIPLE_COMMAND_PLAYTEST',m)
 
+    def test_native_type_provider_order(self):
+        """Mock ABI must expose the missing native header dependency."""
+        src=(stage.HERE/'hd79_mount_world_identity.c').read_text()
+        self.assertIn('#include "hd_player_store.h"',src)
+        self.assertLess(src.index('#include "hd_player_store.h"'),
+                        src.index('#include "mextern.h"'))
+        self.assertIn('typedef struct creature',
+                      (stage.HERE/'ac2-mock/hd_player_store.h').read_text())
+        self.assertNotIn('typedef struct creature',
+                         (stage.HERE/'ac2-mock/mextern.h').read_text())
+
     def test_no_gameplay_mutation(self):
         stage.stage(self.src,self.dst)
         for name in ('global.c','room.c','command1.c','command2.c',

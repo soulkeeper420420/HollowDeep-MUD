@@ -42,3 +42,17 @@ without a later verified runtime rehydration and explicit lifecycle gates.
 
 Linode full ELF32 private build and socket replay are pending. Do not promote
 until the tester reports exit code 0; keep fixture logs private.
+
+## Round79AC2 R2 native ELF32 include repair
+
+R1 completed the policy tests but failed full-game compilation because its
+identity C translation unit included `mextern.h` without first importing
+`hd_player_store.h`, the established native type provider used by the accepted
+mount command and `stablecheck` objects. Compiler errors were unknown
+`creature` and `room` structure members. R2 adds this header in the same order
+as those working objects and moves the mock creature definitions to a dedicated
+mock `hd_player_store.h` so pure ELF32 tests will catch this regression.
+
+R2 requires a fresh complete private ELF32 game and socket replay on Linode.
+No live gameplay hooks or mount awards are enabled, and no production change
+is authorized by this source-only candidate.
