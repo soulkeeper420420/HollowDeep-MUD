@@ -8,4 +8,6 @@ The audit tests contain only synthetic temporary C source; logs remain on Linode
 
 Run `private_lifecycle_audit_round79ac3a.sh WORK SOURCE` from the pinned test candidate checkout, with a fresh `/root/hollowdeep-dev/round79ac3a-*` work directory and accepted Round79AC2 R2 private `/tmp/hd-army-game-round79worldproof-*/src` source.
 
-Tests: eight synthetic Python auditor tests included; real native source audit on Linode pending. Production deployment: none.
+Accepted on Linode: audit exit code 0, private native source inventory PASS, production PID/binary and accepted ELF32 baseline unchanged. Report: 19 del_crt_rom references, 24 free_crt references, 20 del_ply_rom references, and no native mount identity hook callsites outside their own implementation. Private results: `/root/hollowdeep-dev/round79ac3a-o8Xx5d59` (not published). This inventory is NOT proof that all delete paths are hooked; it is the basis for AC3B's mandatory central-hook validation.
+
+Tests: eight synthetic Python auditor tests and the read-only Linode source inventory PASS. Production deployment: none.
