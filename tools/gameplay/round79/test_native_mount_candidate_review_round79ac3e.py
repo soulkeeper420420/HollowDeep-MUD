@@ -36,6 +36,44 @@ class NativeRiskTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             risk.decode_traits(TRAITS.replace(" 400 16"," 310 16"))
 
+    def test_compiled_array_lengths_are_authoritative(self):
+        # HollowDeep may differ from upstream Mordor; 16/16/20 are
+        # fixture values, NOT hard requirements.
+        variable=("HD79_AC3E 1184 310 312 314 316 318 "
+                  "400 32 440 48 500 64")
+        parsed=risk.decode_traits(variable)
+        self.assertEqual((parsed["flags_len"],parsed["spells_len"],
+                          parsed["carry_len"]),(32,48,64))
+        self.assertEqual(risk.decode_traits(TRAITS)["flags_len"],16)
+
+    def test_invalid_native_array_sizes_refused(self):
+        for name,source in (
+            ("empty flags",TRAITS.replace(" 400 16"," 400 0")),
+            ("oversized flags",TRAITS.replace(" 400 16"," 400 257")),
+            ("empty spells",TRAITS.replace(" 420 16"," 420 0")),
+            ("oversized spells",TRAITS.replace(" 420 16"," 420 257")),
+            ("empty carry",TRAITS.replace(" 440 20"," 440 0")),
+            ("odd carry",TRAITS.replace(" 440 20"," 440 21")),
+            ("huge carry",TRAITS.replace(" 440 20"," 440 1024"))
+        ):
+            with self.subTest(name=name):
+                with self.assertRaisesRegex(ValueError,
+                                            "Unsupported native trait array"):
+                    risk.decode_traits(source)
+
+    def test_compiled_array_overlap_is_rejected(self):
+        # Dynamic native flags length must not overlap adjacent spells.
+        with self.assertRaisesRegex(ValueError,"Overlapping native fields"):
+            risk.decode_traits(TRAITS.replace(" 400 16"," 400 32"))
+        with self.assertRaisesRegex(ValueError,"Overlapping native fields"):
+            risk.decode_traits(TRAITS.replace(" 420 16"," 420 32"))
+
+    def test_compiled_array_out_of_bounds_is_rejected(self):
+        with self.assertRaisesRegex(ValueError,"offset out of bounds"):
+            risk.decode_traits(TRAITS.replace(" 440 20"," 1180 20"))
+        with self.assertRaisesRegex(ValueError,"offset out of bounds"):
+            risk.decode_traits(TRAITS.replace(" 400 16"," 1190 16"))
+
     def test_readonly_review_never_approves(self):
         (self.db/"m00").write_bytes(self.record("traveling horse"))
         record=risk.native_record(self.db,0,1000)

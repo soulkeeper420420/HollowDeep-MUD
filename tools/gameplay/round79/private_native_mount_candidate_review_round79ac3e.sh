@@ -59,6 +59,10 @@ cc -m32 -std=gnu99 -w -I "$SOURCE" \
 [[ "$(od -An -tx1 -N5 "$WORK/native-traits" | tr -d ' \n')" == 7f454c4601 ]]
 "$WORK/native-abi" > "$WORK/abi.log"
 "$WORK/native-traits" > "$WORK/traits.log"
+# Numeric C sizeof/offsetof probe output only; no private monster data.
+# This makes future ABI mismatches diagnosable in a single safe run.
+echo "=== NATIVE ELF32 TRAIT METADATA (NO MONSTER DATA) ==="
+cat "$WORK/traits.log"
 python3 "$HERE/native_mount_candidate_review_round79ac3e.py" \
  --world-root /srv/hollowdeep/world --abi "$WORK/abi.log" \
  --traits "$WORK/traits.log" > "$WORK/review.log" 2>&1 || {

@@ -12,6 +12,9 @@ import native_template_inventory_round79ac3d as inventory
 FIELDS=("size","mpmax","mpcur","ndice","sdice","pdice",
         "flags","flags_len","spells","spells_len","carry","carry_len")
 SIGNATURE=re.compile(r"HD79_AC3E(?: \d+){12}")
+# These are defensive byte-array ceilings, not presumed native field sizes.
+# Exact array lengths come from sizeof() in the private compiled ELF32 probe.
+MAX_TRAIT_BYTES=256
 EXCLUDES=("sea horse","statue","cultist","puppet","guardian","ghost",
           "phantom","hatchling","faerie","carp","fenris","adamantine",
           "platinum","baby")
@@ -20,11 +23,19 @@ def decode_traits(source):
     if not SIGNATURE.fullmatch(source.strip()):
         raise ValueError("Unverified native ELF32 trait metadata")
     fields=dict(zip(FIELDS,map(int,source.strip().split()[1:])))
-    if fields["size"]!=inventory.RECORD or (fields["flags_len"],
-        fields["spells_len"],fields["carry_len"])!=(16,16,20):
-        raise ValueError("Native creature trait ABI mismatch")
+    if fields["size"]!=inventory.RECORD:
+        raise ValueError("Native creature trait record size mismatch")
+    for field in ("flags","spells","carry"):
+        count=fields[field+"_len"]
+        if count<1 or count>MAX_TRAIT_BYTES or (field=="carry" and count%2):
+            raise ValueError("Unsupported native trait array size: "+field+
+                             "="+str(count))
+    # Never assume a specific number of spell/flag/carry bytes. Verify
+    # the *compiled* sizeof() values are bounded, disjoint, and within
+    # the actual native creature record before reading raw template data.
     shapes=(("mpmax",2),("mpcur",2),("ndice",2),("sdice",2),
-            ("pdice",2),("flags",16),("spells",16),("carry",20))
+            ("pdice",2)) + tuple((field,fields[field+"_len"])
+                                for field in ("flags","spells","carry"))
     ranges=[]
     for name,size in shapes:
         offset=fields[name]
