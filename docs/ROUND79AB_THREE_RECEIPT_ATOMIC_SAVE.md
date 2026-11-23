@@ -12,6 +12,8 @@ This candidate reserves ID ending `82` for physical positions and stages all thr
 - The fixture's synthetic award assigns a room provided by the test ONLY; it does not imply a safe public-world award implementation. Real mount creature identity, stable matching, logout/reconnect, movement and entity death are later separate gates.
 - Strictly private source copy and fixture; no socket listener, production world, service, players, authentication, secrets or fixture logs are published.
 
-To run, upload the ZIP under `/root/hollowdeep-dev`, extract into `round79ab-bundle`, then run `tools/gameplay/round79/private_mount_presence_store_round79ab.sh` with a new `/root/hollowdeep-dev/round79ab-*` result directory and accepted Round79Z private source.
+Accepted on Linode (private ELF32, exit code 0), 2026-11-22: 80/81/82 one-snapshot save, same-room presence policy, before-/after-rename replay, stale CAS denial, preserved Breath/Necromancer receipts and full native game build PASS. Results: `/root/hollowdeep-dev/round79ab-oPXa64jA` (private, not published). R2 fixed Makefile target prerequisite expansion to build the new `.o` before link.
 
-**This is a candidate. Real ELF32 native tests on Linode are required before marking Round79AB accepted or publishing source.**
+Use a fresh isolated copy of the accepted native Round79Z source and `tools/gameplay/round79/private_mount_presence_store_round79ab.sh` to reproduce. The runner intentionally pins the historical Round79Z commit; do not silently repoint it to this new head.
+
+**No live deployment.** Native mount creature binding, boarding/stabling/retrieval, and ridden travel remain disabled.
