@@ -6,4 +6,4 @@ Read-only live monster-template files are permitted; no live game restart, world
 
 Run `tools/gameplay/round79/private_native_template_inventory_round79ac3d.sh` against the accepted AC3C private source.
 
-R3 verified from Linode ABI output: `CMAX=1000`, `MFILESIZE=100`, and a 1,184-byte creature. This candidate scans only the ten native template files the compiled game could index; the full Linode world-template scan has not yet passed.
+R3 verified from Linode ABI output: `CMAX=1000`, `MFILESIZE=100`, and a 1,184-byte creature. This candidate scans only the ten native template files the compiled game could index; the read-only native Linode scan **PASS** (exit code 0). Fourteen regression tests passed; eight native template files, 726 living records and 34 unapproved name matches were observed. Candidate IDs/names remain private on Linode.

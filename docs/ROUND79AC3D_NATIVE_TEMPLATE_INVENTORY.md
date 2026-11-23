@@ -12,10 +12,10 @@ Run `private_native_template_inventory_round79ac3d.sh WORK SOURCE` from the pinn
 
 The first Linode runner stopped at a hardcoded `$SOURCE/files4.c` check: the private native ELF32 source does not include that translation unit, even though the built executable includes the native monster loader. No binary was compiled or world scanned in that run. The original Mordor loader's `mNN` convention is retained, but R2 attempted to verify `MFILESIZE=100` and incorrectly hardcoded `CMAX=3000` in the ELF32 ABI probe alongside the `creature` size/offsets. The source-filename assumption is removed. Changed constants, missing ABI metadata, or a missing/ambiguous monster database fail closed.
 
-The R2 local/ELF32 native audit has not yet been confirmed on Linode. No production modifications.
+R2 completed native compilation and confirmed the real ELF32 ABI, but refused the mismatched limit before opening any monster templates. Superseded by R3. No production modifications.
 
-## R3 actual HollowDeep CMAX audit repair (pending Linode validation)
+## R3 actual HollowDeep CMAX audit repair (accepted)
 
 The R2 private ELF32 probe compiled and ran successfully, returning `HD79_NATIVE_ABI 1184 0 319 318 332 334 1 100 1000`. This confirms `CMAX=1000` for the tested native build, rather than the upstream Mordor `3000`. R2 refused the mismatch before reading any monster records. R3 carries the real compiled `CMAX` through ABI validation and the template file scan: this build may read only `m00`–`m09` (1,000 index slots) and cannot inspect `m10` or higher. The scanner retains a conservative maximum of 3,000 and rejects missing, non-divisible, out-of-range or untrusted limits. New regressions test the real 1,000-slot ABI, boundary file indexing, 3,000-slot compatibility, and invalid limits.
 
-The actual monster template audit on Linode is **still pending**. No template IDs are approved, no trusted catalog is configured, and no world/game/player files have been edited.
+**R3 native Linode read-only template inventory: PASS (exit code 0).** Fourteen Python regressions passed. The actual native ELF32 record is 1,184 bytes, `CMAX=1000`, `MFILESIZE=100`. The scan read eight native monster database files, observed 726 living records, and reported 34 *name-based candidates* (not authorizations). Their IDs, names and raw template contents remain in private Linode results `/root/hollowdeep-dev/round79ac3d-ofJboT73` and are intentionally omitted from GitHub and Discord. Production PID/binary and accepted private ELF32 were verified unchanged. No catalog is configured, no template is approved, and no gameplay or production deployment occurred.
