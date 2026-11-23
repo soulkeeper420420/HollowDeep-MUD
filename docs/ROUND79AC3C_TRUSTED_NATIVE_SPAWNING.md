@@ -41,6 +41,4 @@ Use `tools/gameplay/round79/private_mount_trusted_spawn_round79ac3c.sh` with a
 fresh `/root/hollowdeep-dev/round79ac3c-*` directory and accepted R3 private
 ELF32 source `/tmp/hd-army-game-round79lifecycle-hc75BLEp/src`.
 
-Tests: synthetic C mocks locally PASS, 10 staging regressions, real native
-ELF32 policy fixture, full ELF32 game build and isolated socket still require
-Linode verification. Production deployment: NONE.
+Accepted on Linode (private exit code 0, 2026-11-22): 10 staging tests, trusted native template and rollback policy, real ELF32 full game compilation, stablecheck/Breath/logout/reconnect isolated socket regression PASS. Production PID/binary and accepted private ELF32 unchanged. Private results: `/root/hollowdeep-dev/round79ac3c-R3JagCC3`; staged private source: `/tmp/hd-army-game-round79trustedspawn-3W2RXVIA/src` (do not publish raw logs/fixtures). Production deployment: NONE.
