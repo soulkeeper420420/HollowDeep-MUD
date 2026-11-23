@@ -72,22 +72,52 @@ def private(root,prefix,exists):
         raise ValueError("Lifecycle hooks already staged")
     return root
 
+# Exact old-style K&R declarations: names in the function head must match
+# each typed declaration once, including pointer-vs-value. Never infer types.
+KNR_PARAMETERS={
+    "add_crt_rom": (("creature","crt_ptr",True), ("room","rom_ptr",True),
+                    ("int","num",False)),
+    "del_crt_rom": (("creature","crt_ptr",True), ("room","rom_ptr",True)),
+    "add_ply_rom": (("creature","ply_ptr",True), ("room","rom_ptr",True)),
+    "del_ply_rom": (("creature","ply_ptr",True), ("room","rom_ptr",True)),
+    "free_crt": (("creature","crt_ptr",True),),
+    "free_rom": (("room","rom_ptr",True),)
+}
+
 def add_hook(body,fn,params,stmt):
-    # Require exact void name and typed parameters, but native HollowDeep
-    # may put the opening brace on the same line, a later line, or split
-    # the function declaration across lines. Do NOT match prototypes.
-    exp=re.compile(r"(?m)^[ \t]*void\s+"+re.escape(fn)+
-                   r"\s*\(\s*"+params+r"\s*\)\s*\{")
-    ms=list(exp.finditer(body))
-    if len(ms)!=1:
-        # Print bounded source declaration candidates into PRIVATE test logs;
-        # never guess how to patch an unfamiliar native function.
-        snippets=re.findall(r"(?m)^[^\r\n]{0,160}\b"+
+    # Modern ANSI C: exact void function definition with a body, not
+    # a prototype or call; allow same-line and later-line braces.
+    modern=re.compile(r"(?m)^[ \t]*void\s+"+re.escape(fn)+
+                      r"\s*\(\s*"+params+r"\s*\)\s*\{")
+    positions=[m.end() for m in modern.finditer(body)]
+
+    # Original Mordor/HollowDeep also uses K&R:
+    # void add_crt_rom(crt_ptr, rom_ptr, num)
+    # creature *crt_ptr; room *rom_ptr; int num;
+    # { ...
+    # Verify all declarations and their types rather than rewriting an
+    # arbitrary untyped function, and never accept a bare prototype.
+    expected=KNR_PARAMETERS[fn]
+    names=r"\s*,\s*".join(re.escape(name) for _,name,_ in expected)
+    declaration=r"(?:creature|room|int)\s*\*?\s*[A-Za-z_]\w*\s*;\s*"
+    classic=re.compile(r"(?m)^[ \t]*void\s+"+re.escape(fn)+
+                       r"\s*\(\s*"+names+r"\s*\)\s*((?:"+
+                       declaration+r"){"+str(len(expected))+r"})\{")
+    for match in classic.finditer(body):
+        typed=re.findall(r"(creature|room|int)\s*(\*?)\s*"
+                         r"([A-Za-z_]\w*)\s*;",match.group(1))
+        actual=sorted((typ,name,bool(pointer)) for typ,pointer,name in typed)
+        if actual==sorted(expected):
+            positions.append(match.end())
+
+    if len(positions)!=1:
+        # Bounded source-only diagnostics are private to the Linode test.
+        examples=re.findall(r"(?m)^[^\r\n]{0,160}\b"+
                             re.escape(fn)+r"\s*\([^\r\n]{0,180}",
                             body)[:3]
-        detail="; candidates="+repr(snippets) if snippets else "; no declaration candidate"
+        detail="; candidates="+repr(examples) if examples else ""
         raise ValueError("Native lifecycle function signature drift: "+fn+detail)
-    position=ms[0].end()
+    position=positions[0]
     addition="\n#ifdef "+FLAG+"\n    "+stmt+"\n#endif\n"
     return body[:position]+addition+body[position:]
 

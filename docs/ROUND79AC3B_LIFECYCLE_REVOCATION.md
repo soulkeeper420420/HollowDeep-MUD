@@ -60,3 +60,17 @@ Three regression tests cover native inline braces, multiline parameters,
 and rejection of a declaration without a body.
 
 **R2 private Linode ELF32/native socket tests pending.** No production change.
+
+## Round79AC3B R3 classic K&R function definitions
+
+R2 ran 15 Python regression tests (PASS) but the exact native staging stopped
+again because the original HollowDeep source uses old-style C functions,
+for example `void add_crt_rom(crt_ptr, rom_ptr, num)`, with separate
+`creature *crt_ptr;`, `room *rom_ptr;`, and `int num;` declarations before
+its opening brace. R3 matches BOTH strict ANSI and exact K&R function bodies,
+checks each named parameter's declared type and pointer status, permits
+whitespace and declaration reordering, and rejects prototypes, wrong types,
+missing declarations or duplicate definitions. Four regressions cover these.
+
+R3 full native ELF32 compilation and isolated socket replay are **pending**.
+No production deployment or mount gameplay activation.

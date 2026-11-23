@@ -169,6 +169,67 @@ class LifecycleStage(unittest.TestCase):
             stage.stage(self.src,self.dst)
         self.assertFalse(self.dst.exists())
 
+    def test_exact_kr_style_all_six_native_definitions(self):
+        # Reproduce native Round79AC3B R2 Linode signature:
+        # 'void add_crt_rom(crt_ptr, rom_ptr, num)'
+        # with typed K&R declarations before the opening brace.
+        import re
+        for file,names in (('room.c',(
+                'add_crt_rom','del_crt_rom','add_ply_rom','del_ply_rom')),
+                           ('files1.c',('free_crt','free_rom'))):
+            p=self.src/file
+            content=p.read_text()
+            for name in names:
+                expected=stage.KNR_PARAMETERS[name]
+                decls=', '.join(param for typ,param,pointer in expected)
+                declarations='\n'.join(
+                    typ+' '+('*' if pointer else '')+param+';'
+                    for typ,param,pointer in expected)
+                pattern=r'(?m)^void\s+'+name+r'\s*\([^)]*\)\s*\{'
+                replacement='void '+name+'('+decls+')\n'+declarations+'\n{'
+                content,num=re.subn(pattern,lambda m: replacement,content,count=1)
+                self.assertEqual(num,1,name)
+            p.write_text(content)
+        stage.stage(self.src,self.dst)
+        room=(self.dst/'room.c').read_text()
+        self.assertIn('void add_crt_rom(crt_ptr, rom_ptr, num)',room)
+        self.assertEqual(room.count('hd79_world_mount_unbind_creature(crt_ptr);'),2)
+        self.assertEqual(room.count('hd79_world_mount_unbind_owner(ply_ptr);'),2)
+        files=(self.dst/'files1.c').read_text()
+        self.assertIn('hd79_world_mount_unbind_all();',files)
+        self.assertEqual(files.count('hd79_world_mount_unbind_owner(crt_ptr);'),1)
+
+    def test_kr_wrong_typed_parameter_rejected(self):
+        p=self.src/'room.c'
+        content=p.read_text()
+        old='void add_crt_rom(creature *crt_ptr, room *rom_ptr, int num )\n{'
+        new=('void add_crt_rom(crt_ptr, rom_ptr, num)\n'
+             'creature *crt_ptr;\ncreature *rom_ptr;\nint num;\n{')
+        self.assertEqual(content.count(old),1)
+        p.write_text(content.replace(old,new))
+        with self.assertRaisesRegex(ValueError,'add_crt_rom'):
+            stage.stage(self.src,self.dst)
+        self.assertFalse(self.dst.exists())
+
+    def test_kr_missing_declaration_rejected(self):
+        p=self.src/'files1.c'
+        content=p.read_text()
+        old='void free_rom( room *rom_ptr )\n{'
+        new='void free_rom(rom_ptr)\n{'
+        self.assertEqual(content.count(old),1)
+        p.write_text(content.replace(old,new))
+        with self.assertRaisesRegex(ValueError,'free_rom'):
+            stage.stage(self.src,self.dst)
+        self.assertFalse(self.dst.exists())
+
+    def test_kr_duplicate_definition_rejected(self):
+        p=self.src/'room.c'
+        content=p.read_text()
+        self.assertEqual(content.count('void del_crt_rom('),1)
+        p.write_text(content+'\n'+content[content.index('void del_crt_rom('):])
+        with self.assertRaisesRegex(ValueError,'del_crt_rom'):
+            stage.stage(self.src,self.dst)
+
     def test_native_signature_drift(self):
         p=self.src/'files1.c'
         p.write_text(p.read_text().replace('void free_crt(', 'void delete_crt('))
