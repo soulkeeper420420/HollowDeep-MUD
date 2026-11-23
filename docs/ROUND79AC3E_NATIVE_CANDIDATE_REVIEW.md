@@ -4,7 +4,7 @@ Read-only private candidate. Round79AC3D R3 audited the real monster database an
 
 All decisions are conservative: EXCLUDE_NAME, MANUAL_MAGIC_REVIEW or MANUAL_REVIEW. None can confer ownership, authorize a template, modify a trusted six-species catalog, trigger a spawn or enable board/stable/retrieve/reconnect/travel. Native template attributes and identifiers remain in private Linode output only.
 
-Validation requires six synthetic tests, compiled native creature offset checks, comparison with the accepted read-only inventory and production PID/binary/ELF32 unchanged. The Linode run is pending. Do not commit private logs, fixtures, creature records, credentials or template IDs. No production deployment.
+Validation requires six synthetic tests, compiled native creature offset checks, comparison with the accepted read-only inventory and production PID/binary/ELF32 unchanged. The private Linode R2 run **PASS** (exit code 0); native ELF32 trait ABI recorded. Production unchanged. Do not commit private logs, fixtures, creature records, credentials or template IDs. No production deployment.
 
 ## AC3E R2 native array-size repair — private tests pending
 
@@ -12,4 +12,4 @@ The first Linode run completed six synthetic tests and both ELF32 probe compilat
 
 R2 uses `sizeof(creature.flags/spells/carry)` from the private ELF32 probe as authoritative. Each is checked for a nonzero conservative byte bound, exact in-record offset and nonoverlap; carry must be an even number of bytes. Invalid or unfamiliar fields are still rejected. New regressions check variable sizes, zero/huge/odd arrays, overlap and out-of-record offsets. The private runner now prints only safe numeric offsets/sizes to make any next ABI failure directly diagnosable. The C probe does not inspect monster files. No trusted mount template is approved and no gameplay is enabled.
 
-**Full native Linode validation pending. No production deployment.**
+**Accepted R2 native Linode validation PASS (exit code 0).** The 11 Python regressions passed. Actual native ELF32 trait ABI: `HD79_AC3E 1184 336 338 352 354 356 412 8 396 16 438 20`. The read-only review examined 34 name-matched monster templates, conservatively excluded 16 by name, and left 18 as manual-review candidates (not approved). Production service PID, binary and accepted private ELF32 were unchanged. Private result directory: `/root/hollowdeep-dev/round79ac3e-1aYqvbRB`; record names, IDs, attributes, and private logs intentionally remain off GitHub/Discord. No template catalog or player mounting enabled.
