@@ -80,7 +80,13 @@ def add_hook(body,fn,params,stmt):
                    r"\s*\(\s*"+params+r"\s*\)\s*\{")
     ms=list(exp.finditer(body))
     if len(ms)!=1:
-        raise ValueError("Native lifecycle function signature drift: "+fn)
+        # Print bounded source declaration candidates into PRIVATE test logs;
+        # never guess how to patch an unfamiliar native function.
+        snippets=re.findall(r"(?m)^[^\r\n]{0,160}\b"+
+                            re.escape(fn)+r"\s*\([^\r\n]{0,180}",
+                            body)[:3]
+        detail="; candidates="+repr(snippets) if snippets else "; no declaration candidate"
+        raise ValueError("Native lifecycle function signature drift: "+fn+detail)
     position=ms[0].end()
     addition="\n#ifdef "+FLAG+"\n    "+stmt+"\n#endif\n"
     return body[:position]+addition+body[position:]
