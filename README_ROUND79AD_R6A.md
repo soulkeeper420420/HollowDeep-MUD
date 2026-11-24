@@ -1,0 +1,7 @@
+# Round79AD R6A — authenticated death-proof action preflight candidate
+
+This is a private, read-only security gate that replaces R2's unverified caller-provided death receipt with the **actual native compressed player receipt #83** via `hd79_ad_four_store_read`. Before previewing an action, it independently verifies player room list membership, epoch-bound roster, canonical presence and permanent death record, exact native bound mount pointer for board/stable, and verified stable room for stable/retrieve. It rechecks pointer/owner room before returning the proposed transition. It never creates a mount, modifies a player save, exposes an action command or restores a living mount.
+
+Files: `hd79_ad_authenticated_action.c/.h`, isolated Python staging (`stage_mount_ad_authenticated_action.py`), Python security regression tests, C mock/native-policy tests, consolidated private ELF32/socket runner, and docs. This stage uses the *clean R4 native source* from the R5 baseline and refuses any test-only `adfixture` native command. A separate future R6B gate must implement exact locked **four-receipt action CAS** and reversible native creature side-effects before any command is made playable.
+
+Staging test: `python3 -m unittest -q test_stage_mount_ad_authenticated_action`. Native test: run `private_mount_ad_authenticated_action.sh NEW_PRIVATE_WORK CLEAN_R4_SOURCE`. The runner uses the known accepted stablecheck/Breath socket regression and compares live PID/binary plus source ELF32. No live world or player save edits, restart or GitHub accepted-branch changes.
