@@ -61,3 +61,9 @@ PID/binary and accepted R2 ELF32 unchanged.
    reconnect, commands, and movement must PASS before any accepted promotion.
 
 This is **NOT** a full Round79AD gameplay release and must not be deployed.
+
+## Linode R3 native result — PASS (private foundation only)
+
+Exact source `e1fa35059b41330d2b437dfcc414f74bb4e45538` validated at **exit 0** on 2026-11-23. Private results: `/root/hollowdeep-dev/round79ad-F5Dos5uu`; staged ELF32 source: `/tmp/hd-army-game-round79adfour-03lRN95P/src`. Actual compressed native player save confirmed all four claims 80/81/82/83, reserved #83, old-writer denial, test-only award and stale CAS rejection, before-rename rollback, after-rename exact death receipt reconciliation, ordinary player save preservation, same-name new epoch isolation, full native ELF32 game link, and isolated REST/stablecheck/Breath/logout socket regressions. Production PID/binary and prior R2 ELF32 baseline remained unchanged.
+
+This **does not** validate actual combat death callbacks or player commands. Login restoration and mounted wilderness movement remain disabled. Keep results, fixtures and player records private; do not promote this candidate to accepted or announce a release on Discord.
