@@ -1,24 +1,38 @@
-/* Round79AD: six inert native species placeholders in a disposable ELF32 game.
- * Absolutely no command/login caller. No persistent monster template edits.
+/* Round79AD: private native mounts; R1 inert fallback, R5 dedicated definitions
+ * only with HD79_AD_SPECIES_PLAYTEST. No public command/login caller.
+ * No persistent monster template edits.
  */
 #include "hd_player_store.h"
 #include "mextern.h"
 #include "hd79_ad_private_fleet.h"
 #include "hd79_mount_world_identity.h"
+#ifdef HD79_AD_FOUR_STORE_PLAYTEST
+#include "hd79_ad_four_store.h"
+#endif
+#ifdef HD79_AD_SPECIES_PLAYTEST
+#include "hd79_ad_species.h"
+#endif
 #include <stdlib.h>
 #include <string.h>
 
 #define HD79_AD_LIST_BOUND 2048U
+#ifndef HD79_AD_SPECIES_PLAYTEST
 static const char *const hd79_ad_names[6]={
     "HD-private horse", "HD-private warhorse", "HD-private dire wolf",
     "HD-private nightmare", "HD-private griffin", "HD-private dark dragon"
 };
+#endif
 
 const char *hd79_ad_private_species_name(int species)
 {
+#ifdef HD79_AD_SPECIES_PLAYTEST
+    const hd79_ad_species_profile *definition=hd79_ad_species_get(species);
+    return definition ? definition->name : NULL;
+#else
     if (species<HD_MOUNT_HORSE || species>HD_MOUNT_DARK_DRAGON)
         return NULL;
     return hd79_ad_names[(unsigned)(species-HD_MOUNT_HORSE)];
+#endif
 }
 
 int hd79_ad_private_reconnect_allowed(void)
@@ -61,14 +75,26 @@ int hd79_ad_private_spawn(creature *owner,unsigned id,creature **out)
 {
     hd79_mount_roster roster;
     hd79_mount_presence presence;
+#ifdef HD79_AD_FOUR_STORE_PLAYTEST
+    hd79_ad_death_receipt death;
+#endif
     const char *title;
     creature *mount;
     int species;
     int result;
     if (!out || !native_owner(owner) || !id ||
         id>HD79_MOUNT_MAX_OWNED) return 0;
+#ifdef HD79_AD_FOUR_STORE_PLAYTEST
+    /* A populated triple is not survival evidence. Never bypass #83,
+     * including from a trusted internal caller or a duplicate spawn. */
+    if (hd79_ad_four_store_read(owner->name,&roster,&presence,&death)!=
+        HD79_AD_FOUR_OK ||
+        !hd79_ad_death_action_eligible(&roster,&death,id)) return 0;
+#else
     if (hd79_presence_store_read(owner->name,&roster,&presence)!=
-        HD79_PRESENCE_STORE_OK ||
+        HD79_PRESENCE_STORE_OK) return 0;
+#endif
+    if (
         !hd79_presence_valid(&roster,&presence) ||
         id>roster.count || roster.active_id ||
         roster.entries[id-1].stabled ||
@@ -91,8 +117,26 @@ int hd79_ad_private_spawn(creature *owner,unsigned id,creature **out)
     mount->mpmax=0;
     mount->mpcur=0;
     mount->fd=-1;
-    /* calloc makes carry, flags, spells, combat dice, follower and
-     * inventory pointers zero. This test NPC has no attacks, loot or XP. */
+#ifdef HD79_AD_SPECIES_PLAYTEST
+    {
+        const hd79_ad_species_profile *definition=hd79_ad_species_get(species);
+        /* Validated species above; these bounded constants fit native fields. */
+        strcpy(mount->key[0],definition->key);
+        strcpy(mount->key[1],"mount");
+        strcpy(mount->description,"An owned mount watches its surroundings.");
+        mount->level=(char)definition->level;
+        mount->hpmax=mount->hpcur=(short)definition->hp;
+        mount->armor=(char)definition->armor;
+        mount->thaco=(char)definition->thaco;
+        mount->ndice=(short)definition->dice;
+        mount->sdice=(short)definition->sides;
+        mount->pdice=(short)definition->plus;
+        mount->strength=mount->dexterity=mount->constitution=12;
+        mount->intelligence=mount->piety=8;
+    }
+#endif
+    /* calloc keeps carry, flags, spells, follower and inventory pointers zero.
+     * Both the inert fallback and dedicated definitions have no loot or XP. */
     if (!native_owner(owner)) {
         free_crt(mount);
         return 0;

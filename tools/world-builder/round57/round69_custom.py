@@ -182,7 +182,7 @@ def native_gameplay(stage,scope,check):
             arrival=command('go archway')
         check('round 69 portal' in arrival,'Round 69 custom named exit reaches new native room')
         look=command('look')
-        check('round 69 practice golem' in look,'Round 69 custom monster visibly spawned')
+        check('you see a round 69 practice golem.' in look,'Round 69 custom monster visibly spawned')
         check('round 69 practice blade' in look,'Round 69 custom object visibly spawned')
         obj=json.loads((stage/'round69-browser.json').read_text())['plan']['custom_templates']['objects'][0]
         pickup=command('get hdo'+str(obj['id']))
@@ -221,7 +221,9 @@ def native_gameplay(stage,scope,check):
             rng.unlink(missing_ok=True)
         check(defeated,'Round 69 custom monster defeated in native combat')
         look=command('look')
-        check('round 69 practice golem' not in look,'Round 69 defeated custom monster absent')
+        check('round 69 portal' in look and
+              'you see a round 69 practice golem.' not in look,
+              'Round 69 defeated custom monster absent')
         return_trip=command('threshold')
         if 'round 69 gateway' not in return_trip:return_trip=command('go threshold')
         check('round 69 gateway' in return_trip,'Round 69 named return exit reaches original room')
@@ -229,7 +231,8 @@ def native_gameplay(stage,scope,check):
         revisit=command('archway')
         if 'round 69 portal' not in revisit:revisit=command('go archway')
         check('round 69 portal' in revisit,'Round 69 custom exit remains usable')
-        check('round 69 practice golem' in revisit or 'round 69 practice golem' in command('look'),
+        check('you see a round 69 practice golem.' in revisit or
+              'you see a round 69 practice golem.' in command('look'),
               'Round 69 custom monster respawns in native gameplay')
     finally:
         for client in scope['clients']:client.close()

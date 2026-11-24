@@ -23,7 +23,7 @@ int hd79_ad_death_identity(creature *dead,creature **out_owner,
            entry->id>HD79_MOUNT_MAX_OWNED ||
            !exactly_once(world->first_mon,dead) ||
            !exactly_once(world->first_ply,owner))return 0;
-        if(owner->type!=PLAYER || owner->hpcur<=0 ||
+        if(owner->type!=PLAYER ||
            owner->parent_rom!=world ||
            owner->rom_num!=world->rom_num ||
            (unsigned)owner->rom_num!=entry->room_id ||

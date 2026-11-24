@@ -21,7 +21,8 @@ NEEDED=('frp.new','Makefile','room.c','files1.c','hd_player_store.c',
         'hd79_mount_world_identity.c','hd79_mount_world_identity.h',
         'hd79_ad_four_store.inc','hd79_ad_four_store.h',
         'hd79_ad_death_receipt.c','hd79_mount_presence.c',
-        'hd79_mount_command.c','wilderness.c')
+        'hd79_mount_command.c','wilderness.c','hd79_ad_private_fleet.c',
+        'creature.c')
 MAKE_ANCHOR='CFLAGS += -DHD79_AD_FOUR_STORE_PLAYTEST\nendif\n'
 
 # Match only a verified modern or old-style K&R native definition.
@@ -69,6 +70,7 @@ def private(path,prefix,existing):
 
 def patch(source):
     room=(source/'room.c').read_text(encoding='latin-1')
+    creature=(source/'creature.c').read_text(encoding='latin-1')
     identity=(source/'hd79_mount_world_identity.c').read_text(encoding='latin-1')
     make=(source/'Makefile').read_text(encoding='latin-1')
     if (FLAG in room or FLAG in identity or FLAG in make or
@@ -84,6 +86,24 @@ def patch(source):
     room=strict_death_hook(room)
     room=('#ifdef '+FLAG+'\n'
           '#include "hd79_ad_combat_death.h"\n#endif\n')+room
+    # The removal hook alone is too late to stop death rewards/free after
+    # a failed save. Gate the actual native die() BEFORE any side effects.
+    death=re.compile(r'(?m)^void\s+die\s*\(\s*crt_ptr\s*,\s*att_ptr\s*\)\s*'
+                     r'creature\s*\*\s*crt_ptr\s*;\s*'
+                     r'creature\s*\*\s*att_ptr\s*;\s*\{')
+    matches=list(death.finditer(creature))
+    if len(matches)!=1 or FLAG in creature:
+        raise ValueError('Exact native die signature drift')
+    pos=matches[0].end()
+    creature=(creature[:pos]+'\n#ifdef '+FLAG+'\n'
+        '    if (hd79_ad_combat_death_before_remove(crt_ptr)<0) {\n'
+        '        del_active(crt_ptr); /* Retain pending body, stop its attacks. */\n'
+        '        if (att_ptr && att_ptr->type==PLAYER)\n'
+        '            print(att_ptr->fd,"Mount death save pending; no rewards released.\\n");\n'
+        '        return;\n    }\n'
+        '#endif\n'+creature[pos:])
+    creature=('#ifdef '+FLAG+'\n#include "hd79_ad_combat_death.h"\n'
+              '#endif\n')+creature
     identity+='\n/* R4 private registry-owning death identity proof. */\n'
     identity+='#ifdef '+FLAG+'\n#include "hd79_ad_death_identity.inc"\n#endif\n'
     make=make.replace(MAKE_ANCHOR,MAKE_ANCHOR+
@@ -103,7 +123,8 @@ def patch(source):
     # room.c. Verify del_crt_rom's own first unbind after this hook.
     if unbind<0 or unbind-bridge>600:
         raise ValueError('Death hook must precede its own lifecycle unbind')
-    return {'room.c':room,'hd79_mount_world_identity.c':identity,
+    return {'room.c':room,'creature.c':creature,
+            'hd79_mount_world_identity.c':identity,
             'Makefile':make}
 
 def stage(source,dest):
@@ -121,8 +142,12 @@ def stage(source,dest):
             (dest/name).write_text(contents,encoding='latin-1')
         for name in ADD:
             shutil.copyfile(HERE/name,dest/name)
+        # The old R1 constructor must not bypass the newly durable #83.
+        shutil.copyfile(HERE/'hd79_ad_private_fleet.c',
+                        dest/'hd79_ad_private_fleet.c')
         for name,blob in original.items():
             if (source/name).read_bytes()!=blob or (name not in modifications and
+                    name!='hd79_ad_private_fleet.c' and
                     (dest/name).read_bytes()!=blob):
                 raise ValueError('Previously validated native source changed '+name)
         for name in ('hd_player_store.c','files1.c','wilderness.c',

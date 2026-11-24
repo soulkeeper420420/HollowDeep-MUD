@@ -45,6 +45,9 @@ class R4PrivateDeathStage(unittest.TestCase):
         for name in mod.NEEDED:
             (self.a/name).write_text('synthetic file\n')
         (self.a/'room.c').write_text(MODERN)
+        (self.a/'creature.c').write_text(
+            'void die(crt_ptr, att_ptr)\ncreature *crt_ptr;\n'
+            'creature *att_ptr;\n{\n native_rewards();\n}\n')
         (self.a/'hd79_mount_world_identity.c').write_text(
             'static void hd79_world_mount_unbind_all(void){}\n')
         (self.a/'Makefile').write_text(MAKE)
@@ -81,6 +84,17 @@ class R4PrivateDeathStage(unittest.TestCase):
     def test_missing_lifecycle_refused(self):
         (self.a/'room.c').write_text('void del_crt_rom() {}')
         with self.assertRaises(ValueError):mod.patch(self.a)
+
+    def test_combat_failure_gate_precedes_rewards_and_free(self):
+        body=mod.patch(self.a)['creature.c']
+        self.assertLess(body.index('hd79_ad_combat_death_before_remove(crt_ptr)<0'),
+                        body.index('native_rewards()'))
+
+    def test_ambiguous_native_death_signature_refused(self):
+        p=self.a/'creature.c'
+        p.write_text(p.read_text()*2)
+        with self.assertRaisesRegex(ValueError,'die signature drift'):
+            mod.patch(self.a)
 
     def test_make_requires_four_store_and_native_target(self):
         make=mod.patch(self.a)['Makefile']

@@ -6,6 +6,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import shutil
 import string
@@ -182,7 +183,12 @@ def gameplay(root, port, populated, browser_export=False):
         defeat_golem()
         check(True, "Explicit monster defeat")
         look = command("look")
-        check("round 59 forge" in look and "practice golem" not in look, "Defeated spawn is absent in the same room")
+        # Newer native builds retain the monster's name in its corpse label.
+        # A failed native creature lookup proves absence without mistaking
+        # that corpse for a surviving monster.
+        absent = command("attack boss")
+        check("round 59 forge" in look and "don't see that here" in absent,
+              "Defeated spawn is absent in the same room")
         if not browser_export:
             check("round 59 gallery" in command("east"), "Original east exit still reaches room 15")
             destination = command("east")
@@ -191,8 +197,15 @@ def gameplay(root, port, populated, browser_export=False):
             check("boss practice golem" in command("look"),
                   "Embedded golem is visible immediately before combat")
             defeat = defeat_golem("boss")
-            check("practice blade" in defeat and "carrying" in defeat,
-                  "Defeated embedded creature drops its serialized carried blade")
+            if "a corpse remains" in defeat:
+                corpse_ids = re.findall(r"\[corpse\s+(\d+)\]", command("look"))
+                check(len(corpse_ids) == 1, "Embedded creature leaves one native corpse")
+                released = command("loot corpse " + corpse_ids[0])
+                check("loot falls to the ground" in released,
+                      "Native corpse releases preserved serialized inventory")
+            else:
+                check("practice blade" in defeat and "carrying" in defeat,
+                      "Defeated embedded creature drops its serialized carried blade")
             check(any("you get" in line and "practice blade" in line
                       for line in command("get all").splitlines()),
                   "Player picks up the preserved carried blade")
@@ -202,7 +215,7 @@ def gameplay(root, port, populated, browser_export=False):
         time.sleep(65)
         revisit = command("south")
         check("round 59 forge" in revisit, "New reciprocal south exit returns to room 14")
-        check("boss practice golem" in revisit or "boss practice golem" in command("look"),
+        check("you attack the boss practice golem" in command("attack boss"),
               "Native monster respawns after the interval and room revisit")
         if browser_export:
             look = command("look")
@@ -362,6 +375,21 @@ with zipfile.ZipFile(io.BytesIO(wzip)) as archive:
         target.write_bytes(data)
         shutil.copystat(wroot / "rooms/r00001",target)
         os.chown(target,65534,65534)
+# Round79's native travel validates map metadata as well as room records.
+# This legacy Round71 grid has coordinates in its validated generated names;
+# supply matching metadata only inside the fresh disposable gameplay world.
+map_rows = ["HDW1"]
+for entry in wplan["rooms"]:
+    if entry["room_id"] < 10000:
+        continue
+    match = re.fullmatch(r"([A-Za-z][A-Za-z0-9 -]*) (\d+),(\d+)", entry["name"])
+    check(match is not None, "Round 71 replay wilderness coordinates are explicit")
+    region, y, x = match.groups()
+    map_rows.append(f"{entry['room_id']}\t{x}\t{y}\t.\t{region}\t-")
+map_path = wroot / "rooms/wilderness.map"
+check(not map_path.exists(), "Round 71 replay map never overwrites existing metadata")
+map_path.write_text("\n".join(map_rows) + "\n", encoding="ascii")
+map_path.chmod(0o644)
 scope.update(root=wroot,PORT=4047,process=None,clients=[])
 scope["start_server"]()
 try:

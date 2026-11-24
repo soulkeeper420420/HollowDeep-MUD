@@ -1,6 +1,7 @@
 /* R4 private native bridge: invoked on del_crt_rom only while hpcur<=0.
  * Dead mount snapshots are retained monotonically under the R3 player lock.
- * Cleanup is not blocked by failed saves; reconnect is always denied.
+ * The staged native die() gate retains a pending dead mount on failed saves,
+ * before native rewards/unlink/free. Reconnect is always denied.
  * Actual combat coverage, cross-process crash recovery and all player
  * commands MUST pass later integration gates before gameplay is exposed.
  */
