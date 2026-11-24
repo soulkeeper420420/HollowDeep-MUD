@@ -57,6 +57,17 @@ class R4PrivateDeathStage(unittest.TestCase):
                         room.index('hd79_world_mount_unbind_creature(crt_ptr)'))
         self.assertEqual(room.count('hd79_ad_combat_death_before_remove(crt_ptr)'),1)
 
+    def test_add_crt_rom_earlier_lifecycle_hook_does_not_confuse_order(self):
+        first=("void add_crt_rom(creature *crt_ptr, room *rom_ptr, int num) {\n"
+               "#ifdef HD79_MOUNT_LIFECYCLE_PLAYTEST\n"
+               "    hd79_world_mount_unbind_creature(crt_ptr);\n"
+               "#endif\n (void)rom_ptr; (void)num;\n}\n")
+        (self.a/'room.c').write_text(first+MODERN)
+        staged=mod.patch(self.a)['room.c']
+        bridge=staged.index('hd79_ad_combat_death_before_remove(crt_ptr)')
+        self.assertLess(bridge,staged.index(
+            'hd79_world_mount_unbind_creature(crt_ptr);',bridge))
+
     def test_old_style_knr_native_signature_supported(self):
         (self.a/'room.c').write_text('#ifdef HD79_MOUNT_LIFECYCLE_PLAYTEST\n#endif\n'+CLASSIC)
         self.assertIn('hd79_ad_combat_death_before_remove(crt_ptr)',

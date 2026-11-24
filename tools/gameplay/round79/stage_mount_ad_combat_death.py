@@ -97,9 +97,12 @@ def patch(source):
         'endif\n',1)
     if make.index('OBJECTS += hd79_ad_combat_death.o')>=make.index('frp.new:'):
         raise ValueError('R4 native object is not an ELF32 prerequisite')
-    if not room.index('hd79_ad_combat_death_before_remove')<room.index(
-            'hd79_world_mount_unbind_creature(crt_ptr);'):
-        raise ValueError('Death hook must precede lifecycle unbind')
+    bridge=room.index('hd79_ad_combat_death_before_remove(crt_ptr)')
+    unbind=room.find('hd79_world_mount_unbind_creature(crt_ptr);',bridge)
+    # add_crt_rom also has a lifecycle unbind and may occur *earlier* in
+    # room.c. Verify del_crt_rom's own first unbind after this hook.
+    if unbind<0 or unbind-bridge>600:
+        raise ValueError('Death hook must precede its own lifecycle unbind')
     return {'room.c':room,'hd79_mount_world_identity.c':identity,
             'Makefile':make}
 
